@@ -18,19 +18,27 @@ await send('Runtime.enable'); await send('Page.enable');
 await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 
 const CHECKS = {
-  '': ['2026-06-03 → 07-21', '2030-09-01', 'IDT-TTPS_A'],
+  '': ['2026-06-03 → 07-21', '2030-09-01', 'IDT-TTPS_A', '2030-09-01'],
+  '?s=dep': ['ROP145', 'C-011', '2031-03-01', '120'],
+  '?s=stu': ['R-CALC-014', '口径 A', '口径 B', '2033-09-01'],
   '?s=esls': ['R-LABOR-019', 'Vallejos', '2(4)(a)(vi)', 'R-LABOR-015'],
   '?s=gap': ['R-CALC-012', '口径 A', '口径 B', '不计入'],
+  '?s=review': ['0.60', 'WARN', 'RNW-012', 'BLOCK'],
+  '?s=c13': ['C13', 'C14', 'R-CALC-012', '先获批'],
+  '?s=school': ['拔萃女书院', '圣保罗男女中学', '48000', 'IANG'],
   '?s=evade': ['C-015', '主动申报']
 };
 
+let bad = 0;
 for (const [qs, musts] of Object.entries(CHECKS)) {
   errs.length = 0;
   await send('Page.navigate', { url: base + qs });
-  await sleep(8000);
+  await sleep(9000);
   const text = await ev('document.getElementById("log").innerText');
   const miss = musts.filter((m) => !text.includes(m));
-  console.log((qs || '(default)').padEnd(10), miss.length ? 'MISS: ' + miss.join(' / ') : 'OK', '| chars=' + text.length, '| errs=' + errs.length);
+  const picks = await ev('document.querySelectorAll(".pick").length');
+  if (miss.length) bad++;
+  console.log((qs || '(default)').padEnd(11), miss.length ? 'MISS: ' + miss.join(' / ') : 'OK', '| chars=' + text.length, '| picks=' + picks, '| errs=' + errs.length);
   if (errs.length) console.log('   ', errs[0].split('\n')[0]);
 }
-ws.close(); process.exit(0);
+ws.close(); process.exit(bad ? 1 : 0);

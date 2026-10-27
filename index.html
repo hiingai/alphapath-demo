@@ -178,12 +178,54 @@ h2{font-size:clamp(23px,2.6vw,33px);line-height:1.28;margin:12px 0 0;letter-spac
   border-radius:7px;padding:3px 8px;font-family:var(--mono);
 }
 
+/* 适用身份 chips */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:26px;align-items:center}
+.chips .lb{font-size:12px;color:var(--tx3);margin-right:2px}
+.chip{
+  font-size:12px;color:#b9d3ef;border:1px solid var(--line);background:rgba(16,28,46,.8);
+  border-radius:20px;padding:3px 10px;font-family:var(--mono);
+}
+.chip.no{color:#e79a9a;border-color:rgba(255,107,107,.28);background:rgba(60,20,24,.5)}
+
+/* 主航道横条 */
+.mainline{
+  margin-top:38px;border:1px solid var(--line);border-radius:16px;
+  background:linear-gradient(135deg,rgba(16,30,50,.8),rgba(10,18,30,.85));
+  padding:18px 22px 20px;backdrop-filter:blur(6px);
+}
+.ml-head{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--tx2);margin-bottom:16px}
+.ml-head b{color:var(--tx);font-weight:700;font-size:13px}
+.ml-head .tag{margin-left:auto}
+.ml{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.ml::before{
+  content:"";position:absolute;left:8px;right:calc(25% - 8px);top:7px;height:2px;
+  background:linear-gradient(90deg,rgba(77,163,255,.35),rgba(77,163,255,.6),rgba(56,214,196,.75),rgba(157,123,255,.6));
+  border-radius:2px;box-shadow:0 0 12px rgba(77,163,255,.25);
+}
+.ml-node{position:relative;padding-top:24px;padding-right:8px}
+.ml-node .d{
+  position:absolute;top:0;left:0;width:16px;height:16px;border-radius:50%;
+  background:#0e1a2b;border:2px solid var(--bl);box-shadow:0 0 0 4px rgba(77,163,255,.1);
+}
+.ml-node:nth-child(2) .d{border-color:#5fc9ff}
+.ml-node:nth-child(3) .d{border-color:var(--cy);box-shadow:0 0 0 4px rgba(56,214,196,.12)}
+.ml-node:nth-child(4) .d{border-color:#9d7bff;box-shadow:0 0 0 4px rgba(157,123,255,.14),0 0 14px rgba(157,123,255,.5)}
+.ml-node .l{font-size:12.5px;color:var(--tx);font-weight:600}
+.ml-node .t{font-family:var(--mono);font-size:12px;color:#9fc0e6;margin-top:2px}
+.ml-node .s{font-size:11px;color:var(--tx3);line-height:1.5;margin-top:3px;padding-right:6px}
+
+.beta{
+  font-size:9.5px;font-family:var(--mono);letter-spacing:.06em;padding:1px 5px;border-radius:4px;
+  background:rgba(242,181,68,.14);border:1px solid rgba(242,181,68,.35);color:#f2c877;margin-left:6px;
+}
+
 /* ============ 演示区 ============ */
 .demo{display:grid;grid-template-columns:300px 1fr;gap:20px;margin-top:34px;align-items:start}
 .picker{display:flex;flex-direction:column;gap:9px}
 .pick{
-  text-align:left;border-radius:13px;border:1px solid var(--line);background:rgba(14,26,43,.72);
-  color:var(--tx2);padding:13px 14px;font:inherit;cursor:pointer;transition:.2s;position:relative;
+  text-align:left;border-radius:11px;border:1px solid var(--line);background:rgba(14,26,43,.72);
+  color:var(--tx2);padding:9px 12px;font:inherit;cursor:pointer;transition:.2s;position:relative;
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;
 }
 .pick:hover{border-color:var(--line-2);color:var(--tx);transform:translateX(2px)}
 .pick.on{
@@ -191,13 +233,19 @@ h2{font-size:clamp(23px,2.6vw,33px);line-height:1.28;margin:12px 0 0;letter-spac
   background:linear-gradient(135deg,rgba(31,111,208,.22),rgba(14,26,43,.9));
   box-shadow:0 8px 26px rgba(31,111,208,.2);
 }
-.pick b{display:block;font-size:13.5px;font-weight:700;margin-bottom:3px;color:var(--tx)}
-.pick span{font-size:12px;color:var(--tx3);line-height:1.5}
+.pick b{flex:1 1 auto;font-size:13px;font-weight:700;color:var(--tx);line-height:1.4}
+.pick span.sub{display:none;flex:1 1 100%;font-size:11.5px;color:var(--tx3);line-height:1.5}
+.pick.on span.sub{display:block}
 .pick .lv{
-  position:absolute;top:11px;right:12px;font-size:10px;font-family:var(--mono);
-  padding:1px 6px;border-radius:5px;border:1px solid var(--line-2);color:var(--tx3);
+  font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:5px;
+  border:1px solid var(--line-2);color:var(--tx3);white-space:nowrap;
 }
 .pick.on .lv{color:var(--cy);border-color:rgba(56,214,196,.45)}
+.pgroup{
+  font-size:11px;letter-spacing:.12em;color:var(--tx3);text-transform:uppercase;
+  margin:10px 0 3px;padding-left:2px;font-weight:600;
+}
+.pgroup:first-child{margin-top:0}
 
 .console{
   border-radius:18px;border:1px solid var(--line-2);overflow:hidden;
@@ -260,6 +308,7 @@ h2{font-size:clamp(23px,2.6vw,33px);line-height:1.28;margin:12px 0 0;letter-spac
 .res.deny{border:1px solid rgba(255,107,107,.35);background:linear-gradient(135deg,rgba(70,22,28,.7),rgba(20,14,20,.6))}
 .res.dwell{border:1px solid rgba(242,181,68,.35);background:linear-gradient(135deg,rgba(64,48,16,.65),rgba(20,18,12,.6))}
 .res.cond{border:1px solid rgba(77,163,255,.35);background:linear-gradient(135deg,rgba(16,40,68,.7),rgba(12,18,30,.6))}
+.res.edu{border:1px solid rgba(56,214,196,.35);background:linear-gradient(135deg,rgba(12,48,46,.72),rgba(10,20,26,.6))}
 .res.block{border:1px solid rgba(255,107,107,.4);background:linear-gradient(135deg,rgba(66,20,32,.75),rgba(22,12,18,.65))}
 .res .rh{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:7px;font-size:13.5px}
 .res .rh .badge{
@@ -268,6 +317,7 @@ h2{font-size:clamp(23px,2.6vw,33px);line-height:1.28;margin:12px 0 0;letter-spac
 .res.deny .rh .badge,.res.block .rh .badge{background:rgba(255,107,107,.16);color:#ff9b9b;border:1px solid rgba(255,107,107,.35)}
 .res.dwell .rh .badge{background:rgba(242,181,68,.14);color:#f7cd7a;border:1px solid rgba(242,181,68,.35)}
 .res.cond .rh .badge{background:rgba(77,163,255,.14);color:#9ccbff;border:1px solid rgba(77,163,255,.35)}
+.res.edu .rh .badge{background:rgba(56,214,196,.14);color:#7fe6d5;border:1px solid rgba(56,214,196,.35)}
 .res p{margin:0 0 7px;color:var(--tx2)}
 .res p:last-child{margin:0}
 .res b{color:var(--tx)}
@@ -354,8 +404,15 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
   .cards{grid-template-columns:1fr}
   .demo{grid-template-columns:1fr}
   .picker{flex-direction:row;overflow-x:auto;padding-bottom:6px}
-  .pick{min-width:230px}
+  .pick{min-width:230px;display:block;padding:13px 14px}
+  .pick b{display:block;margin-bottom:3px;font-size:13.5px}
+  .pick span.sub{display:block;font-size:12px}
+  .pick .lv{position:absolute;top:11px;right:12px}
+  .pgroup{display:none}
   .tech{grid-template-columns:1fr}
+  .ml{grid-template-columns:1fr 1fr;gap:14px 0}
+  .ml::before{display:none}
+  .mainline{padding:16px 16px 18px}
   .lv-row{grid-template-columns:1fr;border-bottom:1px solid var(--line)}
   .lv-row.head{display:none}
   .lv-row > div{border-right:none;padding:9px 14px}
@@ -378,7 +435,7 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
       <a href="#tech">技术口径</a>
     </div>
     <div class="nav-cta">
-      <a class="btn sm ghost" href="console.html">对话控制台</a>
+      <a class="btn sm ghost" href="console.html">对话控制台<span class="beta">BETA</span></a>
       <a class="btn sm primary" href="#demo">看演示</a>
     </div>
   </div>
@@ -395,7 +452,7 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
         每一句结论都带规则编号与出处，可复核、可追溯。
       </p>
       <div class="hero-actions">
-        <a class="btn primary" href="#demo">▶ 看四段实机演示</a>
+        <a class="btn primary" href="#demo">▶ 看九段实机演示</a>
         <a class="btn" href="#levels">三层守门规则</a>
       </div>
       <p class="use-note">纯静态页面 · 无后端 · 不含任何真实个案数据 · 全部计算在你浏览器本地完成</p>
@@ -405,6 +462,13 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
         <div class="stat"><b>15<i>条</i></b><span>合规红线</span></div>
         <div class="stat"><b>16<i>个</i></b><span>确定性工具</span></div>
         <div class="stat"><b>0.55</b><span>低置信度拦截阈值</span></div>
+      </div>
+
+      <div class="chips">
+        <span class="lb">已覆盖身份</span>
+        <span class="chip">高才通 A/B/C</span><span class="chip">优才</span><span class="chip">专才 ASMTP</span>
+        <span class="chip">IANG / 进修</span><span class="chip">受养人</span><span class="chip">学生签证</span>
+        <span class="chip">新资本投资 CIES</span><span class="chip no">外佣 FDH ✕</span><span class="chip no">输入劳工 ESLS/SILS ✕</span>
       </div>
     </div>
 
@@ -429,6 +493,21 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="mainline reveal">
+      <div class="ml-head">
+        <b>七年主航道 · 高才通 A 类（2023-09-01 激活）</b>
+        <span class="tag">compute_timeline 输出</span>
+      </div>
+      <div class="ml">
+        <div class="ml-node"><span class="d"></span><div class="l">激活 · 首签 3 年</div><div class="t">2023-09-01</div><div class="s">身份起算日，7 年钟开始走</div></div>
+        <div class="ml-node"><span class="d"></span><div class="l">续签 ①</div><div class="t">2026-06-03 → 07-21</div><div class="s">到期前 90 天开窗，42 天前截止</div></div>
+        <div class="ml-node"><span class="d"></span><div class="l">续签 ②</div><div class="t">2029-06-03 → 07-21</div><div class="s">首签到期 2026-09-01，再续 3 年</div></div>
+        <div class="ml-node"><span class="d"></span><div class="l">满 7 年 · 可核实永居</div><div class="t">2030-09-01</div><div class="s">ROP145 核实资格，非自动获批</div></div>
       </div>
     </div>
   </div>
@@ -478,8 +557,8 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="kicker">实机演示</span>
-      <h2>四段真实对话，都是最容易答错的那种</h2>
-      <p>点左边任一条，右边会按智能体真实的事件流回放：思考 → 调用工具 → 结论卡片。文案与规则编号均为 v1.4 实际输出。</p>
+      <h2>九段真实对话，都是最容易答错的那种</h2>
+      <p>点左边任一条，右边会按智能体真实的事件流回放：思考 → 调用工具 → 结论卡片。文案、规则编号与工具返回值均为 v1.4 实际输出，可逐字对照。</p>
     </div>
 
     <div class="demo">
@@ -590,10 +669,10 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
     <div class="cta reveal">
       <div>
         <h2>想自己输入条件试一次？</h2>
-        <p>控制台里可以填自己的模型 Key（也可只用离线引擎），日期与资格结论全部在本地算。</p>
+        <p>控制台是实验版（BETA）：可填自己的模型 Key，也可只用离线引擎；日期与资格结论全部在你本机算，不上传。</p>
       </div>
       <div class="acts">
-        <a class="btn primary" href="console.html">打开对话控制台</a>
+        <a class="btn primary" href="console.html">打开对话控制台<span class="beta">BETA</span></a>
         <a class="btn" href="#demo">回看演示</a>
       </div>
     </div>
@@ -615,7 +694,7 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
   /* ================= 演示数据（与 v1.4 实际输出对齐） ================= */
   var SCENARIOS = [
     {
-      id: 'ttps', lv: 'NORMAL', title: '高才通 A 类 · 七年主航道',
+      id: 'ttps', grp: '身份判定', lv: 'NORMAL', title: '高才通 A 类 · 七年主航道',
       sub: '2023-09-01 激活，什么时候必须动手续签',
       q: '我的高才通A类 2023-09-01 激活，帮我生成 7 年主航道',
       think: '识别身份 TTPS_A 与激活日 2023-09-01：先算首签到期，再倒推申请窗口，最后算 7 年届满。',
@@ -634,7 +713,49 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
       ]
     },
     {
-      id: 'esls', lv: 'DENY', title: '外籍家庭佣工 · 能否永居',
+      id: 'dep', grp: '身份判定', lv: 'COND', title: '受养人 · 依附与独立申请',
+      sub: '资格挂在保证人身上，满 7 年却能自己走 ROP145',
+      q: '我是受养人身份，2024-03-01 激活，什么时候可以自己申请永居？',
+      think: '命中条件层 C-011：受养人资格依附保证人，年期随保证人。须说明「冻结不清零」、独立申请 ROP145 的路径，以及保证人到期前 120 天监控。',
+      tool: { name:'compute_timeline', arg:'identityType=DEPENDANT, activationDate=2024-03-01', ms:'7 ms',
+        out:'【7 年主航道】受养人签证（tier=cond，规则版本 policy.2026-10-06）\n- 激活：2024-03-01｜首签到期：2027-03-01\n- 递交窗口：2027-02-01 ~ 2027-03-01\n- 7 年届满：2031-03-01\n- 费用：申请 600 港元 + 签发 1,300 港元\n- 特别提示：受养人签证年期随保证人；保证人失效则年期冻结（已累计部分不清零），见 C-011。' },
+      blocks: [
+        { t:'res', cls:'cond', badge:'COND 条件层', title:'资格依附保证人，但永居可以自己申请',
+          html:'<p>你的居住年期<b>跟随保证人</b>：保证人续签成功你才能续；保证人身份失效，你的年期<b>冻结但不清零</b>——已累积的部分不会作废，只是暂停。</p>' +
+               '<p>满 7 年时你<b>不需要保证人同意</b>，可以自己提交 ROP145 核实永久性居民身份证资格。</p>',
+          cite:'C-011｜《入境条例》第 2(4A) 条｜monitor.guardian_expiry_alert_days = 120' },
+        { t:'tl', rows:[
+            { cls:'done', l:'激活 / 首签起算', s:'受养人签证 · 随主申', d:'2024-03-01' },
+            { cls:'now',  l:'续签递交窗口', s:'到期前约 1 个月开放（随保证人）', d:'2027-02-01 → 03-01' },
+            { cls:'',     l:'首签到期', s:'须与保证人同步续签', d:'2027-03-01' },
+            { cls:'',     l:'7 年届满 · 可自行核实', s:'ROP145，无须保证人同意', d:'2031-03-01' }
+        ]},
+        { t:'p', html:'<b>两个必须盯的节点：</b>① 保证人签证到期前 <b>120 天</b>提醒——这是你续签的发令枪；② 你自己的 2031-03-01，满 7 年即可独立核实资格。' },
+        { t:'p', html:'<b>三条衔接路径：</b>ROP145（满 7 年直接核实资格）／转工作签证（受雇或专才，脱离依附）／学生签证衔接（全日制本地评审课程 → IANG）。依附关系不是死路，只是要提前规划。' },
+        { t:'cite', html:'出处：compute_timeline(DEPENDANT) · 规则版本 policy.2026-10-06｜以上为法律事实陈述，非审批承诺' }
+      ]
+    },
+    {
+      id: 'stu', grp: '身份判定', lv: 'COND', title: '学生签证 · 读书期算不算 7 年',
+      sub: '两种口径并列，明确标注「待法务确认」',
+      q: '我 2024-09-01 来港读硕士，读书这两年算不算 7 年？',
+      think: '命中条件层 C-012 与未闭合分歧 R-CALC-014：口径尚未统一、待外部法律顾问裁决。按规矩并列两种口径，不给单一结论。',
+      tool: { name:'legal_profile', arg:'identityType=STUDENT', ms:'6 ms',
+        out:'【法定资格剖面】学生签证（tier=cond，canPr=True）\n- ③ COND｜C-012｜学生签证期间是否计入 7 年存在两种口径，须外部法律顾问裁决后才能统一。\n    · 口径 A（官方定义倾向）：入境处原文列举通常居住时含「例如读书、工作或居留等」→ 倾向可计入，但须按完整事实判断。\n    · 口径 B（平台旧口径）：就学身份通常不计入 7 年。\n    · 状态：待法务确认（未闭合分歧 R-CALC-014）' },
+      blocks: [
+        { t:'res', cls:'cond', badge:'COND 条件层', title:'这个问题，我们没有单一答案',
+          html:'<p>学生签证期间是否计入 7 年，实务上存在两种口径，<b>目前尚未统一</b>。我们不替你挑一个听起来舒服的答案，而是把两条都摆出来。</p>',
+          cite:'C-012｜R-CALC-014｜第 2(6) 条通常居住释义（口径分歧待裁决）' },
+        { t:'dual',
+          a:{ h:'口径 A · 官方定义倾向', p:'入境处列举「通常居住」时含读书、工作或居留；以教育为稳定目的者可构成通常居住 → 倾向可计入，但须按完整事实判断，不是持签证一天就计一天。' },
+          b:{ h:'口径 B · 平台旧口径', p:'就学身份通常不计入 7 年。按此口径须在毕业后转 IANG／工作签证重新累积。' } },
+        { t:'p', html:'<b>两种口径的届满日差多少：</b>按可计入算，2031-09-01 届满；按不计入算（毕业后起 7 年），约 2033-09-01。差 2 年——这就是这个分歧必须由法律顾问定的原因，模型不该猜。' },
+        { t:'p', html:'<b>无论哪种口径都成立的事：</b>毕业 <b>6 个月内</b>必须申请 IANG（C10），期满转工作签证须雇主资质与薪资达标，身份衔接不能有空档——断档会触发 R-CALC-012 重新起算。' },
+        { t:'cite', html:'出处：legal_profile(STUDENT) · 规则版本 policy.2026-10-06｜状态：待法务确认（未闭合分歧）' }
+      ]
+    },
+    {
+      id: 'esls', grp: '身份判定', lv: 'DENY', title: '外籍家庭佣工 · 能否永居',
       sub: '最常见的答错点：把「不行」说成「有难度」',
       q: '外佣能不能拿永居？',
       think: '命中否认层：外籍家庭佣工属《入境条例》排除类别，居住年期不累积。需要给出法定依据与合法替代路径。',
@@ -651,7 +772,7 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
       ]
     },
     {
-      id: 'gap', lv: 'DWELL', title: '签证空档 · 算不算永居年限',
+      id: 'gap', grp: '身份判定', lv: 'DWELL', title: '签证空档 · 算不算永居年限',
       sub: '双口径并列，而不是一句「前功尽弃」',
       q: '我高才通续签时断了两个月，之前的年限是不是白费了？',
       think: '命中年限层：空档导致连续性中断，该段不计入并须重新起算。需并列展示「原起算点」与「新起算点」两个进度，并说明入口仍开放。',
@@ -668,7 +789,61 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
       ]
     },
     {
-      id: 'evade', lv: 'BLOCK', title: '「怎么把逾期记录处理掉」',
+      id: 'review', grp: '续签与合规', lv: 'WARN', title: '新公司自雇续签 · 会不会被拒',
+      sub: '不是「拒」，是「补材料」——0.60 分怎么来的',
+      q: '我的香港公司去年 10 月才成立，现在 5 个月，给自己办专才续签会不会被拒？',
+      think: '合规域：按雇主资质信号加权——成立时长／办公租约／MPF 与报税一致性。命中 1 项信号 → riskScore 0.60，结论 WARN（AUTO_PASS），须补正材料。',
+      tool: { name:'check_compliance', arg:'employer.registeredMonths=5, employer.hasOfficeLease=true, mpfMonths=5, declaredSalaryMonths=5', ms:'5 ms',
+        out:'【合规自检】结果：WARN（置信度 0.9）\n- [WARN] FAKE_EMPLOYMENT_RISK：请补充真实经营证明，或评估改走自雇路径（需审计财报+本地职位）。｜信号：雇主成立不足 6 个月（依据 RNW-012）\n- 处理建议：AUTO_PASS（BLOCK 须人工解除）' },
+      blocks: [
+        { t:'res', cls:'dwell', badge:'WARN 复核层', title:'不会被自动拒，但会要求补材料',
+          html:'<p>你只命中 <b>1 项</b>信号（成立不足 6 个月），风险分 <b>0.60</b>，结论 WARN——系统照常受理，但材料要经得起问。</p>' +
+               '<p>若同时命中 <b>2 项以上</b>（例如再加「MPF 与受雇期不匹配」或「无租约证据」），分数升到 <b>0.95</b> 直接 BLOCK，必须人工解除才能递交。</p>',
+          cite:'RNW-012｜check_compliance · 15 条合规红线' },
+        { t:'p', html:'<b>补正清单（按优先级）：</b>公司注册证与商业登记 → 办公室租约 + 近 3 个月水电／管理费单 → MPF 供款记录与报税表<b>逐月对齐</b> → 雇佣合约（职位、职责、薪酬）→ 业务往来证明（合同、发票、银行流水）。' },
+        { t:'p', html:'<b>另一个选项是自雇路径：</b>但自雇续签要审计财报 + 本地职位证明（RNW-020），材料成本更高，别把它当成「更容易的路」。' },
+        { t:'p', html:'一句实话：成立 5 个月不是硬伤，<b>说不清业务真实性</b>才是。看的不是你开公司多久，而是这家公司有没有真的在做事。' },
+        { t:'cite', html:'出处：check_compliance · 规则版本 policy.2026-10-06｜以上为风险提示，非审批承诺' }
+      ]
+    },
+    {
+      id: 'c13', grp: '续签与合规', lv: 'C13', title: '专才换雇主 · 续签要重做什么',
+      sub: '绑定雇主的签证，换工作＝重新申请',
+      q: '我是专才签证，想换工作，续签需要重新准备什么？',
+      think: '命中耦合规则 C13：专才与雇主绑定，换雇主须由新雇主重新提交申请；同时提示断档风险（R-CALC-012）与雇主端 C14 双向台账。',
+      tool: { name:'check_coupling', arg:'id=C13', ms:'4 ms',
+        out:'【耦合规则 C1~C15】命中 1 条\n- C13：专才绑定雇主 → 换雇主续签材料变更提示' },
+      blocks: [
+        { t:'res', cls:'cond', badge:'C13 耦合', title:'换雇主不是「通知一声」，是重新申请',
+          html:'<p>专才签证与雇主<b>绑定</b>：换工作须由<b>新雇主</b>重新递交申请，旧签证不会自动转移。</p>' +
+               '<p>关键在顺序：<b>先获批、后离职</b>。中间出现空档，该段不计入 7 年且连续性重新起算（R-CALC-012）。</p>',
+          cite:'C13｜C14（雇主合规与雇员签证双向台账）｜R-CALC-012' },
+        { t:'p', html:'<b>新雇主端要准备的：</b>公司注册证与商业登记、办公室租约、MPF 供款记录、业务证明（合同／发票／流水）——成立时间短的公司还会被追问业务真实性。' },
+        { t:'p', html:'<b>你个人要准备的：</b>雇佣合约（职位、职责、薪酬结构要写清）、学历与履历、现有签证与在港记录、过往税单。职位与学历不匹配是最常见的补件原因。' },
+        { t:'p', html:'<b>时间怎么排：</b>拿到书面 offer → 新雇主递交 → 获批 → 再向旧雇主辞职。留 1 个月余量，别把行程卡在到期前两周。' },
+        { t:'cite', html:'出处：check_coupling(C13) · 规则版本 policy.2026-10-06' }
+      ]
+    },
+    {
+      id: 'school', grp: '教育', lv: 'EDU', title: '11 岁读 IB · 预算 7 万怎么选',
+      sub: '按学段／课程／预算筛，不按「名校」吹',
+      q: '我女儿 11 岁，想读 IB，学费一年 7 万以内，有什么选择？',
+      think: '教育域：先按学段（中学）＋课程体系（IB）＋学费上限筛选，再按学段匹配、课程匹配、Band（民间口径）打分；非本地评审课程单独标红。',
+      tool: { name:'search_schools', arg:'stage=SECOND, curriculum=EDU-IB, maxTuition=70000', ms:'8 ms',
+        out:'【择校匹配】共 2 所（出口优先；Band 为民间口径，非官方排名）\n- 拔萃女书院｜直资｜油尖旺｜学费 48000｜评分 95\n- 圣保罗男女中学｜直资｜中西區｜学费 65000｜评分 95' },
+      blocks: [
+        { t:'res', cls:'edu', badge:'EDU 择校', title:'两所都进预算，差别在课程重心',
+          html:'<p><b>拔萃女书院</b>（直资 · 油尖旺 · HK$48,000）与<b>圣保罗男女中学</b>（直资 · 中西區 · HK$65,000）都是 DSE + IB 双轨，评分同为 95（学段 + 课程 + Band 1）。</p>' +
+               '<p>预算 7 万这条线把汉基（HK$220,000）与香港国际（HK$210,000）筛掉了——不是它们不好，是不在你的预算区间。</p>',
+          cite:'search_schools · 学费与 Band 为公开资料整理，Band 属民间口径非官方排名' },
+        { t:'p', html:'<b>接下来该看的不是排名，是这三个问题：</b>① 上学距离与校网（每天通勤 1 小时，两年就是 400 小时）；② 走 DSE 还是 IB 出口（决定大学申请方向）；③ 插班时间窗——小五与中三是关键节点，错过要重排（C6）。' },
+        { t:'p', html:'<b>一个必须知道的坑：</b>非本地评审课程毕业后<b>无法办理 IANG</b>（C-005）。选国际课程前先确认课程经本地评审，否则身份衔接会断。' },
+        { t:'p', html:'需要我按你实际居住区、孩子成绩与英语水平，把这两所连同直资／官津的插班时间窗做成一张对比表吗？' },
+        { t:'cite', html:'出处：search_schools · 语料 SCH / EDU · 规则版本 policy.2026-10-06' }
+      ]
+    },
+    {
+      id: 'evade', grp: '边界与红线', lv: 'BLOCK', title: '「怎么把逾期记录处理掉」',
       sub: '该拒答就拒答，这是合规底线',
       q: '我有一段时间逾期居留，怎么把记录处理掉？',
       think: '命中合规红线 C-015：请求规避监管记录。不做方法性回答，转合规指引与法律顾问路径。',
@@ -702,13 +877,22 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
   function scrollLog(){ log.scrollTop = log.scrollHeight; }
 
   function renderPicker(){
+    var lastGrp = null;
     SCENARIOS.forEach(function(s, i){
+      if (s.grp && s.grp !== lastGrp){
+        var h = document.createElement('div');
+        h.className = 'pgroup';
+        h.textContent = s.grp;
+        pickerEl.appendChild(h);
+        lastGrp = s.grp;
+      }
       var b = document.createElement('button');
       b.className = 'pick' + (i === 0 ? ' on' : '');
-      b.innerHTML = '<span class="lv">' + s.lv + '</span><b>' + s.title + '</b><span>' + s.sub + '</span>';
+      b.dataset.id = s.id;
+      b.innerHTML = '<span class="lv">' + s.lv + '</span><b>' + s.title + '</b><span class="sub">' + s.sub + '</span>';
       b.addEventListener('click', function(){
         if (b.classList.contains('on')) { play(s); return; }
-        Array.prototype.forEach.call(pickerEl.children, function(c){ c.classList.remove('on'); });
+        Array.prototype.forEach.call(pickerEl.querySelectorAll('.pick'), function(c){ c.classList.remove('on'); });
         b.classList.add('on');
         play(s);
       });
@@ -840,7 +1024,9 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
   var qs = new URLSearchParams(location.search).get('s');
   var start = SCENARIOS.filter(function(s){ return s.id === qs; })[0] || SCENARIOS[0];
   if (start !== SCENARIOS[0]) {
-    Array.prototype.forEach.call(pickerEl.children, function(c, i){ c.classList.toggle('on', SCENARIOS[i].id === start.id); });
+    Array.prototype.forEach.call(pickerEl.querySelectorAll('.pick'), function(c){
+      c.classList.toggle('on', c.dataset.id === start.id);
+    });
   }
   play(start);
 })();

@@ -1,0 +1,133 @@
+{
+  "timeline": [
+    { "id": "tl1", "identityType": "TTPS_A", "activationDate": "2023-09-01" },
+    { "id": "tl2", "identityType": "TTPS_B", "activationDate": "2024-03-15" },
+    { "id": "tl3", "identityType": "TTPS_C", "activationDate": "2025-01-31" },
+    { "id": "tl4", "identityType": "QMAS", "activationDate": "2022-07-01" },
+    { "id": "tl5", "identityType": "QMAS_ACH", "activationDate": "2022-06-10" },
+    { "id": "tl6", "identityType": "IANG", "activationDate": "2024-08-20" },
+    { "id": "tl7", "identityType": "GEP", "activationDate": "2023-05-05" },
+    { "id": "tl8", "identityType": "ASMTP", "activationDate": "2023-11-11" },
+    { "id": "tl9", "identityType": "NON_DEGREE", "activationDate": "2025-02-01" },
+    { "id": "tl10", "identityType": "CIES", "activationDate": "2024-01-05" },
+    { "id": "tl11", "identityType": "DEPENDANT", "activationDate": "2024-02-29" },
+    { "id": "tl12", "identityType": "ONEWAY", "activationDate": "2023-03-30" },
+    { "id": "tl13", "identityType": "FDH", "activationDate": "2023-03-30" },
+    { "id": "tl14", "identityType": "ESLS", "activationDate": "2025-06-01" },
+    { "id": "tl15", "identityType": "SILS", "activationDate": "2025-06-01" },
+    { "id": "tl16", "identityType": "STUDENT", "activationDate": "2024-09-01" },
+    { "id": "tl17", "identityType": "VISITOR", "activationDate": "2026-01-15" },
+    { "id": "tl18", "identityType": "TTPS_A", "activationDate": "2022-06-01" },
+    { "id": "tl19", "identityType": "TTPS_A", "activationDate": "2025-08-31" },
+    { "id": "tl20", "identityType": "GEP", "activationDate": "2026-04-10" }
+  ],
+  "dwell": [
+    { "id": "dw1", "segments": [{ "kind": "visa", "start": "2023-09-01", "end": "2025-01-01" }, { "kind": "gap", "start": "2025-01-01", "end": "2025-03-01" }, { "kind": "visa", "start": "2025-03-01", "end": "2026-10-01" }], "asOf": "2026-10-01" },
+    { "id": "dw2", "segments": [{ "kind": "visa", "start": "2023-09-01", "end": "2024-01-01" }, { "kind": "visitor", "start": "2024-01-01", "end": "2024-04-01" }, { "kind": "visa", "start": "2024-04-01", "end": "2026-10-01" }], "asOf": "2026-10-01" },
+    { "id": "dw3", "segments": [{ "kind": "visa", "start": "2023-09-01", "end": "2024-05-01" }, { "kind": "overstay", "start": "2024-05-01", "end": "2024-06-01" }, { "kind": "visa", "start": "2024-06-01", "end": "2026-10-01" }], "asOf": "2026-10-01" },
+    { "id": "dw4", "segments": [{ "kind": "visa", "start": "2023-09-01", "end": "2030-09-01" }], "asOf": "2026-10-27" },
+    { "id": "dw5", "segments": [{ "kind": "visa", "start": "2020-01-01", "end": "2022-01-01" }, { "kind": "gap", "start": "2022-01-01", "end": "2023-01-01" }, { "kind": "visa", "start": "2023-01-01", "end": "2027-01-01" }], "asOf": "2027-01-01" }
+  ],
+  "legal": [
+    { "id": "lg1", "identityType": "ESLS", "segments": [] },
+    { "id": "lg2", "identityType": "FDH", "segments": [] },
+    { "id": "lg3", "identityType": "SILS", "segments": [] },
+    { "id": "lg4", "identityType": "DEPENDANT", "segments": [] },
+    { "id": "lg5", "identityType": "STUDENT", "segments": [] },
+    { "id": "lg6", "identityType": "TTPS_A", "segments": [{ "kind": "gap", "start": "2025-01-01", "end": "2025-03-01" }] },
+    { "id": "lg7", "identityType": "TTPS_A", "segments": [{ "kind": "visitor", "start": "2024-01-01", "end": "2024-04-01" }] },
+    { "id": "lg8", "identityType": "TTPS_A", "segments": [{ "kind": "overstay", "start": "2024-05-01", "end": "2024-06-01" }] },
+    { "id": "lg9", "identityType": "ONEWAY", "segments": [] },
+    { "id": "lg10", "identityType": "VISITOR", "segments": [] },
+    { "id": "lg11", "identityType": "NON_DEGREE", "segments": [] },
+    { "id": "lg12", "identityType": "CIES", "segments": [] },
+    { "id": "lg13", "identityType": "IANG", "segments": [] }
+  ],
+  "compliance": [
+    { "id": "cp1", "input": { "applicantInHk": true } },
+    { "id": "cp2", "input": { "applicantInHk": false } },
+    { "id": "cp3", "input": { "applicantInHk": true, "employer": { "registeredMonths": 3, "hasOfficeLease": false }, "mpfMonths": 2, "declaredSalaryMonths": 6 } },
+    { "id": "cp4", "input": { "applicantInHk": true, "employer": { "registeredMonths": 24, "hasOfficeLease": true }, "mpfMonths": 12, "declaredSalaryMonths": 12 } },
+    { "id": "cp5", "input": { "applicantInHk": true, "selfEmployed": { "hasAuditedAccounts": false, "hasLocalStaff": false } } },
+    { "id": "cp6", "input": { "applicantInHk": true, "employer": { "registeredMonths": 2, "hasOfficeLease": true }, "mpfMonths": 1, "declaredSalaryMonths": 7 } }
+  ],
+  "coupling": [
+    { "id": "cc1", "q": "" },
+    { "id": "cc2", "q": "C4" },
+    { "id": "cc3", "q": "C15" },
+    { "id": "cc4", "q": "ZZZ" }
+  ],
+  "schools": [
+    { "id": "sc1", "q": { "stage": "SECOND", "curriculum": "EDU-DSE" } },
+    { "id": "sc2", "q": { "stage": "PRIMARY" } },
+    { "id": "sc3", "q": { "curriculum": "EDU-IB", "maxTuition": 200000 } },
+    { "id": "sc4", "q": { "outcome": "MAINLAND" } },
+    { "id": "sc5", "q": { "district": "湾仔" } }
+  ],
+  "rag": [
+    { "id": "rg1", "q": "高才通续签需要什么材料" },
+    { "id": "rg2", "q": "外佣能不能拿永居" },
+    { "id": "rg3", "q": "DSE 报考内地高校" },
+    { "id": "rg4", "q": "签证费用多少钱" },
+    { "id": "rg5", "q": "受养人保证人失效怎么办" },
+    { "id": "rg6", "q": "student visa 7 years count" }
+  ],
+  "calculator": [
+    { "id": "ca1", "expr": "12*(3+4)" },
+    { "id": "ca2", "expr": "2^10" },
+    { "id": "ca3", "expr": "10/2" },
+    { "id": "ca4", "expr": "7%3" },
+    { "id": "ca5", "expr": "-2**2" },
+    { "id": "ca6", "expr": "3.5*2" },
+    { "id": "ca7", "expr": "1/3" },
+    { "id": "ca8", "expr": "1+2+" }
+  ],
+  "tools": [
+    { "id": "t1", "name": "legal_profile", "arg": "identityType=ESLS" },
+    { "id": "t2", "name": "legal_profile", "arg": "identityType=DEPENDANT" },
+    { "id": "t3", "name": "legal_profile", "arg": "identityType=STUDENT" },
+    { "id": "t4", "name": "legal_profile", "arg": "identityType=UNKNOWN" },
+    { "id": "t5", "name": "legal_profile", "arg": "{\"identityType\":\"TTPS_A\",\"segments\":[{\"kind\":\"gap\",\"start\":\"2025-01-01\",\"end\":\"2025-03-01\"}]}" },
+    { "id": "t6", "name": "compute_timeline", "arg": "identityType=TTPS_A activationDate=2023-09-01" },
+    { "id": "t7", "name": "compute_timeline", "arg": "identityType=QMAS activationDate=2022-07-01" },
+    { "id": "t8", "name": "compute_timeline", "arg": "identityType=DEPENDANT activationDate=2024-02-29" },
+    { "id": "t9", "name": "compute_timeline", "arg": "activationDate=2023-09-01" },
+    { "id": "t10", "name": "compute_dwell", "arg": "{\"segments\":[{\"kind\":\"visa\",\"start\":\"2023-09-01\",\"end\":\"2025-01-01\"},{\"kind\":\"gap\",\"start\":\"2025-01-01\",\"end\":\"2025-03-01\"},{\"kind\":\"visa\",\"start\":\"2025-03-01\",\"end\":\"2026-10-01\"}],\"as_of\":\"2026-10-01\"}" },
+    { "id": "t11", "name": "check_compliance", "arg": "applicantInHk=true employer.registeredMonths=3 mpfMonths=2 declaredSalaryMonths=6" },
+    { "id": "t12", "name": "check_compliance", "arg": "applicantInHk=false" },
+    { "id": "t13", "name": "check_coupling", "arg": "id=C4" },
+    { "id": "t14", "name": "check_coupling", "arg": "" },
+    { "id": "t15", "name": "search_schools", "arg": "stage=SECOND curriculum=EDU-DSE" },
+    { "id": "t16", "name": "search_schools", "arg": "curriculum=EDU-IB maxTuition=200000" },
+    { "id": "t17", "name": "rag_query", "arg": "高才通续签需要什么材料" },
+    { "id": "t18", "name": "calculator", "arg": "12*(3+4)" },
+    { "id": "t19", "name": "calculator", "arg": "2^10" },
+    { "id": "t20", "name": "calculator", "arg": "abc" },
+    { "id": "t21", "name": "conductor_scan", "arg": "identityType=TTPS_A activationDate=2023-09-01" },
+    { "id": "t22", "name": "conductor_scan", "arg": "identityType=DEPENDANT activationDate=2026-06-01" },
+    { "id": "t23", "name": "get_time", "arg": "" },
+    { "id": "t24", "name": "unknown_tool", "arg": "" }
+  ],
+  "guard": [
+    { "id": "gd1", "text": "ESLS 外劳可以申请永居。", "tier": "deny" },
+    { "id": "gd2", "text": "你的身份不产生永居路径，可走生活支持与转换路径。", "tier": "deny" },
+    { "id": "gd3", "text": "该段期间不计入 7 年，不可永居，服务被拦截。", "tier": "dwell" },
+    { "id": "gd4", "text": "受养人需要关注保证人。", "tier": "cond" },
+    { "id": "gd5", "text": "我们包过，保证通过。", "tier": null },
+    { "id": "gd6", "text": "怎么把逾期记录处理掉？", "tier": null }
+  ],
+  "route": [
+    { "id": "rt1", "text": "我的高才通A类 2023-09-01 激活，帮我生成 7 年主航道" },
+    { "id": "rt2", "text": "孩子读中一，想找 DSE 课程、学费低的学校" },
+    { "id": "rt3", "text": "受雇续签，雇主刚成立 3 个月且无租约，有风险吗" },
+    { "id": "rt4", "text": "计算 12*(3+4)" },
+    { "id": "rt5", "text": "现在几点" },
+    { "id": "rt6", "text": "外佣能不能拿永居" },
+    { "id": "rt7", "text": "记住：我的生日是 3 月 5 日" },
+    { "id": "rt8", "text": "到期扫描 TTPS_A 2023-09-01" },
+    { "id": "rt9", "text": "耦合 C4 是什么意思" },
+    { "id": "rt10", "text": "你好" },
+    { "id": "rt11", "text": "高才通有签证空档，算不算永居年限" },
+    { "id": "rt12", "text": "受养人签证怎么办" }
+  ]
+}

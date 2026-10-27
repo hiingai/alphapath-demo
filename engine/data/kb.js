@@ -1,0 +1,1100 @@
+/* 自动生成，请勿手改：python tools/export_kb.py (源: AlphaPath v1.4 agent/domain/kb.py) */
+(function(g){ g.AP_KB = {
+ "meta": {
+  "source": "AlphaPath v1.4 agent/domain/kb.py",
+  "ruleVersion": "policy.2026-10-06",
+  "exportedAt": "2026-10-27T14:47:12+08:00",
+  "generator": "tools/export_kb.py",
+  "corpusDocs": 89,
+  "sha256": "c3efc075e98882161512783f911327435a3f518370f3b732f9a155f076b3e4b9"
+ },
+ "identityTypes": {
+  "TTPS_A": {
+   "name": "高才通 A 类",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 3,
+   "renew": "3+3+3",
+   "window_days": 90,
+   "lead_days": 42,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "前一年收入 ≥ 250 万港元"
+  },
+  "TTPS_B": {
+   "name": "高才通 B 类",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 2,
+   "renew": "2+3+3",
+   "window_days": 90,
+   "lead_days": 42,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "合资格大学学士 + 前 5 年累计 ≥ 3 年经验"
+  },
+  "TTPS_C": {
+   "name": "高才通 C 类",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 2,
+   "renew": "2+3+3",
+   "window_days": 90,
+   "lead_days": 42,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "合资格大学学士，经验 < 3 年，配额"
+  },
+  "QMAS": {
+   "name": "优才（综合计分）",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 3,
+   "renew": "3+3+2",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "12 项准则符合 6 项；终身仅可获批一次"
+  },
+  "QMAS_ACH": {
+   "name": "优才（成就计分）",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 8,
+   "renew": "一次性",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [],
+   "note": "顶尖成就人士"
+  },
+  "ASMTP": {
+   "name": "专才 ASMTP",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 2,
+   "renew": "2+3+3",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "绑定雇主，转换雇主需重新报备"
+  },
+  "GEP": {
+   "name": "一般就业政策 GEP",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 2,
+   "renew": "2+3+3",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "海外专业人士；岗位须本地难以觅得"
+  },
+  "NON_DEGREE": {
+   "name": "非学位专才渠道",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 2,
+   "renew": "2+3+3",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "⭐ 可累积居住年数并可申请永居，与输入劳工有本质区别（耦合 C15）"
+  },
+  "IANG": {
+   "name": "IANG 非本地毕业生",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 2,
+   "renew": "2+3+3",
+   "window_days": 90,
+   "lead_days": 42,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "毕业 6 个月内为应届通道"
+  },
+  "STUDENT": {
+   "name": "学生签证",
+   "tier": "cond",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 1,
+   "renew": "转 IANG",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [],
+   "note": "⚠️ 读书期是否计入 7 年见 R-CALC-014（待法务确认）"
+  },
+  "CIES": {
+   "name": "新资本投资者入境计划",
+   "tier": "normal",
+   "can_pr": true,
+   "dependants": true,
+   "first_years": 2,
+   "renew": "2+3+3",
+   "window_days": 90,
+   "lead_days": 42,
+   "peak": [
+    6,
+    7,
+    8
+   ],
+   "note": "投资额与资产门槛"
+  },
+  "DEPENDANT": {
+   "name": "受养人签证",
+   "tier": "cond",
+   "can_pr": true,
+   "dependants": false,
+   "first_years": 3,
+   "renew": "随主申",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [],
+   "note": "依附保证人；保证人失效则年期冻结（不清零），见 C-011"
+  },
+  "ONEWAY": {
+   "name": "单程证",
+   "tier": "special",
+   "can_pr": false,
+   "dependants": false,
+   "first_years": 0,
+   "renew": "—",
+   "window_days": 0,
+   "lead_days": 0,
+   "peak": [],
+   "note": "《基本法》第 24 条其他类别，不按 7 年计算"
+  },
+  "ESLS": {
+   "name": "补充劳工优化计划 ESLS",
+   "tier": "deny",
+   "can_pr": false,
+   "dependants": false,
+   "first_years": 2,
+   "renew": "雇主重新申请",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [],
+   "note": "第 2(4)(a)(v) 条：外来合约工人期间不视为通常居住"
+  },
+  "SILS": {
+   "name": "行业输入劳工计划",
+   "tier": "deny",
+   "can_pr": false,
+   "dependants": false,
+   "first_years": 2,
+   "renew": "雇主重新申请",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [],
+   "note": "建造业/运输业/安老院舍；第 2(4)(a)(v) 条"
+  },
+  "FDH": {
+   "name": "外籍家庭佣工 FDH",
+   "tier": "deny",
+   "can_pr": false,
+   "dependants": false,
+   "first_years": 2,
+   "renew": "雇主重新申请",
+   "window_days": 28,
+   "lead_days": 0,
+   "peak": [],
+   "note": "第 2(4)(a)(vi) 条；Vallejos v. Commissioner of Registration [2013] 2 HKC 1 确认合宪"
+  },
+  "VISITOR": {
+   "name": "访客期",
+   "tier": "dwell",
+   "can_pr": false,
+   "dependants": false,
+   "first_years": 0,
+   "renew": "—",
+   "window_days": 0,
+   "lead_days": 0,
+   "peak": [],
+   "note": "访客逗留期间不计入 7 年（R-CALC-011）"
+  },
+  "GAP": {
+   "name": "签证空档期",
+   "tier": "dwell",
+   "can_pr": false,
+   "dependants": false,
+   "first_years": 0,
+   "renew": "—",
+   "window_days": 0,
+   "lead_days": 0,
+   "peak": [],
+   "note": "空档导致连续性中断，须重新起算（R-CALC-012）"
+  },
+  "OVERSTAY": {
+   "name": "逾期逗留",
+   "tier": "dwell",
+   "can_pr": false,
+   "dependants": false,
+   "first_years": 0,
+   "renew": "—",
+   "window_days": 0,
+   "lead_days": 0,
+   "peak": [],
+   "note": "该段不计入；其后合法期可重新起算（R-CALC-013）—— 属 ② 层非 ① 层"
+  }
+ },
+ "legalBlockRules": [
+  {
+   "id": "R-LABOR-015",
+   "tier": "deny",
+   "applicable": [
+    "ESLS"
+   ],
+   "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+   "remedy": [
+    "switch_to_other_visa"
+   ]
+  },
+  {
+   "id": "R-LABOR-016",
+   "tier": "deny",
+   "applicable": [
+    "SILS"
+   ],
+   "subtype": "建造业",
+   "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+   "remedy": [
+    "switch_to_other_visa"
+   ]
+  },
+  {
+   "id": "R-LABOR-017",
+   "tier": "deny",
+   "applicable": [
+    "SILS"
+   ],
+   "subtype": "运输业",
+   "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+   "remedy": [
+    "switch_to_other_visa"
+   ]
+  },
+  {
+   "id": "R-LABOR-018",
+   "tier": "deny",
+   "applicable": [
+    "SILS"
+   ],
+   "subtype": "安老院及残疾人士院舍",
+   "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+   "remedy": [
+    "switch_to_other_visa"
+   ]
+  },
+  {
+   "id": "R-LABOR-019",
+   "tier": "deny",
+   "applicable": [
+    "FDH"
+   ],
+   "legal_basis": "《入境条例》第 2(4)(a)(vi) 条",
+   "precedent": "Vallejos v. Commissioner of Registration [2013] 2 HKC 1（确认合宪）",
+   "remedy": [
+    "switch_to_other_visa"
+   ]
+  }
+ ],
+ "legalDwellRules": [
+  {
+   "id": "R-CALC-011",
+   "tier": "dwell",
+   "condition": "visitor",
+   "effect": "exclude",
+   "calc_hint": "以访客身份逗留的期间不计入 7 年（R-CALC-011），其后取得合法逗留身份的期间仍正常累计；全部服务入口均正常开放。",
+   "compliance": "C-013"
+  },
+  {
+   "id": "R-CALC-012",
+   "tier": "dwell",
+   "condition": "gap",
+   "effect": "rebase",
+   "dual_required": true,
+   "calc_hint": "签证空档期导致连续性中断，该段不计入并须重新起算（R-CALC-012）；此前合法累计不视为「白费」，服务入口均正常开放，可按重新起算点并列展示两个进度数值。",
+   "compliance": "C-014"
+  },
+  {
+   "id": "R-CALC-013",
+   "tier": "dwell",
+   "condition": "overstay",
+   "effect": "exclude_flagged",
+   "calc_hint": "逾期逗留期间不计入 7 年（R-CALC-013），其后合法期可重新起算；服务入口均正常开放。本平台不提供任何规避逾期记录的操作建议。",
+   "compliance": "C-015"
+  }
+ ],
+ "legalCondRules": [
+  {
+   "id": "C-011",
+   "tier": "cond",
+   "applicable": [
+    "DEPENDANT"
+   ],
+   "condition": "depends_on_guardian",
+   "conclusion": {
+    "freeze_on_guardian_lapse": true,
+    "accumulated_retained": true
+   },
+   "action": [
+    "apply_rop145",
+    "switch_to_work_visa",
+    "student_visa_bridge"
+   ],
+   "monitor": {
+    "guardian_expiry_alert_days": 120
+   },
+   "legal_basis": "《入境条例》第 2(4A) 条",
+   "reminder": "你的资格依附于保证人；若保证人失效，年期冻结但不清零。满 7 年可独立申请 ROP145 核实永久性居民身份证资格，无须保证人同意。"
+  },
+  {
+   "id": "C-012",
+   "tier": "cond",
+   "applicable": [
+    "STUDENT"
+   ],
+   "rule_ref": "R-CALC-014",
+   "pending_legal_review": true,
+   "dual_basis": [
+    {
+     "label": "口径 A（官方定义倾向）",
+     "text": "入境处原文列举通常居住时含「例如读书、工作或居留等」；CLIC 载明以教育为稳定目的者可构成通常居住 → 倾向可计入，但须按完整事实判断，不是「持签证一天就计一天」。"
+    },
+    {
+     "label": "口径 B（平台旧口径）",
+     "text": "就学身份通常不计入 7 年。"
+    }
+   ],
+   "action": [
+    "student_visa_bridge"
+   ],
+   "legal_basis": "第 2(6) 条通常居住释义（口径分歧待裁决）",
+   "reminder": "学生签证期间是否计入 7 年存在两种口径，须外部法律顾问裁决后才能统一；本平台并列展示两个口径、不给单一结论。"
+  }
+ ],
+ "dwellEffects": [
+  "exclude",
+  "rebase",
+  "exclude_flagged"
+ ],
+ "remedyActions": {
+  "apply_rop145": {
+   "label": "申请 ROP145（核实永久性居民身份证资格）",
+   "desc": "满 7 年可独立申请核实资格，无须保证人同意。"
+  },
+  "switch_to_work_visa": {
+   "label": "转换工作签证路径",
+   "desc": "以受雇/专才等可累积身份衔接，避免依附中断。"
+  },
+  "student_visa_bridge": {
+   "label": "学生签证衔接路径",
+   "desc": "全日制经本地评审课程毕业后转 IANG，衔接永居。"
+  },
+  "switch_to_other_visa": {
+   "label": "评估转换其他可累积身份的可行性",
+   "desc": "例如符合条件时转非学位专才/专才等正常层身份。"
+  }
+ },
+ "couplingRules": {
+  "C1": "子女入读香港官津中小学 → 需香港居民身份（含受养人）",
+  "C2": "享受本地生学费 → 需香港居民身份",
+  "C3": "接受直资小学学位 → 不可逆，放弃统筹派位资格",
+  "C4": "DSE 报考内地高校 → 通常需永居 + 回乡证（时间窗）",
+  "C5": "华侨生联考 → 一般需永居 + 回乡证（时间窗）",
+  "C6": "小五/中三关键期插班 → 时间窗禁忌",
+  "C7": "续签需家庭在港记录 → 教育记录互相加分",
+  "C8": "永居家庭安排维度 → 教育数据补全材料包",
+  "C9": "进修/留学获取身份 → 全日制经本地评审课程（读书期口径见 R-CALC-014）",
+  "C10": "IANG 衔接 → 毕业 6 个月内申请，断档预警",
+  "C11": "受养人子女教育权益 → 主申身份有效；保证人到期前 120 天提醒",
+  "C12": "① 层身份与在港生活 → 拦永居相关服务，转生活工作支持",
+  "C13": "专才绑定雇主 → 换雇主续签材料变更提示",
+  "C14": "雇主合规与雇员签证 → 双向台账与提醒",
+  "C15": "非学位专才 vs 输入劳工 → 易混淆，须显式区分"
+ },
+ "educationOutcomes": [
+  {
+   "id": "HK",
+   "name": "香港本地院校",
+   "desc": "港八大 / 副学士 / 高教",
+   "prereq": "本地生学费需香港居民身份（C2）"
+  },
+  {
+   "id": "MAINLAND",
+   "name": "内地高校",
+   "desc": "DSE 免试招生 / 华侨生联考",
+   "prereq": "通常需香港永居 + 回乡证（C4/C5）"
+  },
+  {
+   "id": "OVERSEAS",
+   "name": "海外院校",
+   "desc": "英联邦 / 北美 / 其他",
+   "prereq": "身份通常无硬门槛"
+  }
+ ],
+ "curricula": [
+  {
+   "id": "EDU-DSE",
+   "name": "DSE",
+   "outcome": [
+    "HK",
+    "MAINLAND",
+    "OVERSEAS"
+   ],
+   "desc": "港籍生首选；成绩 2 年有效"
+  },
+  {
+   "id": "EDU-IB",
+   "name": "IB",
+   "outcome": [
+    "OVERSEAS",
+    "HK"
+   ],
+   "desc": "目标藤校/G5"
+  },
+  {
+   "id": "EDU-AL",
+   "name": "A-Level",
+   "outcome": [
+    "OVERSEAS"
+   ],
+   "desc": "英联邦为主"
+  },
+  {
+   "id": "EDU-AP",
+   "name": "AP",
+   "outcome": [
+    "OVERSEAS"
+   ],
+   "desc": "美国方向"
+  },
+  {
+   "id": "EDU-OVS",
+   "name": "其他",
+   "outcome": [
+    "OVERSEAS"
+   ],
+   "desc": "副学士 2+2 / 其他体系"
+  }
+ ],
+ "educationStages": [
+  {
+   "id": "KINDER",
+   "name": "学前教育",
+   "age": "2–5 岁"
+  },
+  {
+   "id": "PRIMARY",
+   "name": "小学",
+   "age": "6–12 岁"
+  },
+  {
+   "id": "SECOND",
+   "name": "中学",
+   "age": "12–18 岁"
+  },
+  {
+   "id": "ASSOC",
+   "name": "副学士/高级文凭",
+   "age": "2 年"
+  },
+  {
+   "id": "UG",
+   "name": "本科",
+   "age": "4 年"
+  },
+  {
+   "id": "PG",
+   "name": "硕士",
+   "age": "1–2 年"
+  },
+  {
+   "id": "PHD",
+   "name": "博士",
+   "age": "3–4 年"
+  },
+  {
+   "id": "CE",
+   "name": "持续进修/职业培训",
+   "age": "全龄"
+  }
+ ],
+ "schools": [
+  {
+   "id": "SCH-001",
+   "name": "拔萃女书院",
+   "stage": "SECOND",
+   "type": "直资",
+   "district": "油尖旺",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "tuition": 48000,
+   "band": "Band 1",
+   "accredited": true
+  },
+  {
+   "id": "SCH-002",
+   "name": "皇仁书院",
+   "stage": "SECOND",
+   "type": "官立",
+   "district": "湾仔",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "tuition": 0,
+   "band": "Band 1",
+   "accredited": true
+  },
+  {
+   "id": "SCH-003",
+   "name": "喇沙书院",
+   "stage": "SECOND",
+   "type": "资助",
+   "district": "九龙城",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "tuition": 0,
+   "band": "Band 1",
+   "accredited": true
+  },
+  {
+   "id": "SCH-004",
+   "name": "汉基国际学校",
+   "stage": "SECOND",
+   "type": "国际",
+   "district": "湾仔",
+   "curricula": [
+    "EDU-IB"
+   ],
+   "tuition": 220000,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-005",
+   "name": "香港国际学校",
+   "stage": "SECOND",
+   "type": "国际",
+   "district": "南區",
+   "curricula": [
+    "EDU-AP",
+    "EDU-IB"
+   ],
+   "tuition": 210000,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-006",
+   "name": "圣保罗男女中学",
+   "stage": "SECOND",
+   "type": "直资",
+   "district": "中西區",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "tuition": 65000,
+   "band": "Band 1",
+   "accredited": true
+  },
+  {
+   "id": "SCH-101",
+   "name": "拔萃小学",
+   "stage": "PRIMARY",
+   "type": "直资",
+   "district": "油尖旺",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "tuition": 42000,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-102",
+   "name": "圣公会圣彼得小学",
+   "stage": "PRIMARY",
+   "type": "资助",
+   "district": "中西區",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "tuition": 0,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-103",
+   "name": "沪江维多利亚学校",
+   "stage": "PRIMARY",
+   "type": "私立",
+   "district": "南區",
+   "curricula": [
+    "EDU-IB"
+   ],
+   "tuition": 165000,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-201",
+   "name": "香港大学",
+   "stage": "UG",
+   "type": "资助",
+   "district": "中西區",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB",
+    "EDU-AL"
+   ],
+   "tuition": 42100,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-202",
+   "name": "香港中文大学",
+   "stage": "UG",
+   "type": "资助",
+   "district": "沙田",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "tuition": 42100,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-203",
+   "name": "香港科技大学",
+   "stage": "UG",
+   "type": "资助",
+   "district": "西貢",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB",
+    "EDU-AL"
+   ],
+   "tuition": 42100,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-301",
+   "name": "香港大学（授课型硕士）",
+   "stage": "PG",
+   "type": "资助",
+   "district": "中西區",
+   "curricula": [
+    "—"
+   ],
+   "tuition": 180000,
+   "band": "—",
+   "accredited": true
+  },
+  {
+   "id": "SCH-401",
+   "name": "某非本地评审私立课程",
+   "stage": "CE",
+   "type": "私立",
+   "district": "油尖旺",
+   "curricula": [
+    "—"
+   ],
+   "tuition": 45000,
+   "band": "—",
+   "accredited": false
+  }
+ ],
+ "policies": [
+  {
+   "id": "P-2026-0819-01",
+   "title": "高才通计划合资格大学名单更新",
+   "source": "香港人才服务办公室",
+   "url": "https://www.talent.gov.hk/",
+   "effective_from": "2026-08-19",
+   "verified_at": "2026-09-03",
+   "applicable": [
+    "TTPS_A",
+    "TTPS_B",
+    "TTPS_C"
+   ],
+   "impact": "medium"
+  },
+  {
+   "id": "P-RNW-WINDOW-01",
+   "title": "续签最早可于到期前 3 个月递交；最迟到期前 6 周",
+   "source": "香港入境事务处",
+   "url": "https://www.immd.gov.hk/",
+   "effective_from": "2026-03-01",
+   "verified_at": "2026-09-03",
+   "applicable": [
+    "*"
+   ],
+   "impact": "high"
+  },
+  {
+   "id": "P-LABOR-01",
+   "title": "补充劳工优化计划（ESLS）安排",
+   "source": "香港劳工处",
+   "url": "https://www.labour.gov.hk/",
+   "effective_from": "2023-09-01",
+   "verified_at": "2026-09-03",
+   "applicable": [
+    "ESLS",
+    "SILS"
+   ],
+   "impact": "high"
+  },
+  {
+   "id": "P-LABOR-FDH-01",
+   "title": "外籍家庭佣工入境安排（ID 407 标准合约）",
+   "source": "香港入境事务处",
+   "url": "https://www.immd.gov.hk/",
+   "effective_from": "2013-03-25",
+   "verified_at": "2026-09-03",
+   "applicable": [
+    "FDH"
+   ],
+   "impact": "high"
+  },
+  {
+   "id": "P-IDT-DEPENDANT-01",
+   "title": "受养人签证依附安排与 ROP145 独立申请",
+   "source": "香港入境事务处",
+   "url": "https://www.immd.gov.hk/",
+   "effective_from": "2024-01-01",
+   "verified_at": "2026-09-03",
+   "applicable": [
+    "DEPENDANT"
+   ],
+   "impact": "high"
+  },
+  {
+   "id": "P-PR-CONTINUITY-02",
+   "title": "通常居住连续 7 年：连续性中断与重新起算",
+   "source": "香港入境事务处（第 2(6) 条释义）",
+   "url": "https://www.immd.gov.hk/",
+   "effective_from": "2024-01-01",
+   "verified_at": "2026-09-03",
+   "applicable": [
+    "*"
+   ],
+   "impact": "high"
+  },
+  {
+   "id": "P-EDU-IANG-01",
+   "title": "非本地评审课程毕业后无法办理 IANG",
+   "source": "香港入境事务处",
+   "url": "https://www.immd.gov.hk/",
+   "effective_from": "2024-01-01",
+   "verified_at": "2026-09-03",
+   "applicable": [
+    "STUDENT"
+   ],
+   "impact": "high"
+  }
+ ],
+ "ruleCapacity": {
+  "total": 230,
+  "redlines": 22,
+  "test_cases": 1030,
+  "a_grade_sources": 19,
+  "domains": [
+   {
+    "prefix": "R-IDT",
+    "range": "001~046",
+    "count": 46
+   },
+   {
+    "prefix": "RNW",
+    "range": "001~028",
+    "count": 28
+   },
+   {
+    "prefix": "PR",
+    "range": "001~022",
+    "count": 22
+   },
+   {
+    "prefix": "LABOR",
+    "range": "001~019",
+    "count": 19
+   },
+   {
+    "prefix": "EDU",
+    "range": "001~035",
+    "count": 35
+   },
+   {
+    "prefix": "PATH",
+    "range": "001~018",
+    "count": 18
+   },
+   {
+    "prefix": "ORG",
+    "range": "001~018",
+    "count": 18
+   },
+   {
+    "prefix": "CPL (C1~C15)",
+    "range": "—",
+    "count": 15
+   },
+   {
+    "prefix": "CALC",
+    "range": "001~014",
+    "count": 14
+   },
+   {
+    "prefix": "CMP (C-001~C-015)",
+    "range": "—",
+    "count": 15
+   }
+  ]
+ },
+ "complianceRedlines": [
+  {
+   "id": "C-001",
+   "name": "身份定性不误导",
+   "desc": "① 层必须明确告知不可申请永久性居民。"
+  },
+  {
+   "id": "C-002",
+   "name": "非学位专才与劳工不混淆",
+   "desc": "两者法律定性不同（C15），必须显式区分。"
+  },
+  {
+   "id": "C-003",
+   "name": "不承诺结果",
+   "desc": "禁止「保证通过/100% 成功/包过」。"
+  },
+  {
+   "id": "C-004",
+   "name": "不提供灰色方案",
+   "desc": "拒绝虚拟地址、空壳包装、虚假文书。"
+  },
+  {
+   "id": "C-005",
+   "name": "非本地评审课程警告",
+   "desc": "必须提示非本地评审课程无法办理 IANG。"
+  },
+  {
+   "id": "C-006",
+   "name": "政策可溯源",
+   "desc": "所有结论附官方来源。"
+  },
+  {
+   "id": "C-007",
+   "name": "时效标注",
+   "desc": "展示最后核验日期。"
+  },
+  {
+   "id": "C-008",
+   "name": "不替代官方",
+   "desc": "以官方要求为准。"
+  },
+  {
+   "id": "C-009",
+   "name": "机构话术留痕",
+   "desc": "机构侧输出自动归档。"
+  },
+  {
+   "id": "C-010",
+   "name": "告知书归档",
+   "desc": "劳工合同须附不可永居告知书回执。"
+  },
+  {
+   "id": "C-011",
+   "name": "受养人依附性",
+   "tier": "cond",
+   "action": "条件告警 + ROP145 补救 + 保证人 120 天监控",
+   "forbidden": "「受养人不能永居」"
+  },
+  {
+   "id": "C-012",
+   "name": "学生单一口径",
+   "tier": "cond",
+   "action": "双口径并列 + 待法务确认",
+   "forbidden": "「一定计入」/「一定不计入」"
+  },
+  {
+   "id": "C-013",
+   "name": "访客居留期",
+   "tier": "dwell",
+   "action": "标记该段不计入 + calcHint；不拦服务",
+   "forbidden": "「访客不能永居」"
+  },
+  {
+   "id": "C-014",
+   "name": "空档可补救",
+   "tier": "dwell",
+   "action": "提示可重新起算；不拦服务",
+   "forbidden": "「空档后无法挽回」"
+  },
+  {
+   "id": "C-015",
+   "name": "逾期灰色方案",
+   "tier": "dwell",
+   "action": "仅陈述事实；拒绝规避建议（拦请求不拦身份）",
+   "forbidden": "任何规避/包装操作指引"
+  }
+ ],
+ "services": [
+  {
+   "id": "profile",
+   "name": "身份档案",
+   "need": []
+  },
+  {
+   "id": "renewal",
+   "name": "续签管家",
+   "need": [],
+   "blocked_by_deny": true
+  },
+  {
+   "id": "pr",
+   "name": "永居进度",
+   "need": [],
+   "blocked_by_deny": true
+  },
+  {
+   "id": "pr_apply",
+   "name": "永居申报",
+   "need": [
+    "pr"
+   ],
+   "blocked_by_deny": true
+  },
+  {
+   "id": "education",
+   "name": "择校引擎",
+   "need": []
+  },
+  {
+   "id": "pathway",
+   "name": "升学路径",
+   "need": []
+  },
+  {
+   "id": "labor_care",
+   "name": "在港生活支持",
+   "need": []
+  },
+  {
+   "id": "school_apply",
+   "name": "学校申请",
+   "need": [
+    "education"
+   ]
+  },
+  {
+   "id": "material",
+   "name": "材料中心",
+   "need": []
+  },
+  {
+   "id": "report",
+   "name": "报告导出",
+   "need": [
+    "profile"
+   ]
+  },
+  {
+   "id": "rulebook",
+   "name": "规则库维护",
+   "need": [],
+   "admin_only": true
+  }
+ ],
+ "faq": [
+  {
+   "id": "FAQ-RNW",
+   "q": "续签什么时候递交？最早最迟是什么时候？",
+   "a": "一般可于到期前 3 个月（90 天）内递交，最迟须于到期前 6 周（42 天）递交；6–8 月为高峰期，建议再提前约 4 周。"
+  },
+  {
+   "id": "FAQ-FEE",
+   "q": "续签费用是多少？",
+   "a": "申请费 600 港元 + 签发费 1300 港元（以入境处最新公布为准）；框架占位金额以「分」为单位存储。"
+  },
+  {
+   "id": "FAQ-PR",
+   "q": "7 年永居怎么计算？通常居住如何认定？",
+   "a": "以「通常居住连续 7 年」为核心，通常居住为综合判定，非天数硬指标；离港原因、期间与次数均在考量之列。"
+  },
+  {
+   "id": "FAQ-STUDENT",
+   "q": "学生签证期间算不算 7 年？",
+   "a": "存在两种口径（R-CALC-014，待法务确认）：口径 A 倾向可计入但须按完整事实判断；口径 B 认为就学身份通常不计入。本平台并列展示、不给单一结论。"
+  },
+  {
+   "id": "FAQ-LABOR",
+   "q": "输入劳工可以拿香港永居吗？",
+   "a": "ESLS/SILS/FDH 等输入劳工与外籍家庭佣工，受雇期间不视为通常居住，在法律上不产生永居路径（第 2(4)(a)(v)/(vi) 条）。"
+  },
+  {
+   "id": "FAQ-DEPENDANT",
+   "q": "受养人保证人失效怎么办？",
+   "a": "受养人属条件性资格（C-011）：保证人失效则年期冻结但已累计部分不清零；满 7 年可独立申请 ROP145，无须保证人同意。"
+  },
+  {
+   "id": "FAQ-GAP",
+   "q": "签证空档/断签了，之前的年限白费了吗？",
+   "a": "空档导致连续性中断（R-CALC-012），该段不计入并须重新起算；此前合法累计不视为白费，服务入口正常开放，进度并列展示两个口径。"
+  },
+  {
+   "id": "FAQ-OVERSTAY",
+   "q": "逾期逗留期间算吗？",
+   "a": "逾期逗留期间不计入 7 年（R-CALC-013），其后合法期可重新起算；本平台不提供任何规避逾期记录的操作建议（C-015）。"
+  },
+  {
+   "id": "FAQ-IANG",
+   "q": "非本地评审课程毕业能办 IANG 吗？",
+   "a": "不能。非本地评审课程毕业后无法办理 IANG，不能衔接永居（C-005 / P-EDU-IANG-01）。"
+  }
+ ]
+}; })(typeof window!=='undefined'?window:globalThis);

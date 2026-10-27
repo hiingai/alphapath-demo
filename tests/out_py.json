@@ -1,0 +1,2121 @@
+{
+ "ca1": "计算结果：12*(3+4) = 84",
+ "ca2": "计算结果：2**10 = 1024",
+ "ca3": "计算结果：10/2 = 5.0",
+ "ca4": "计算结果：7%3 = 1",
+ "ca5": "计算结果：-2**2 = -4",
+ "ca6": "计算结果：3.5*2 = 7.0",
+ "ca7": "计算结果：1/3 = 0.3333333333333333",
+ "ca8": "__ERROR__:计算失败：invalid syntax (<unknown>, line 1)",
+ "cc1": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C5",
+  "C6",
+  "C7",
+  "C8",
+  "C9",
+  "C10",
+  "C11",
+  "C12",
+  "C13",
+  "C14",
+  "C15"
+ ],
+ "cc2": [
+  "C4"
+ ],
+ "cc3": [
+  "C15"
+ ],
+ "cc4": [],
+ "cp1": {
+  "confidence": 0.9,
+  "decision": "AUTO_PASS",
+  "findings": [],
+  "result": "PASS"
+ },
+ "cp2": {
+  "confidence": 0.9,
+  "decision": "BLOCK",
+  "findings": [
+   {
+    "code": "MUST_BE_IN_HK",
+    "severity": "BLOCK",
+    "suggestion": "申请人须身在香港方可递交/缴费/领取电子签证。"
+   }
+  ],
+  "result": "BLOCK"
+ },
+ "cp3": {
+  "confidence": 0.9,
+  "decision": "BLOCK",
+  "findings": [
+   {
+    "basisRef": "RNW-012",
+    "code": "FAKE_EMPLOYMENT_RISK",
+    "riskScore": 0.95,
+    "severity": "BLOCK",
+    "signals": [
+     "雇主成立不足 6 个月",
+     "MPF 供款期与受雇期不匹配",
+     "无办公地址/租约证据"
+    ],
+    "suggestion": "请补充真实经营证明，或评估改走自雇路径（需审计财报+本地职位）。"
+   }
+  ],
+  "result": "BLOCK"
+ },
+ "cp4": {
+  "confidence": 0.9,
+  "decision": "AUTO_PASS",
+  "findings": [],
+  "result": "PASS"
+ },
+ "cp5": {
+  "confidence": 0.9,
+  "decision": "AUTO_PASS",
+  "findings": [
+   {
+    "basisRef": "RNW-020",
+    "code": "SELF_EMPLOYED_WEAK",
+    "severity": "WARN",
+    "suggestion": "自雇续签需业务真实营运：审计财报与本地职位证明为关键材料。"
+   }
+  ],
+  "result": "WARN"
+ },
+ "cp6": {
+  "confidence": 0.9,
+  "decision": "BLOCK",
+  "findings": [
+   {
+    "basisRef": "RNW-012",
+    "code": "FAKE_EMPLOYMENT_RISK",
+    "riskScore": 0.8,
+    "severity": "BLOCK",
+    "signals": [
+     "雇主成立不足 6 个月",
+     "MPF 供款期与受雇期不匹配"
+    ],
+    "suggestion": "请补充真实经营证明，或评估改走自雇路径（需审计财报+本地职位）。"
+   }
+  ],
+  "result": "BLOCK"
+ },
+ "dw1": {
+  "asOf": "2026-10-01",
+  "creditedDays": 579,
+  "creditedMonths": 7,
+  "creditedYears": 1,
+  "dual": {
+   "baseA": {
+    "days": 579,
+    "label": "按重新起算（保守口径）",
+    "years": 1
+   },
+   "baseB": {
+    "days": 1067,
+    "label": "含空档前累计（并列参考）",
+    "years": 2
+   }
+  },
+  "dualRequired": true,
+  "exclusions": [
+   {
+    "days": 59,
+    "effect": "rebase",
+    "kind": "gap",
+    "ruleId": "R-CALC-012"
+   }
+  ],
+  "progress": 0.22661448140900195,
+  "rebasedFrom": "2025-01-01"
+ },
+ "dw2": {
+  "asOf": "2026-10-01",
+  "creditedDays": 1035,
+  "creditedMonths": 10,
+  "creditedYears": 2,
+  "exclusions": [
+   {
+    "days": 91,
+    "effect": "exclude",
+    "kind": "visitor",
+    "ruleId": "R-CALC-011"
+   }
+  ],
+  "progress": 0.4050880626223092,
+  "rebasedFrom": null
+ },
+ "dw3": {
+  "asOf": "2026-10-01",
+  "creditedDays": 1095,
+  "creditedMonths": 0,
+  "creditedYears": 3,
+  "exclusions": [
+   {
+    "days": 31,
+    "effect": "exclude_flagged",
+    "flagged": true,
+    "kind": "overstay",
+    "ruleId": "R-CALC-013"
+   }
+  ],
+  "progress": 0.42857142857142855,
+  "rebasedFrom": null
+ },
+ "dw4": {
+  "asOf": "2026-10-27",
+  "creditedDays": 1152,
+  "creditedMonths": 1,
+  "creditedYears": 3,
+  "exclusions": [],
+  "progress": 0.450880626223092,
+  "rebasedFrom": null
+ },
+ "dw5": {
+  "asOf": "2027-01-01",
+  "creditedDays": 1461,
+  "creditedMonths": 0,
+  "creditedYears": 4,
+  "dual": {
+   "baseA": {
+    "days": 1461,
+    "label": "按重新起算（保守口径）",
+    "years": 4
+   },
+   "baseB": {
+    "days": 2192,
+    "label": "含空档前累计（并列参考）",
+    "years": 6
+   }
+  },
+  "dualRequired": true,
+  "exclusions": [
+   {
+    "days": 365,
+    "effect": "rebase",
+    "kind": "gap",
+    "ruleId": "R-CALC-012"
+   }
+  ],
+  "progress": 0.5718199608610568,
+  "rebasedFrom": "2022-01-01"
+ },
+ "gd1": {
+  "blocked": false,
+  "confidence": 1.0,
+  "escalation": null,
+  "lint": {
+   "hits": [],
+   "ok": true
+  },
+  "reason": "",
+  "text": "【身份定性前置】该身份在法律上不产生永居路径。ESLS 外劳不产生永居路径。 本平台将服务重定位为「在港工作与生活支持」，并提供转换其他可累积身份的可行性评估（合规替代路径）。",
+  "tierCheck": {
+   "ok": true,
+   "tier": "deny",
+   "violations": []
+  }
+ },
+ "gd2": {
+  "blocked": false,
+  "confidence": 1.0,
+  "escalation": null,
+  "lint": {
+   "hits": [],
+   "ok": true
+  },
+  "reason": "",
+  "text": "你的身份不产生永居路径，可走生活支持与转换路径。",
+  "tierCheck": {
+   "ok": true,
+   "tier": "deny",
+   "violations": []
+  }
+ },
+ "gd3": {
+  "blocked": false,
+  "confidence": 1.0,
+  "escalation": null,
+  "lint": {
+   "hits": [],
+   "ok": true
+  },
+  "reason": "",
+  "text": "该段期间不计入 7 年，该期间不计入，服务被提示。",
+  "tierCheck": {
+   "ok": true,
+   "tier": "dwell",
+   "violations": []
+  }
+ },
+ "gd4": {
+  "blocked": false,
+  "confidence": 1.0,
+  "escalation": null,
+  "lint": {
+   "hits": [],
+   "ok": true
+  },
+  "reason": "",
+  "text": "受养人需要关注保证人。 补救路径：满 7 年可独立申请 ROP145 核实永久性居民身份证资格（无须保证人同意）。",
+  "tierCheck": {
+   "ok": true,
+   "tier": "cond",
+   "violations": []
+  }
+ },
+ "gd5": {
+  "blocked": true,
+  "confidence": 1.0,
+  "escalation": null,
+  "lint": {
+   "hits": [
+    "包过",
+    "保证通过"
+   ],
+   "ok": false
+  },
+  "reason": "C-003：检测到禁用表述 包过、保证通过，请改用「参考判断 / 存在以下风险」。",
+  "text": "",
+  "tierCheck": null
+ },
+ "gd6": {
+  "blocked": true,
+  "confidence": 1.0,
+  "escalation": null,
+  "lint": {
+   "hits": [],
+   "ok": true
+  },
+  "reason": "C-015：本平台只陈述法律事实（逾期期间不计入 7 年，其后合法期可重新起算），不提供任何规避、包装或「处理掉记录」的操作建议。",
+  "text": "",
+  "tierCheck": null
+ },
+ "lg1": {
+  "canBringDependants": false,
+  "canPr": false,
+  "conds": [],
+  "denials": [
+   {
+    "applicable": [
+     "ESLS"
+    ],
+    "id": "R-LABOR-015",
+    "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+    "remedy": [
+     "switch_to_other_visa"
+    ],
+    "tier": "deny"
+   }
+  ],
+  "dwells": [],
+  "identityType": "ESLS",
+  "notices": [
+   {
+    "closable": false,
+    "icon": "⛔",
+    "legalBasis": "《入境条例》第 2(4)(a)(v) 条",
+    "remedies": [
+     {
+      "desc": "例如符合条件时转非学位专才/专才等正常层身份。",
+      "key": "switch_to_other_visa",
+      "label": "评估转换其他可累积身份的可行性"
+     }
+    ],
+    "ruleIds": [
+     "R-LABOR-015"
+    ],
+    "text": "你在现行法律下（《入境条例》第 2(4)(a)(v) 条）不产生永久性居民申请路径，本平台将把服务重定位为「在港工作与生活支持」。",
+    "tier": "deny",
+    "title": "该身份在现行法律下不产生永居路径"
+   }
+  ],
+  "tier": "deny"
+ },
+ "lg10": {
+  "canBringDependants": false,
+  "canPr": false,
+  "conds": [],
+  "denials": [],
+  "dwells": [],
+  "identityType": "VISITOR",
+  "notices": [],
+  "tier": "dwell"
+ },
+ "lg11": {
+  "canBringDependants": true,
+  "canPr": true,
+  "conds": [],
+  "denials": [],
+  "dwells": [],
+  "identityType": "NON_DEGREE",
+  "notices": [],
+  "tier": "normal"
+ },
+ "lg12": {
+  "canBringDependants": true,
+  "canPr": true,
+  "conds": [],
+  "denials": [],
+  "dwells": [],
+  "identityType": "CIES",
+  "notices": [],
+  "tier": "normal"
+ },
+ "lg13": {
+  "canBringDependants": true,
+  "canPr": true,
+  "conds": [],
+  "denials": [],
+  "dwells": [],
+  "identityType": "IANG",
+  "notices": [],
+  "tier": "normal"
+ },
+ "lg2": {
+  "canBringDependants": false,
+  "canPr": false,
+  "conds": [],
+  "denials": [
+   {
+    "applicable": [
+     "FDH"
+    ],
+    "id": "R-LABOR-019",
+    "legal_basis": "《入境条例》第 2(4)(a)(vi) 条",
+    "precedent": "Vallejos v. Commissioner of Registration [2013] 2 HKC 1（确认合宪）",
+    "remedy": [
+     "switch_to_other_visa"
+    ],
+    "tier": "deny"
+   }
+  ],
+  "dwells": [],
+  "identityType": "FDH",
+  "notices": [
+   {
+    "closable": false,
+    "icon": "⛔",
+    "legalBasis": "《入境条例》第 2(4)(a)(vi) 条",
+    "remedies": [
+     {
+      "desc": "例如符合条件时转非学位专才/专才等正常层身份。",
+      "key": "switch_to_other_visa",
+      "label": "评估转换其他可累积身份的可行性"
+     }
+    ],
+    "ruleIds": [
+     "R-LABOR-019"
+    ],
+    "text": "你在现行法律下（《入境条例》第 2(4)(a)(vi) 条）不产生永久性居民申请路径，本平台将把服务重定位为「在港工作与生活支持」。",
+    "tier": "deny",
+    "title": "该身份在现行法律下不产生永居路径"
+   }
+  ],
+  "tier": "deny"
+ },
+ "lg3": {
+  "canBringDependants": false,
+  "canPr": false,
+  "conds": [],
+  "denials": [
+   {
+    "applicable": [
+     "SILS"
+    ],
+    "id": "R-LABOR-016",
+    "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+    "remedy": [
+     "switch_to_other_visa"
+    ],
+    "subtype": "建造业",
+    "tier": "deny"
+   },
+   {
+    "applicable": [
+     "SILS"
+    ],
+    "id": "R-LABOR-017",
+    "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+    "remedy": [
+     "switch_to_other_visa"
+    ],
+    "subtype": "运输业",
+    "tier": "deny"
+   },
+   {
+    "applicable": [
+     "SILS"
+    ],
+    "id": "R-LABOR-018",
+    "legal_basis": "《入境条例》第 2(4)(a)(v) 条",
+    "remedy": [
+     "switch_to_other_visa"
+    ],
+    "subtype": "安老院及残疾人士院舍",
+    "tier": "deny"
+   }
+  ],
+  "dwells": [],
+  "identityType": "SILS",
+  "notices": [
+   {
+    "closable": false,
+    "icon": "⛔",
+    "legalBasis": "《入境条例》第 2(4)(a)(v) 条",
+    "remedies": [
+     {
+      "desc": "例如符合条件时转非学位专才/专才等正常层身份。",
+      "key": "switch_to_other_visa",
+      "label": "评估转换其他可累积身份的可行性"
+     }
+    ],
+    "ruleIds": [
+     "R-LABOR-016",
+     "R-LABOR-017",
+     "R-LABOR-018"
+    ],
+    "text": "你在现行法律下（《入境条例》第 2(4)(a)(v) 条）不产生永久性居民申请路径，本平台将把服务重定位为「在港工作与生活支持」。",
+    "tier": "deny",
+    "title": "该身份在现行法律下不产生永居路径"
+   }
+  ],
+  "tier": "deny"
+ },
+ "lg4": {
+  "canBringDependants": false,
+  "canPr": true,
+  "conds": [
+   {
+    "action": [
+     "apply_rop145",
+     "switch_to_work_visa",
+     "student_visa_bridge"
+    ],
+    "applicable": [
+     "DEPENDANT"
+    ],
+    "conclusion": {
+     "accumulated_retained": true,
+     "freeze_on_guardian_lapse": true
+    },
+    "condition": "depends_on_guardian",
+    "id": "C-011",
+    "legal_basis": "《入境条例》第 2(4A) 条",
+    "monitor": {
+     "guardian_expiry_alert_days": 120
+    },
+    "reminder": "你的资格依附于保证人；若保证人失效，年期冻结但不清零。满 7 年可独立申请 ROP145 核实永久性居民身份证资格，无须保证人同意。",
+    "tier": "cond"
+   }
+  ],
+  "denials": [],
+  "dwells": [],
+  "identityType": "DEPENDANT",
+  "notices": [
+   {
+    "actions": [
+     {
+      "desc": "满 7 年可独立申请核实资格，无须保证人同意。",
+      "key": "apply_rop145",
+      "label": "申请 ROP145（核实永久性居民身份证资格）"
+     },
+     {
+      "desc": "以受雇/专才等可累积身份衔接，避免依附中断。",
+      "key": "switch_to_work_visa",
+      "label": "转换工作签证路径"
+     },
+     {
+      "desc": "全日制经本地评审课程毕业后转 IANG，衔接永居。",
+      "key": "student_visa_bridge",
+      "label": "学生签证衔接路径"
+     }
+    ],
+    "closable": false,
+    "dualBasis": null,
+    "icon": "⚑",
+    "monitor": {
+     "guardian_expiry_alert_days": 120
+    },
+    "pendingLegalReview": false,
+    "ruleId": "C-011",
+    "serviceAvailable": true,
+    "text": "你的资格依附于保证人；若保证人失效，年期冻结但不清零。满 7 年可独立申请 ROP145 核实永久性居民身份证资格，无须保证人同意。",
+    "tier": "cond",
+    "title": "条件性资格告警"
+   }
+  ],
+  "tier": "cond"
+ },
+ "lg5": {
+  "canBringDependants": true,
+  "canPr": true,
+  "conds": [
+   {
+    "action": [
+     "student_visa_bridge"
+    ],
+    "applicable": [
+     "STUDENT"
+    ],
+    "dual_basis": [
+     {
+      "label": "口径 A（官方定义倾向）",
+      "text": "入境处原文列举通常居住时含「例如读书、工作或居留等」；CLIC 载明以教育为稳定目的者可构成通常居住 → 倾向可计入，但须按完整事实判断，不是「持签证一天就计一天」。"
+     },
+     {
+      "label": "口径 B（平台旧口径）",
+      "text": "就学身份通常不计入 7 年。"
+     }
+    ],
+    "id": "C-012",
+    "legal_basis": "第 2(6) 条通常居住释义（口径分歧待裁决）",
+    "pending_legal_review": true,
+    "reminder": "学生签证期间是否计入 7 年存在两种口径，须外部法律顾问裁决后才能统一；本平台并列展示两个口径、不给单一结论。",
+    "rule_ref": "R-CALC-014",
+    "tier": "cond"
+   }
+  ],
+  "denials": [],
+  "dwells": [],
+  "identityType": "STUDENT",
+  "notices": [
+   {
+    "actions": [
+     {
+      "desc": "全日制经本地评审课程毕业后转 IANG，衔接永居。",
+      "key": "student_visa_bridge",
+      "label": "学生签证衔接路径"
+     }
+    ],
+    "closable": false,
+    "dualBasis": [
+     {
+      "label": "口径 A（官方定义倾向）",
+      "text": "入境处原文列举通常居住时含「例如读书、工作或居留等」；CLIC 载明以教育为稳定目的者可构成通常居住 → 倾向可计入，但须按完整事实判断，不是「持签证一天就计一天」。"
+     },
+     {
+      "label": "口径 B（平台旧口径）",
+      "text": "就学身份通常不计入 7 年。"
+     }
+    ],
+    "icon": "⚑",
+    "monitor": null,
+    "pendingLegalReview": true,
+    "ruleId": "C-012",
+    "serviceAvailable": true,
+    "text": "学生签证期间是否计入 7 年存在两种口径，须外部法律顾问裁决后才能统一；本平台并列展示两个口径、不给单一结论。",
+    "tier": "cond",
+    "title": "条件性资格告警"
+   }
+  ],
+  "tier": "cond"
+ },
+ "lg6": {
+  "canBringDependants": true,
+  "canPr": true,
+  "conds": [],
+  "denials": [],
+  "dwells": [
+   {
+    "calc_hint": "签证空档期导致连续性中断，该段不计入并须重新起算（R-CALC-012）；此前合法累计不视为「白费」，服务入口均正常开放，可按重新起算点并列展示两个进度数值。",
+    "compliance": "C-014",
+    "condition": "gap",
+    "dual_required": true,
+    "effect": "rebase",
+    "id": "R-CALC-012",
+    "tier": "dwell"
+   }
+  ],
+  "identityType": "TTPS_A",
+  "notices": [
+   {
+    "closable": false,
+    "dualRequired": true,
+    "effect": "rebase",
+    "icon": "◷",
+    "ruleId": "R-CALC-012",
+    "serviceAvailable": true,
+    "text": "签证空档期导致连续性中断，该段不计入并须重新起算（R-CALC-012）；此前合法累计不视为「白费」，服务入口均正常开放，可按重新起算点并列展示两个进度数值。",
+    "tier": "dwell",
+    "title": "期间不计入提示"
+   }
+  ],
+  "tier": "normal"
+ },
+ "lg7": {
+  "canBringDependants": true,
+  "canPr": true,
+  "conds": [],
+  "denials": [],
+  "dwells": [
+   {
+    "calc_hint": "以访客身份逗留的期间不计入 7 年（R-CALC-011），其后取得合法逗留身份的期间仍正常累计；全部服务入口均正常开放。",
+    "compliance": "C-013",
+    "condition": "visitor",
+    "effect": "exclude",
+    "id": "R-CALC-011",
+    "tier": "dwell"
+   }
+  ],
+  "identityType": "TTPS_A",
+  "notices": [
+   {
+    "closable": false,
+    "dualRequired": false,
+    "effect": "exclude",
+    "icon": "◷",
+    "ruleId": "R-CALC-011",
+    "serviceAvailable": true,
+    "text": "以访客身份逗留的期间不计入 7 年（R-CALC-011），其后取得合法逗留身份的期间仍正常累计；全部服务入口均正常开放。",
+    "tier": "dwell",
+    "title": "期间不计入提示"
+   }
+  ],
+  "tier": "normal"
+ },
+ "lg8": {
+  "canBringDependants": true,
+  "canPr": true,
+  "conds": [],
+  "denials": [],
+  "dwells": [
+   {
+    "calc_hint": "逾期逗留期间不计入 7 年（R-CALC-013），其后合法期可重新起算；服务入口均正常开放。本平台不提供任何规避逾期记录的操作建议。",
+    "compliance": "C-015",
+    "condition": "overstay",
+    "effect": "exclude_flagged",
+    "id": "R-CALC-013",
+    "tier": "dwell"
+   }
+  ],
+  "identityType": "TTPS_A",
+  "notices": [
+   {
+    "closable": false,
+    "dualRequired": false,
+    "effect": "exclude_flagged",
+    "icon": "◷",
+    "ruleId": "R-CALC-013",
+    "serviceAvailable": true,
+    "text": "逾期逗留期间不计入 7 年（R-CALC-013），其后合法期可重新起算；服务入口均正常开放。本平台不提供任何规避逾期记录的操作建议。",
+    "tier": "dwell",
+    "title": "期间不计入提示"
+   }
+  ],
+  "tier": "normal"
+ },
+ "lg9": {
+  "canBringDependants": false,
+  "canPr": false,
+  "conds": [],
+  "denials": [],
+  "dwells": [],
+  "identityType": "ONEWAY",
+  "notices": [],
+  "tier": "special"
+ },
+ "rg1": [
+  "CPL-C13",
+  "CPL-C7",
+  "IDT-TTPS_C",
+  "FAQ-RNW",
+  "IDT-TTPS_A"
+ ],
+ "rg2": [
+  "FAQ-LABOR",
+  "C-013",
+  "FAQ-IANG",
+  "CPL-C8",
+  "C-011"
+ ],
+ "rg3": [
+  "CPL-C4",
+  "SCH-003",
+  "SCH-002",
+  "SCH-201",
+  "SCH-001"
+ ],
+ "rg4": [
+  "FAQ-FEE",
+  "IDT-QMAS_ACH",
+  "FAQ-GAP",
+  "IDT-GAP",
+  "IDT-CIES"
+ ],
+ "rg5": [
+  "FAQ-DEPENDANT",
+  "IDT-DEPENDANT",
+  "CPL-C11",
+  "C-011",
+  "C-011"
+ ],
+ "rg6": [
+  "IDT-STUDENT",
+  "P-EDU-IANG-01",
+  "IDT-FDH",
+  "P-PR-CONTINUITY-02",
+  "C-011"
+ ],
+ "rt1": {
+  "arg": "identityType=TTPS_A activationDate=2023-09-01",
+  "tool": "compute_timeline"
+ },
+ "rt10": null,
+ "rt11": {
+  "arg": "identityType=TTPS_A segments=[{\"kind\":\"gap\",\"start\":\"2025-01-01\",\"end\":\"2025-03-01\"}]",
+  "tool": "legal_profile"
+ },
+ "rt12": {
+  "arg": "identityType=DEPENDANT",
+  "tool": "legal_profile"
+ },
+ "rt2": {
+  "arg": "stage=SECOND curriculum=EDU-DSE",
+  "tool": "search_schools"
+ },
+ "rt3": {
+  "arg": "employer.registeredMonths=3",
+  "tool": "check_compliance"
+ },
+ "rt4": {
+  "arg": "12*(3+4)",
+  "tool": "calculator"
+ },
+ "rt5": {
+  "arg": "",
+  "tool": "get_time"
+ },
+ "rt6": {
+  "arg": "identityType=FDH",
+  "tool": "legal_profile"
+ },
+ "rt7": {
+  "arg": "我的生日是 3 月 5 日",
+  "tool": "remember"
+ },
+ "rt8": {
+  "arg": "identityType=TTPS_A activationDate=2023-09-01",
+  "tool": "conductor_scan"
+ },
+ "rt9": {
+  "arg": "id=C4",
+  "tool": "check_coupling"
+ },
+ "sc1": [
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "油尖旺",
+   "id": "SCH-001",
+   "name": "拔萃女书院",
+   "reasons": [
+    "学段匹配",
+    "课程体系匹配",
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 95,
+   "stage": "SECOND",
+   "tuition": 48000,
+   "type": "直资"
+  },
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "湾仔",
+   "id": "SCH-002",
+   "name": "皇仁书院",
+   "reasons": [
+    "学段匹配",
+    "课程体系匹配",
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 95,
+   "stage": "SECOND",
+   "tuition": 0,
+   "type": "官立"
+  },
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "九龙城",
+   "id": "SCH-003",
+   "name": "喇沙书院",
+   "reasons": [
+    "学段匹配",
+    "课程体系匹配",
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 95,
+   "stage": "SECOND",
+   "tuition": 0,
+   "type": "资助"
+  },
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "中西區",
+   "id": "SCH-006",
+   "name": "圣保罗男女中学",
+   "reasons": [
+    "学段匹配",
+    "课程体系匹配",
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 95,
+   "stage": "SECOND",
+   "tuition": 65000,
+   "type": "直资"
+  }
+ ],
+ "sc2": [
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "油尖旺",
+   "id": "SCH-101",
+   "name": "拔萃小学",
+   "reasons": [
+    "学段匹配"
+   ],
+   "score": 75,
+   "stage": "PRIMARY",
+   "tuition": 42000,
+   "type": "直资"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "中西區",
+   "id": "SCH-102",
+   "name": "圣公会圣彼得小学",
+   "reasons": [
+    "学段匹配"
+   ],
+   "score": 75,
+   "stage": "PRIMARY",
+   "tuition": 0,
+   "type": "资助"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-IB"
+   ],
+   "district": "南區",
+   "id": "SCH-103",
+   "name": "沪江维多利亚学校",
+   "reasons": [
+    "学段匹配"
+   ],
+   "score": 75,
+   "stage": "PRIMARY",
+   "tuition": 165000,
+   "type": "私立"
+  }
+ ],
+ "sc3": [
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "油尖旺",
+   "id": "SCH-001",
+   "name": "拔萃女书院",
+   "reasons": [
+    "课程体系匹配",
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 80,
+   "stage": "SECOND",
+   "tuition": 48000,
+   "type": "直资"
+  },
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "中西區",
+   "id": "SCH-006",
+   "name": "圣保罗男女中学",
+   "reasons": [
+    "课程体系匹配",
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 80,
+   "stage": "SECOND",
+   "tuition": 65000,
+   "type": "直资"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-IB"
+   ],
+   "district": "南區",
+   "id": "SCH-103",
+   "name": "沪江维多利亚学校",
+   "reasons": [
+    "课程体系匹配"
+   ],
+   "score": 75,
+   "stage": "PRIMARY",
+   "tuition": 165000,
+   "type": "私立"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB",
+    "EDU-AL"
+   ],
+   "district": "中西區",
+   "id": "SCH-201",
+   "name": "香港大学",
+   "reasons": [
+    "课程体系匹配"
+   ],
+   "score": 75,
+   "stage": "UG",
+   "tuition": 42100,
+   "type": "资助"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "沙田",
+   "id": "SCH-202",
+   "name": "香港中文大学",
+   "reasons": [
+    "课程体系匹配"
+   ],
+   "score": 75,
+   "stage": "UG",
+   "tuition": 42100,
+   "type": "资助"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB",
+    "EDU-AL"
+   ],
+   "district": "西貢",
+   "id": "SCH-203",
+   "name": "香港科技大学",
+   "reasons": [
+    "课程体系匹配"
+   ],
+   "score": 75,
+   "stage": "UG",
+   "tuition": 42100,
+   "type": "资助"
+  }
+ ],
+ "sc4": [
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "油尖旺",
+   "id": "SCH-001",
+   "name": "拔萃女书院",
+   "reasons": [
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 65,
+   "stage": "SECOND",
+   "tuition": 48000,
+   "type": "直资"
+  },
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "湾仔",
+   "id": "SCH-002",
+   "name": "皇仁书院",
+   "reasons": [
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 65,
+   "stage": "SECOND",
+   "tuition": 0,
+   "type": "官立"
+  },
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "九龙城",
+   "id": "SCH-003",
+   "name": "喇沙书院",
+   "reasons": [
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 65,
+   "stage": "SECOND",
+   "tuition": 0,
+   "type": "资助"
+  },
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "中西區",
+   "id": "SCH-006",
+   "name": "圣保罗男女中学",
+   "reasons": [
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 65,
+   "stage": "SECOND",
+   "tuition": 65000,
+   "type": "直资"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "油尖旺",
+   "id": "SCH-101",
+   "name": "拔萃小学",
+   "reasons": [],
+   "score": 60,
+   "stage": "PRIMARY",
+   "tuition": 42000,
+   "type": "直资"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "中西區",
+   "id": "SCH-102",
+   "name": "圣公会圣彼得小学",
+   "reasons": [],
+   "score": 60,
+   "stage": "PRIMARY",
+   "tuition": 0,
+   "type": "资助"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB",
+    "EDU-AL"
+   ],
+   "district": "中西區",
+   "id": "SCH-201",
+   "name": "香港大学",
+   "reasons": [],
+   "score": 60,
+   "stage": "UG",
+   "tuition": 42100,
+   "type": "资助"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-DSE",
+    "EDU-IB"
+   ],
+   "district": "沙田",
+   "id": "SCH-202",
+   "name": "香港中文大学",
+   "reasons": [],
+   "score": 60,
+   "stage": "UG",
+   "tuition": 42100,
+   "type": "资助"
+  }
+ ],
+ "sc5": [
+  {
+   "accredited": true,
+   "band": "Band 1",
+   "curricula": [
+    "EDU-DSE"
+   ],
+   "district": "湾仔",
+   "id": "SCH-002",
+   "name": "皇仁书院",
+   "reasons": [
+    "校网匹配",
+    "热门 Band 1（民间口径，非官方排名）"
+   ],
+   "score": 75,
+   "stage": "SECOND",
+   "tuition": 0,
+   "type": "官立"
+  },
+  {
+   "accredited": true,
+   "band": "—",
+   "curricula": [
+    "EDU-IB"
+   ],
+   "district": "湾仔",
+   "id": "SCH-004",
+   "name": "汉基国际学校",
+   "reasons": [
+    "校网匹配"
+   ],
+   "score": 70,
+   "stage": "SECOND",
+   "tuition": 220000,
+   "type": "国际"
+  }
+ ],
+ "t1": "【法定资格剖面】补充劳工优化计划 ESLS（tier=deny，canPr=False）\n- ① DENY｜R-LABOR-015｜依据：《入境条例》第 2(4)(a)(v) 条\n- 提示：2025 年起 GEP/ASMTP 下新增的「非学位专才」渠道属正常层、可累积在港居住年数并可申请永居，与输入劳工/外籍家庭佣工有本质区别（耦合 C15），请勿混淆。\n- ⛔ 该身份在现行法律下不产生永居路径｜合规替代路径：评估转换其他可累积身份的可行性\n以上为法律事实陈述，非审批承诺；具体以入境事务处认定为准。",
+ "t10": "【居住年限】截至 2026-10-01｜计入 579 天（约 1 年 7 个月）\n- 7 年进度：22.7%\n- [R-CALC-012] gap：不计入并重新起算（59 天）\n- 重新起算点：2025-01-01（连续性中断）\n- 双口径并列：按重新起算（保守口径） 1 年 / 含空档前累计（并列参考） 2 年（须专业顾问复核）\n- 通常居住为综合判定，非天数硬指标；服务入口正常开放。",
+ "t11": "【合规自检】结果：BLOCK（置信度 0.9）\n- [BLOCK] FAKE_EMPLOYMENT_RISK：请补充真实经营证明，或评估改走自雇路径（需审计财报+本地职位）。｜信号：雇主成立不足 6 个月、MPF 供款期与受雇期不匹配、无办公地址/租约证据（依据 RNW-012）\n- 处理建议：BLOCK（BLOCK 须人工解除）",
+ "t12": "【合规自检】结果：BLOCK（置信度 0.9）\n- [BLOCK] MUST_BE_IN_HK：申请人须身在香港方可递交/缴费/领取电子签证。\n- 处理建议：BLOCK（BLOCK 须人工解除）",
+ "t13": "【耦合规则 C1~C15】命中 1 条\n- C4：DSE 报考内地高校 → 通常需永居 + 回乡证（时间窗）",
+ "t14": "【耦合规则 C1~C15】命中 15 条\n- C1：子女入读香港官津中小学 → 需香港居民身份（含受养人）\n- C2：享受本地生学费 → 需香港居民身份\n- C3：接受直资小学学位 → 不可逆，放弃统筹派位资格\n- C4：DSE 报考内地高校 → 通常需永居 + 回乡证（时间窗）\n- C5：华侨生联考 → 一般需永居 + 回乡证（时间窗）\n- C6：小五/中三关键期插班 → 时间窗禁忌\n- C7：续签需家庭在港记录 → 教育记录互相加分\n- C8：永居家庭安排维度 → 教育数据补全材料包\n- C9：进修/留学获取身份 → 全日制经本地评审课程（读书期口径见 R-CALC-014）\n- C10：IANG 衔接 → 毕业 6 个月内申请，断档预警\n- C11：受养人子女教育权益 → 主申身份有效；保证人到期前 120 天提醒\n- C12：① 层身份与在港生活 → 拦永居相关服务，转生活工作支持\n- C13：专才绑定雇主 → 换雇主续签材料变更提示\n- C14：雇主合规与雇员签证 → 双向台账与提醒\n- C15：非学位专才 vs 输入劳工 → 易混淆，须显式区分",
+ "t15": "【择校匹配】共 4 所（出口优先；Band 为民间口径，非官方排名）\n- 拔萃女书院｜直资｜油尖旺｜学费 48000｜评分 95\n- 皇仁书院｜官立｜湾仔｜学费 0｜评分 95\n- 喇沙书院｜资助｜九龙城｜学费 0｜评分 95\n- 圣保罗男女中学｜直资｜中西區｜学费 65000｜评分 95",
+ "t16": "【择校匹配】共 6 所（出口优先；Band 为民间口径，非官方排名）\n- 拔萃女书院｜直资｜油尖旺｜学费 48000｜评分 80\n- 圣保罗男女中学｜直资｜中西區｜学费 65000｜评分 80\n- 沪江维多利亚学校｜私立｜南區｜学费 165000｜评分 75\n- 香港大学｜资助｜中西區｜学费 42100｜评分 75\n- 香港中文大学｜资助｜沙田｜学费 42100｜评分 75\n- 香港科技大学｜资助｜西貢｜学费 42100｜评分 75",
+ "t17": "【知识库检索】关键词：高才通续签需要什么材料（规则版本 policy.2026-10-06）\n- [coupling] 耦合 C13：专才绑定雇主 → 换雇主续签材料变更提示\n  出处：领域规则库｜版本 policy.2026-10-06｜最后核验 2026-10-06\n- [coupling] 耦合 C7：续签需家庭在港记录 → 教育记录互相加分\n  出处：领域规则库｜版本 policy.2026-10-06｜最后核验 2026-10-06\n- [identity] 高才通 C 类：合资格大学学士，经验 < 3 年，配额\n  出处：香港入境事务处（框架口径）｜版本 policy.2026-10-06｜最后核验 2026-10-06\n- [faq] 续签什么时候递交？最早最迟是什么时候？：一般可于到期前 3 个月（90 天）内递交，最迟须于到期前 6 周（42 天）递交；6–8 月为高峰期，建议再提前约 4 周。\n  出处：平台 FAQ｜版本 policy.2026-10-06｜最后核验 2026-10-06\n- [identity] 高才通 A 类：前一年收入 ≥ 250 万港元\n  出处：香港入境事务处（框架口径）｜版本 policy.2026-10-06｜最后核验 2026-10-06\n以上为参考判断，非审批承诺；最终以入境事务处/教育局/劳工处官方要求为准。",
+ "t18": "计算结果：12*(3+4) = 84",
+ "t19": "计算结果：2**10 = 1024",
+ "t2": "【法定资格剖面】受养人签证（tier=cond，canPr=True）\n- ③ COND｜C-011｜你的资格依附于保证人；若保证人失效，年期冻结但不清零。满 7 年可独立申请 ROP145 核实永久性居民身份证资格，无须保证人同意。\n    · 监控：保证人到期前 120 天提醒\n以上为法律事实陈述，非审批承诺；具体以入境事务处认定为准。",
+ "t20": "__ERROR__:表达式包含非法字符",
+ "t21": "【到期扫描】TTPS_A（激活 2023-09-01）在 90 天窗口内无到期任务。",
+ "t22": "【到期扫描】DEPENDANT（激活 2026-06-01）在 90 天窗口内无到期任务。",
+ "t23": "<time>",
+ "t24": "__ERROR__:未知工具：unknown_tool",
+ "t3": "【法定资格剖面】学生签证（tier=cond，canPr=True）\n- ③ COND｜C-012｜学生签证期间是否计入 7 年存在两种口径，须外部法律顾问裁决后才能统一；本平台并列展示两个口径、不给单一结论。\n    · 口径 A（官方定义倾向）：入境处原文列举通常居住时含「例如读书、工作或居留等」；CLIC 载明以教育为稳定目的者可构成通常居住 → 倾向可计入，但须按完整事实判断，不是「持签证一天就计一天」。\n    · 口径 B（平台旧口径）：就学身份通常不计入 7 年。\n    · 状态：待法务确认（未闭合分歧 R-CALC-014，须外部法律顾问裁决后方可统一口径）\n以上为法律事实陈述，非审批承诺；具体以入境事务处认定为准。",
+ "t4": "__ERROR__:未知身份类型：UNKNOWN",
+ "t5": "【法定资格剖面】高才通 A 类（tier=normal，canPr=True）\n- ② DWELL｜R-CALC-012｜签证空档期导致连续性中断，该段不计入并须重新起算（R-CALC-012）；此前合法累计不视为「白费」，服务入口均正常开放，可按重新起算点并列展示两个进度数值。（服务入口正常开放）\n以上为法律事实陈述，非审批承诺；具体以入境事务处认定为准。",
+ "t6": "【7 年主航道】高才通 A 类（tier=normal，规则版本 policy.2026-10-06）\n- 激活：2023-09-01｜首签到期：2026-09-01\n- 递交窗口：2026-06-03 ~ 2026-07-21\n- 建议递交：2026-07-21\n- 7 年届满：2030-09-01\n- 费用：申请 600 港元 + 签发 1300 港元\n- 第 1 轮（首签）：到期 2026-09-01；窗口 2026-06-03 ~ 2026-07-21；建议 2026-07-21\n- 第 2 轮（续签 1）：到期 2029-09-01；窗口 2029-06-03 ~ 2029-07-21；建议 2029-07-21\n- 第 3 轮（续签 2）：到期 2032-09-01；窗口 2032-06-03 ~ 2032-07-21；建议 2032-07-21",
+ "t7": "【7 年主航道】优才（综合计分）（tier=normal，规则版本 policy.2026-10-06）\n- 激活：2022-07-01｜首签到期：2025-07-01\n- 递交窗口：2025-06-03 ~ 2025-07-01（6–8 月高峰，建议提前递交）\n- 建议递交：2025-06-03\n- 7 年届满：2029-07-01\n- 费用：申请 600 港元 + 签发 1300 港元\n- 第 1 轮（首签）：到期 2025-07-01；窗口 2025-06-03 ~ 2025-07-01；建议 2025-06-03\n- 第 2 轮（续签 1）：到期 2028-07-01；窗口 2028-06-03 ~ 2028-07-01；建议 2028-06-03\n- 第 3 轮（续签 2）：到期 2031-07-01；窗口 2031-06-03 ~ 2031-07-01；建议 2031-06-03",
+ "t8": "【7 年主航道】受养人签证（tier=cond，规则版本 policy.2026-10-06）\n- 激活：2024-02-29｜首签到期：2027-02-28\n- 递交窗口：2027-01-31 ~ 2027-02-28\n- 建议递交：2027-02-28\n- 7 年届满：2031-02-28\n- 费用：申请 600 港元 + 签发 1300 港元\n- 第 1 轮（随主申）：到期 2027-02-28；窗口 2027-01-31 ~ 2027-02-28；建议 2027-02-28\n- 特别提示：受养人签证年期随保证人；保证人失效则年期冻结（已累计部分不清零），见 C-011。",
+ "t9": "__ERROR__:需要参数 identityType 与 activationDate，例如 identityType=TTPS_A activationDate=2023-09-01",
+ "tl1": {
+  "activation": "2023-09-01",
+  "applyWindow": {
+   "deadline": "2026-07-21",
+   "start": "2026-06-03"
+  },
+  "canPr": true,
+  "expiry": "2026-09-01",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "高才通 A 类",
+  "identityType": "TTPS_A",
+  "isPeak": false,
+  "prDate": "2030-09-01",
+  "rounds": [
+   {
+    "expiry": "2026-09-01",
+    "grant": "2023-09-01",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2026-07-21",
+    "windowDeadline": "2026-07-21",
+    "windowStart": "2026-06-03"
+   },
+   {
+    "expiry": "2029-09-01",
+    "grant": "2026-09-01",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2029-07-21",
+    "windowDeadline": "2029-07-21",
+    "windowStart": "2029-06-03",
+    "years": 3
+   },
+   {
+    "expiry": "2032-09-01",
+    "grant": "2029-09-01",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2032-07-21",
+    "windowDeadline": "2032-07-21",
+    "windowStart": "2032-06-03",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2026-07-21",
+  "tier": "normal"
+ },
+ "tl10": {
+  "activation": "2024-01-05",
+  "applyWindow": {
+   "deadline": "2025-11-24",
+   "start": "2025-10-07"
+  },
+  "canPr": true,
+  "expiry": "2026-01-05",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "新资本投资者入境计划",
+  "identityType": "CIES",
+  "isPeak": false,
+  "prDate": "2031-01-05",
+  "rounds": [
+   {
+    "expiry": "2026-01-05",
+    "grant": "2024-01-05",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2025-11-24",
+    "windowDeadline": "2025-11-24",
+    "windowStart": "2025-10-07"
+   },
+   {
+    "expiry": "2028-01-05",
+    "grant": "2026-01-05",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2027-11-24",
+    "windowDeadline": "2027-11-24",
+    "windowStart": "2027-10-07",
+    "years": 2
+   },
+   {
+    "expiry": "2031-01-05",
+    "grant": "2028-01-05",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2030-11-24",
+    "windowDeadline": "2030-11-24",
+    "windowStart": "2030-10-07",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2025-11-24",
+  "tier": "normal"
+ },
+ "tl11": {
+  "activation": "2024-02-29",
+  "applyWindow": {
+   "deadline": "2027-02-28",
+   "start": "2027-01-31"
+  },
+  "canPr": true,
+  "expiry": "2027-02-28",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "受养人签证",
+  "identityType": "DEPENDANT",
+  "isPeak": false,
+  "prDate": "2031-02-28",
+  "rounds": [
+   {
+    "expiry": "2027-02-28",
+    "grant": "2024-02-29",
+    "index": 1,
+    "isPeak": false,
+    "kind": "随主申",
+    "suggestedSubmitBy": "2027-02-28",
+    "windowDeadline": "2027-02-28",
+    "windowStart": "2027-01-31"
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": "受养人签证年期随保证人；保证人失效则年期冻结（已累计部分不清零），见 C-011。",
+  "suggestedSubmitBy": "2027-02-28",
+  "tier": "cond"
+ },
+ "tl12": {
+  "activation": "2023-03-30",
+  "applyWindow": {
+   "deadline": "2023-03-30",
+   "start": "2023-03-30"
+  },
+  "canPr": false,
+  "expiry": "2023-03-30",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "单程证",
+  "identityType": "ONEWAY",
+  "isPeak": false,
+  "prDate": null,
+  "rounds": [],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": "单程证属《基本法》第 24 条其他类别，不按 7 年计算路径。",
+  "suggestedSubmitBy": "2023-03-30",
+  "tier": "special"
+ },
+ "tl13": {
+  "activation": "2023-03-30",
+  "applyWindow": {
+   "deadline": "2025-03-30",
+   "start": "2025-03-02"
+  },
+  "canPr": false,
+  "expiry": "2025-03-30",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "外籍家庭佣工 FDH",
+  "identityType": "FDH",
+  "isPeak": false,
+  "prDate": null,
+  "rounds": [],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": "该身份在法律上不产生永居路径，系统仅提供在港工作与生活支持。",
+  "suggestedSubmitBy": "2025-03-30",
+  "tier": "deny"
+ },
+ "tl14": {
+  "activation": "2025-06-01",
+  "applyWindow": {
+   "deadline": "2027-06-01",
+   "start": "2027-05-04"
+  },
+  "canPr": false,
+  "expiry": "2027-06-01",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "补充劳工优化计划 ESLS",
+  "identityType": "ESLS",
+  "isPeak": false,
+  "prDate": null,
+  "rounds": [],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": "该身份在法律上不产生永居路径，系统仅提供在港工作与生活支持。",
+  "suggestedSubmitBy": "2027-06-01",
+  "tier": "deny"
+ },
+ "tl15": {
+  "activation": "2025-06-01",
+  "applyWindow": {
+   "deadline": "2027-06-01",
+   "start": "2027-05-04"
+  },
+  "canPr": false,
+  "expiry": "2027-06-01",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "行业输入劳工计划",
+  "identityType": "SILS",
+  "isPeak": false,
+  "prDate": null,
+  "rounds": [],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": "该身份在法律上不产生永居路径，系统仅提供在港工作与生活支持。",
+  "suggestedSubmitBy": "2027-06-01",
+  "tier": "deny"
+ },
+ "tl16": {
+  "activation": "2024-09-01",
+  "applyWindow": {
+   "deadline": "2025-09-01",
+   "start": "2025-08-04"
+  },
+  "canPr": true,
+  "expiry": "2025-09-01",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "学生签证",
+  "identityType": "STUDENT",
+  "isPeak": false,
+  "prDate": "2031-09-01",
+  "rounds": [
+   {
+    "expiry": "2025-09-01",
+    "grant": "2024-09-01",
+    "index": 1,
+    "isPeak": false,
+    "kind": "学生课程",
+    "suggestedSubmitBy": "2025-09-01",
+    "windowDeadline": "2025-09-01",
+    "windowStart": "2025-08-04"
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": "学生签证毕业后 6 个月内可转 IANG（C10）；读书期是否计入 7 年见 R-CALC-014（待法务确认）。",
+  "suggestedSubmitBy": "2025-09-01",
+  "tier": "cond"
+ },
+ "tl17": {
+  "activation": "2026-01-15",
+  "applyWindow": {
+   "deadline": "2026-01-15",
+   "start": "2026-01-15"
+  },
+  "canPr": false,
+  "expiry": "2026-01-15",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "访客期",
+  "identityType": "VISITOR",
+  "isPeak": false,
+  "prDate": null,
+  "rounds": [],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": "该段期间不计入 7 年；服务入口正常开放。",
+  "suggestedSubmitBy": "2026-01-15",
+  "tier": "dwell"
+ },
+ "tl18": {
+  "activation": "2022-06-01",
+  "applyWindow": {
+   "deadline": "2025-04-20",
+   "start": "2025-03-03"
+  },
+  "canPr": true,
+  "expiry": "2025-06-01",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "高才通 A 类",
+  "identityType": "TTPS_A",
+  "isPeak": true,
+  "prDate": "2029-06-01",
+  "rounds": [
+   {
+    "expiry": "2025-06-01",
+    "grant": "2022-06-01",
+    "index": 1,
+    "isPeak": true,
+    "kind": "首签",
+    "suggestedSubmitBy": "2025-03-23",
+    "windowDeadline": "2025-04-20",
+    "windowStart": "2025-03-03"
+   },
+   {
+    "expiry": "2028-06-01",
+    "grant": "2025-06-01",
+    "index": 2,
+    "isPeak": true,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2028-03-23",
+    "windowDeadline": "2028-04-20",
+    "windowStart": "2028-03-03",
+    "years": 3
+   },
+   {
+    "expiry": "2031-06-01",
+    "grant": "2028-06-01",
+    "index": 3,
+    "isPeak": true,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2031-03-23",
+    "windowDeadline": "2031-04-20",
+    "windowStart": "2031-03-03",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2025-03-23",
+  "tier": "normal"
+ },
+ "tl19": {
+  "activation": "2025-08-31",
+  "applyWindow": {
+   "deadline": "2028-07-20",
+   "start": "2028-06-02"
+  },
+  "canPr": true,
+  "expiry": "2028-08-31",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "高才通 A 类",
+  "identityType": "TTPS_A",
+  "isPeak": true,
+  "prDate": "2032-08-31",
+  "rounds": [
+   {
+    "expiry": "2028-08-31",
+    "grant": "2025-08-31",
+    "index": 1,
+    "isPeak": true,
+    "kind": "首签",
+    "suggestedSubmitBy": "2028-06-22",
+    "windowDeadline": "2028-07-20",
+    "windowStart": "2028-06-02"
+   },
+   {
+    "expiry": "2031-08-31",
+    "grant": "2028-08-31",
+    "index": 2,
+    "isPeak": true,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2031-06-22",
+    "windowDeadline": "2031-07-20",
+    "windowStart": "2031-06-02",
+    "years": 3
+   },
+   {
+    "expiry": "2034-08-31",
+    "grant": "2031-08-31",
+    "index": 3,
+    "isPeak": true,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2034-06-22",
+    "windowDeadline": "2034-07-20",
+    "windowStart": "2034-06-02",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2028-06-22",
+  "tier": "normal"
+ },
+ "tl2": {
+  "activation": "2024-03-15",
+  "applyWindow": {
+   "deadline": "2026-02-01",
+   "start": "2025-12-15"
+  },
+  "canPr": true,
+  "expiry": "2026-03-15",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "高才通 B 类",
+  "identityType": "TTPS_B",
+  "isPeak": false,
+  "prDate": "2031-03-15",
+  "rounds": [
+   {
+    "expiry": "2026-03-15",
+    "grant": "2024-03-15",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2026-02-01",
+    "windowDeadline": "2026-02-01",
+    "windowStart": "2025-12-15"
+   },
+   {
+    "expiry": "2028-03-15",
+    "grant": "2026-03-15",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2028-02-02",
+    "windowDeadline": "2028-02-02",
+    "windowStart": "2027-12-16",
+    "years": 2
+   },
+   {
+    "expiry": "2031-03-15",
+    "grant": "2028-03-15",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2031-02-01",
+    "windowDeadline": "2031-02-01",
+    "windowStart": "2030-12-15",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2026-02-01",
+  "tier": "normal"
+ },
+ "tl20": {
+  "activation": "2026-04-10",
+  "applyWindow": {
+   "deadline": "2028-04-10",
+   "start": "2028-03-13"
+  },
+  "canPr": true,
+  "expiry": "2028-04-10",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "一般就业政策 GEP",
+  "identityType": "GEP",
+  "isPeak": false,
+  "prDate": "2033-04-10",
+  "rounds": [
+   {
+    "expiry": "2028-04-10",
+    "grant": "2026-04-10",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2028-04-10",
+    "windowDeadline": "2028-04-10",
+    "windowStart": "2028-03-13"
+   },
+   {
+    "expiry": "2030-04-10",
+    "grant": "2028-04-10",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2030-04-10",
+    "windowDeadline": "2030-04-10",
+    "windowStart": "2030-03-13",
+    "years": 2
+   },
+   {
+    "expiry": "2033-04-10",
+    "grant": "2030-04-10",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2033-04-10",
+    "windowDeadline": "2033-04-10",
+    "windowStart": "2033-03-13",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2028-04-10",
+  "tier": "normal"
+ },
+ "tl3": {
+  "activation": "2025-01-31",
+  "applyWindow": {
+   "deadline": "2026-12-20",
+   "start": "2026-11-02"
+  },
+  "canPr": true,
+  "expiry": "2027-01-31",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "高才通 C 类",
+  "identityType": "TTPS_C",
+  "isPeak": false,
+  "prDate": "2032-01-31",
+  "rounds": [
+   {
+    "expiry": "2027-01-31",
+    "grant": "2025-01-31",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2026-12-20",
+    "windowDeadline": "2026-12-20",
+    "windowStart": "2026-11-02"
+   },
+   {
+    "expiry": "2029-01-31",
+    "grant": "2027-01-31",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2028-12-20",
+    "windowDeadline": "2028-12-20",
+    "windowStart": "2028-11-02",
+    "years": 2
+   },
+   {
+    "expiry": "2032-01-31",
+    "grant": "2029-01-31",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2031-12-20",
+    "windowDeadline": "2031-12-20",
+    "windowStart": "2031-11-02",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2026-12-20",
+  "tier": "normal"
+ },
+ "tl4": {
+  "activation": "2022-07-01",
+  "applyWindow": {
+   "deadline": "2025-07-01",
+   "start": "2025-06-03"
+  },
+  "canPr": true,
+  "expiry": "2025-07-01",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "优才（综合计分）",
+  "identityType": "QMAS",
+  "isPeak": true,
+  "prDate": "2029-07-01",
+  "rounds": [
+   {
+    "expiry": "2025-07-01",
+    "grant": "2022-07-01",
+    "index": 1,
+    "isPeak": true,
+    "kind": "首签",
+    "suggestedSubmitBy": "2025-06-03",
+    "windowDeadline": "2025-07-01",
+    "windowStart": "2025-06-03"
+   },
+   {
+    "expiry": "2028-07-01",
+    "grant": "2025-07-01",
+    "index": 2,
+    "isPeak": true,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2028-06-03",
+    "windowDeadline": "2028-07-01",
+    "windowStart": "2028-06-03",
+    "years": 3
+   },
+   {
+    "expiry": "2031-07-01",
+    "grant": "2028-07-01",
+    "index": 3,
+    "isPeak": true,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2031-06-03",
+    "windowDeadline": "2031-07-01",
+    "windowStart": "2031-06-03",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2025-06-03",
+  "tier": "normal"
+ },
+ "tl5": {
+  "activation": "2022-06-10",
+  "applyWindow": {
+   "deadline": "2030-06-10",
+   "start": "2030-05-13"
+  },
+  "canPr": true,
+  "expiry": "2030-06-10",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "优才（成就计分）",
+  "identityType": "QMAS_ACH",
+  "isPeak": false,
+  "prDate": "2029-06-10",
+  "rounds": [
+   {
+    "expiry": "2030-06-10",
+    "grant": "2022-06-10",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2030-06-10",
+    "windowDeadline": "2030-06-10",
+    "windowStart": "2030-05-13"
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2030-06-10",
+  "tier": "normal"
+ },
+ "tl6": {
+  "activation": "2024-08-20",
+  "applyWindow": {
+   "deadline": "2026-07-09",
+   "start": "2026-05-22"
+  },
+  "canPr": true,
+  "expiry": "2026-08-20",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "IANG 非本地毕业生",
+  "identityType": "IANG",
+  "isPeak": true,
+  "prDate": "2031-08-20",
+  "rounds": [
+   {
+    "expiry": "2026-08-20",
+    "grant": "2024-08-20",
+    "index": 1,
+    "isPeak": true,
+    "kind": "首签",
+    "suggestedSubmitBy": "2026-06-11",
+    "windowDeadline": "2026-07-09",
+    "windowStart": "2026-05-22"
+   },
+   {
+    "expiry": "2028-08-20",
+    "grant": "2026-08-20",
+    "index": 2,
+    "isPeak": true,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2028-06-11",
+    "windowDeadline": "2028-07-09",
+    "windowStart": "2028-05-22",
+    "years": 2
+   },
+   {
+    "expiry": "2031-08-20",
+    "grant": "2028-08-20",
+    "index": 3,
+    "isPeak": true,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2031-06-11",
+    "windowDeadline": "2031-07-09",
+    "windowStart": "2031-05-22",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2026-06-11",
+  "tier": "normal"
+ },
+ "tl7": {
+  "activation": "2023-05-05",
+  "applyWindow": {
+   "deadline": "2025-05-05",
+   "start": "2025-04-07"
+  },
+  "canPr": true,
+  "expiry": "2025-05-05",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "一般就业政策 GEP",
+  "identityType": "GEP",
+  "isPeak": false,
+  "prDate": "2030-05-05",
+  "rounds": [
+   {
+    "expiry": "2025-05-05",
+    "grant": "2023-05-05",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2025-05-05",
+    "windowDeadline": "2025-05-05",
+    "windowStart": "2025-04-07"
+   },
+   {
+    "expiry": "2027-05-05",
+    "grant": "2025-05-05",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2027-05-05",
+    "windowDeadline": "2027-05-05",
+    "windowStart": "2027-04-07",
+    "years": 2
+   },
+   {
+    "expiry": "2030-05-05",
+    "grant": "2027-05-05",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2030-05-05",
+    "windowDeadline": "2030-05-05",
+    "windowStart": "2030-04-07",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2025-05-05",
+  "tier": "normal"
+ },
+ "tl8": {
+  "activation": "2023-11-11",
+  "applyWindow": {
+   "deadline": "2025-11-11",
+   "start": "2025-10-14"
+  },
+  "canPr": true,
+  "expiry": "2025-11-11",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "专才 ASMTP",
+  "identityType": "ASMTP",
+  "isPeak": false,
+  "prDate": "2030-11-11",
+  "rounds": [
+   {
+    "expiry": "2025-11-11",
+    "grant": "2023-11-11",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2025-11-11",
+    "windowDeadline": "2025-11-11",
+    "windowStart": "2025-10-14"
+   },
+   {
+    "expiry": "2027-11-11",
+    "grant": "2025-11-11",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2027-11-11",
+    "windowDeadline": "2027-11-11",
+    "windowStart": "2027-10-14",
+    "years": 2
+   },
+   {
+    "expiry": "2030-11-11",
+    "grant": "2027-11-11",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2030-11-11",
+    "windowDeadline": "2030-11-11",
+    "windowStart": "2030-10-14",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2025-11-11",
+  "tier": "normal"
+ },
+ "tl9": {
+  "activation": "2025-02-01",
+  "applyWindow": {
+   "deadline": "2027-02-01",
+   "start": "2027-01-04"
+  },
+  "canPr": true,
+  "expiry": "2027-02-01",
+  "fees": {
+   "application": 60000,
+   "issuance": 130000
+  },
+  "identityName": "非学位专才渠道",
+  "identityType": "NON_DEGREE",
+  "isPeak": false,
+  "prDate": "2032-02-01",
+  "rounds": [
+   {
+    "expiry": "2027-02-01",
+    "grant": "2025-02-01",
+    "index": 1,
+    "isPeak": false,
+    "kind": "首签",
+    "suggestedSubmitBy": "2027-02-01",
+    "windowDeadline": "2027-02-01",
+    "windowStart": "2027-01-04"
+   },
+   {
+    "expiry": "2029-02-01",
+    "grant": "2027-02-01",
+    "index": 2,
+    "isPeak": false,
+    "kind": "续签 1",
+    "suggestedSubmitBy": "2029-02-01",
+    "windowDeadline": "2029-02-01",
+    "windowStart": "2029-01-04",
+    "years": 2
+   },
+   {
+    "expiry": "2032-02-01",
+    "grant": "2029-02-01",
+    "index": 3,
+    "isPeak": false,
+    "kind": "续签 2",
+    "suggestedSubmitBy": "2032-02-01",
+    "windowDeadline": "2032-02-01",
+    "windowStart": "2032-01-04",
+    "years": 3
+   }
+  ],
+  "ruleVersion": "policy.2026-10-06",
+  "specialNotice": null,
+  "suggestedSubmitBy": "2027-02-01",
+  "tier": "normal"
+ }
+}

@@ -630,7 +630,7 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
             { cls:'',     l:'7 年通常居住届满', s:'可申请核实永久居民资格', d:'2030-09-01' }
         ]},
         { t:'p', html:'<b>你要记住的只有一件事：</b>2026 年 6 月 3 日窗口一开就递，别等到 8 月。窗口关闭（7 月 21 日）后仍在签证有效期内可继续申请，但会压缩审批余量。' },
-        { t:'cite', html:'规则 R-CALC-011 · 语料 IDT-TTPS_A · 版本 policy.2026-10-06｜以上为法律事实陈述，非审批承诺' }
+        { t:'cite', html:'出处：IDT-TTPS_A · 规则版本 policy.2026-10-06｜申请费 600 港元 · 签发费 1,300 港元｜以上为法律事实陈述，非审批承诺' }
       ]
     },
     {
@@ -639,13 +639,14 @@ footer{border-top:1px solid var(--line);margin-top:64px;padding:26px 0 40px;colo
       q: '外佣能不能拿永居？',
       think: '命中否认层：外籍家庭佣工属《入境条例》排除类别，居住年期不累积。需要给出法定依据与合法替代路径。',
       tool: { name:'legal_profile', arg:'identityType=FDH', ms:'6 ms',
-        out:'{\n  "tier": "deny",\n  "canPr": false,\n  "rule": "R-LABOR-015",\n  "basis": "《入境条例》第 2(4)(a)(v) 条"\n}' },
+        out:'{\n  "tier": "deny",\n  "canPr": false,\n  "ruleIds": ["R-LABOR-019"],\n  "legalBasis": "《入境条例》第 2(4)(a)(vi) 条",\n  "precedent": "Vallejos v. Commissioner of Registration [2013] 2 HKC 1"\n}' },
       blocks: [
         { t:'res', cls:'deny', badge:'DENY 否认层', title:'不产生永久居民资格',
           html:'<p>以外籍家庭佣工身份在港的居住期间，<b>不产生</b>申请永久性居民身份证的资格，该段年期不予累积。</p>' +
                '<p>这不是「材料不够」或「审批偏严」，而是身份类别本身被排除在外。</p>',
-          cite:'R-LABOR-015｜《入境条例》第 2(4)(a)(v) 条' },
-        { t:'p', html:'<b>合法的替代路径是存在的：</b>2025 年起 GEP / ASMTP 下新增的「非学位专才」渠道属正常层，获批后可累积在港居住年数并申请永居——但须由雇主按该计划提出申请，与「转换身份」不是同一件事。' },
+          cite:'R-LABOR-019｜《入境条例》第 2(4)(a)(vi) 条｜Vallejos v. Commissioner of Registration [2013] 2 HKC 1（确认合宪）' },
+        { t:'p', html:'<b>顺带分清两条条文：</b>输入劳工（ESLS / SILS）走第 2(4)(a)(v) 条（R-LABOR-015~018），外籍家庭佣工走第 2(4)(a)(vi) 条（R-LABOR-019）——条文不同，结论相同：都不产生永居。' },
+        { t:'p', html:'<b>合法的替代路径是存在的：</b>2025 年起 GEP / ASMTP 下新增的「非学位专才」渠道属正常层，获批后可累积在港居住年数并申请永居——但须由雇主按该计划提出申请，与「转换身份」不是同一件事（耦合 C15）。' },
         { t:'p', html:'如果你已经在考虑转型，我可以按你的学历、年资与雇主情况，比对 GEP / ASMTP / 进修三条路径的门槛与时间成本。要继续吗？' }
       ]
     },

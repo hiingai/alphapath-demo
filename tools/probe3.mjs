@@ -20,6 +20,7 @@ const ev = async (expr) => {
   return r.result.value;
 };
 await send('Log.enable'); await send('Runtime.enable'); await send('Page.enable');
+await send('Network.enable'); await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Page.navigate', { url });
 await sleep(3500);
 console.log('load logs:', JSON.stringify(logs));

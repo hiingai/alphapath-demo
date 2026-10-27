@@ -6,3 +6,7 @@ _eout*.txt
 shot*.png
 shot*.txt
 _dom.html
+tests/_*.txt
+tests/_*.md
+tests/_*.mjs
+_dom.html

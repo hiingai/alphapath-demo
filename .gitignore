@@ -1,0 +1,8 @@
+﻿.env
+.env.local
+node_modules/
+tests/_out*.txt
+_eout*.txt
+shot*.png
+shot*.txt
+_dom.html

@@ -120,6 +120,12 @@
       if (carg) return { tool: 'check_compliance', arg: carg.trim() };
     }
 
+    /* 有身份 + 有日期 + 问「什么时候」→ 直接算时间线（比只给剖面有用） */
+    if (ident && date && !/(空档|断签|断了|访客|游客|逾期|超期|不计入|算不算|算几年)/.test(t)
+        && /(什么时候|多久|何时|时间线|主航道|7\s*年|七年|永居|永久|续签窗口|到期)/.test(t)) {
+      return { tool: 'compute_timeline', arg: 'identityType=' + ident + ' activationDate=' + date };
+    }
+
     if (ident && /(永居|永久|通常居住|能拿|能不能|可不可以|算不算|什么身份|资格|续签|怎么办)/.test(t)) {
       var seg = '';
       if (/(空档|断签|断了)/.test(t)) seg = ' segments=[{"kind":"gap","start":"2025-01-01","end":"2025-03-01"}]';

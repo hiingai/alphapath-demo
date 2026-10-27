@@ -63,4 +63,6 @@
   };
 
   AP.Engine = Engine;
+  /* 便捷别名：UI 里直接 AP.settings.xxx */
+  AP.settings = Engine.settings;
 })(typeof window !== 'undefined' ? window : globalThis);

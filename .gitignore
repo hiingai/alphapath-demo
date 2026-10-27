@@ -10,3 +10,6 @@ tests/_*.txt
 tests/_*.md
 tests/_*.mjs
 _dom.html
+
+_*.png
+_*.txt

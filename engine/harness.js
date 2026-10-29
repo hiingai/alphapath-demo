@@ -90,6 +90,43 @@
   Agent.prototype.detect_identity = function (t) { return detect_identity(t); };
 
   /* ---------------- 规则路由（离线兜底） ---------------- */
+  var CHECKLIST_PRESETS = {
+    renew: {
+      title: '续签材料清单',
+      items: ['有效旅行证件（含现时签证标签）', '雇佣合同 / 聘用书（注明职位与薪酬）',
+        '薪俸税评税通知书或报税表', '强积金供款记录', '住址证明（租约 + 最近一期水电煤单）',
+        '公司商业登记证（自雇适用）', '公司审计报告 / 银行流水（自雇适用）', '学历证书与专业资格证明']
+    },
+    student: {
+      title: '学生签证材料清单',
+      items: ['有效旅行证件', '院校录取通知书 / 在读证明', '学费缴付收据',
+        '住宿安排证明', '经济能力证明（存款或担保）', '学历与语言成绩证明']
+    },
+    rop145: {
+      title: 'ROP145 永居核实材料清单',
+      items: ['ROP145 申请表', '有效旅行证件与历年签证标签', '在港通常居住证明（租约／水电单／税单）',
+        '受雇证明 / 强积金记录', '配偶与子女关系证明（如适用）', '连续离港超过 6 个月的说明（如有）']
+    }
+  };
+
+  /* 工具产出的「文件」结果转成人话（保留 ARTIFACT 标记给前端渲染卡片） */
+  function friendly_tool_reply(result) {
+    var s = String(result == null ? '' : result);
+    if (s.indexOf('ARTIFACT:') !== 0) return s;
+    var spec = null;
+    try { spec = JSON.parse(s.slice(9)); } catch (e) { return s; }
+    if (!spec) return s;
+    return '已生成《' + spec.title + '》交互式清单：共 ' + (spec.items || []).length + ' 项，'
+      + '在下面直接勾选即可（勾选状态保存在本机），也可以点「下载 HTML」带走一个能离线用的文件。\n'
+      + '注意清单只是材料准备提示，具体要求以入境处最新公布为准。\n\n' + s;
+  }
+
+  function checklist_preset(text) {    var t = String(text || '');
+    if (/(ROP145|永居|永久)/.test(t)) return CHECKLIST_PRESETS.rop145;
+    if (/(学生|读书|院校)/.test(t)) return CHECKLIST_PRESETS.student;
+    return CHECKLIST_PRESETS.renew;
+  }
+
   Agent.prototype._route = function (text) {
     var t = String(text == null ? '' : text).trim();
     var ident = detect_identity(t);
@@ -101,6 +138,13 @@
     if (/^[\d\s+\-*/().%^]+$/.test(t) && /[+\-*/]/.test(t)) return { tool: 'calculator', arg: t };
 
     if (TIME_KEYWORDS.some(function (k) { return t.indexOf(k) >= 0; })) return { tool: 'get_time', arg: '' };
+
+    /* 要做清单/表格/文件 → 生成可勾选的 HTML（MVP 不限制这类正常需求） */
+    if (/(清单|表格|文件|checklist|导出|勾选|html)/i.test(t)
+        && /(做成|生成|导出|制作|整理|列成|列个|来个|帮我做|写个|写一个|做一个)/.test(t)) {
+      var preset = checklist_preset(t);
+      return { tool: 'make_file', arg: 'title=' + preset.title + '\nitems=' + preset.items.join('|') };
+    }
 
     m = t.match(/(?:记住|记一下)\s*[：:]?\s*(.+)/);
     if (m) return { tool: 'remember', arg: m[1].trim() };
@@ -397,6 +441,7 @@
           var ok = String(reply).indexOf(ERR) !== 0;
           emit(on_event, { type: 'tool_result', name: route.tool, arg: route.arg, result: reply, ok: ok });
           steps.push({ name: route.tool, arg: route.arg, result: reply, ok: ok });
+          reply = friendly_tool_reply(reply);
         } else {
           emit(on_event, { type: 'think', round: 1, text: '未命中工具路由，直接生成回答。' });
           var system = SYSTEM_PROMPT + (memory_context ? ('\n\n' + memory_context) : '');

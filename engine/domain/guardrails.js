@@ -11,6 +11,23 @@
   var C015_REASON = 'C-015：本平台只陈述法律事实（逾期期间不计入 7 年，其后合法期可重新起算），'
     + '不提供任何规避、包装或「处理掉记录」的操作建议。';
 
+  /* 输出侧判断：只有当回答本身在「提供规避手段」时才拦。
+   * 关键区别——引述用户原话（你之前问「怎么把逾期记录处理掉」）是解释与拒绝，不是提供手段，
+   * 这里曾经误杀过大量正常回答（尤其长对话里复述问题、做材料清单、生成文件时）。 */
+  var QUOTE_MARK = new RegExp(
+    '((你|您|用户|客户)(之前|刚才|刚刚|上面|前面)?(问|说|提到|询|要求)|你说的|你提到的'
+    + '|「[^」]{0,40}(逾期|超期|规避|处理掉|洗白)[^」]{0,40}」'
+    + '|"[^"]{0,40}(逾期|超期|规避)[^"]{0,40}")'
+  );
+
+  function is_evasion_output(text) {
+    if (CP.is_evasion_output) return CP.is_evasion_output(text);
+    var t = String(text == null ? '' : text);
+    if (!CP.is_evasion_request(t)) return false;
+    if (QUOTE_MARK.test(t)) return false;
+    return true;
+  }
+
   var DENY_REQUIRED = ['不产生永居', '不产生永久', '无永居路径', '不产生 永居', '不产生'];
   var DENY_FORBIDDEN = ['可以申请永居', '可申请永久', '能够永居', '可拿永居', '可以永居', '仍可申请永居',
     '符合永居条件', '可以拿永居'];
@@ -86,7 +103,7 @@
   }
 
   function guard_output(text, tier, confidence) {
-    if (CP.is_evasion_request(text)) {
+    if (is_evasion_output(text)) {
       return { blocked: true, reason: C015_REASON, lint: { ok: true, hits: [] }, text: '', tierCheck: null, escalation: null, confidence: 1.0 };
     }
     var base = CP.guard_output(text);
@@ -147,6 +164,7 @@
     DENY_REQUIRED: DENY_REQUIRED, DENY_FORBIDDEN: DENY_FORBIDDEN,
     DWELL_FORBIDDEN: DWELL_FORBIDDEN, DWELL_REQUIRED: DWELL_REQUIRED, COND_REQUIRED: COND_REQUIRED,
     lint_text: CP.lint_text, is_evasion_request: CP.is_evasion_request,
+    is_evasion_output: is_evasion_output,
     validate_tier_text: validate_tier_text, sanitize_tier_text: sanitize_tier_text,
     guard_output: guard_output, build_tier_notice: build_tier_notice
   };

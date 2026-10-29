@@ -128,7 +128,7 @@ async function e2e() {
   /* 统计与语料 */
   const st = a2.stats();
   ok('语料 89 条', st.rag_coverage.total === 89, String(st.rag_coverage.total));
-  ok('工具 16 个', st.tools === 16, String(st.tools));
+  ok('工具 17 个', st.tools === 17, String(st.tools));
 }
 
 const t0 = Date.now();

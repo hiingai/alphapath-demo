@@ -70,8 +70,21 @@
     };
   }
 
+  /* 引述用户原话不算「提供手段」：这里与 guardrails.is_evasion_output 保持同一口径 */
+  var QUOTE_MARK = new RegExp(
+    '((你|您|用户|客户)(之前|刚才|刚刚|上面|前面)?(问|说|提到|询|要求)|你说的|你提到的'
+    + '|「[^」]{0,40}(逾期|超期|规避|处理掉|洗白)[^」]{0,40}」'
+    + '|"[^"]{0,40}(逾期|超期|规避)[^"]{0,40}")'
+  );
+
+  function is_evasion_output(text) {
+    var t = String(text == null ? '' : text);
+    if (!is_evasion_request(t)) return false;
+    return !QUOTE_MARK.test(t);
+  }
+
   function guard_output(text) {
-    if (is_evasion_request(text)) {
+    if (is_evasion_output(text)) {
       return {
         blocked: true,
         reason: 'C-015：本平台只陈述法律事实（逾期期间不计入 7 年，其后合法期可重新起算），不提供任何规避、包装或「处理掉记录」的操作建议。',
@@ -91,7 +104,7 @@
 
   AP.compliance = {
     FORBIDDEN_PHRASES: FORBIDDEN_PHRASES, EVASION_PATTERNS: EVASION_PATTERNS,
-    lint_text: lint_text, is_evasion_request: is_evasion_request,
+    lint_text: lint_text, is_evasion_request: is_evasion_request, is_evasion_output: is_evasion_output,
     check_compliance: check_compliance, guard_output: guard_output
   };
 })(typeof window !== 'undefined' ? window : globalThis);

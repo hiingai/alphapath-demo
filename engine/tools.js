@@ -369,8 +369,86 @@
     return lines.join('\n');
   }
 
-  function check_coupling(arg) {
-    var p = parseKV(arg);
+  /* ---------------- 生成文件（清单 / 表格 → 可勾选的 HTML） ---------------- */
+  function parseFileArg(arg) {
+    var s = String(arg == null ? '' : arg).trim(), o = {};
+    if (s.charAt(0) === '{') {
+      try { o = JSON.parse(s) || {}; } catch (e) { o = {}; }
+    }
+    if (!Object.keys(o).length) {
+      s.split(/[\n;]+/).forEach(function (line) {
+        var i = line.indexOf('=');
+        if (i > 0) o[line.slice(0, i).trim()] = line.slice(i + 1).trim();
+      });
+    }
+    var items = o.items;
+    if (typeof items === 'string') items = items.split(/\s*[|｜、]\s*|\s*,\s*/);
+    if (!Array.isArray(items)) items = [];
+    items = items.map(function (x) { return String(x).trim(); }).filter(Boolean);
+    return {
+      kind: String(o.kind || 'checklist'),
+      title: String(o.title || o.name || '续签材料清单'),
+      items: items.slice(0, 60),
+      note: String(o.note || '')
+    };
+  }
+
+  function slugify(s) {
+    return String(s || 'file').replace(/[\\/:*?"<>|\s]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'file';
+  }
+
+  function build_checklist_html(title, items, note) {
+    var esc = function (x) {
+      return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    };
+    var key = 'ap-checklist:' + slugify(title);
+    var li = items.map(function (t, i) {
+      return '<li><label><input type="checkbox" data-i="' + i + '"><span>' + esc(t) + '</span></label></li>';
+    }).join('\n      ');
+    return '<!DOCTYPE html>\n<html lang="zh-HK">\n<head>\n<meta charset="utf-8">\n'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+      + '<title>' + esc(title) + '</title>\n<style>\n'
+      + ':root{color-scheme:light dark}body{font:16px/1.7 -apple-system,"Segoe UI","PingFang HK","Microsoft YaHei",sans-serif;'
+      + 'max-width:720px;margin:0 auto;padding:32px 20px;background:#0f1620;color:#e8eef7}\n'
+      + 'h1{font-size:20px;margin:0 0 6px}.sub{color:#8ba0b8;font-size:13px;margin-bottom:22px}\n'
+      + 'ul{list-style:none;padding:0;margin:0}li{border:1px solid #26313f;border-radius:10px;margin-bottom:8px;background:#141d29}\n'
+      + 'label{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;cursor:pointer}\n'
+      + 'input{margin-top:4px;width:17px;height:17px;accent-color:#4da3ff}\n'
+      + 'li.done span{text-decoration:line-through;color:#7d8fa5}\n'
+      + '.bar{display:flex;gap:10px;margin:18px 0}.bar button{font:inherit;font-size:13px;padding:7px 13px;'
+      + 'border-radius:8px;border:1px solid #2c3a4a;background:#18222e;color:#cfe0f4;cursor:pointer}\n'
+      + '.note{color:#8ba0b8;font-size:12.5px;border-top:1px solid #26313f;padding-top:14px;margin-top:24px}\n'
+      + '</style>\n</head>\n<body>\n<h1>' + esc(title) + '</h1>\n'
+      + '<div class="sub">共 ' + items.length + ' 项 · 勾选状态保存在本机浏览器</div>\n'
+      + '<ul id="list">\n      ' + li + '\n</ul>\n'
+      + '<div class="bar"><button id="all">全选</button><button id="none">清空</button><button onclick="window.print()">打印</button></div>\n'
+      + '<div class="note">' + esc(note || '本清单由 AlphaPath 生成，仅作材料准备提示，不构成审批承诺。') + '</div>\n'
+      + '<script>\n(function(){var K=' + JSON.stringify(key) + ';var s={};try{s=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}\n'
+      + 'var bs=[].slice.call(document.querySelectorAll("input[type=checkbox]"));\n'
+      + 'function sync(){bs.forEach(function(b){b.closest("li").classList.toggle("done",b.checked)})}\n'
+      + 'function save(){var o={};bs.forEach(function(b){o[b.dataset.i]=b.checked});localStorage.setItem(K,JSON.stringify(o))}\n'
+      + 'bs.forEach(function(b){b.checked=!!s[b.dataset.i];b.addEventListener("change",function(){sync();save()})});\n'
+      + 'document.getElementById("all").onclick=function(){bs.forEach(function(b){b.checked=true});sync();save()};\n'
+      + 'document.getElementById("none").onclick=function(){bs.forEach(function(b){b.checked=false});sync();save()};\n'
+      + 'sync();})();\n</script>\n</body>\n</html>\n';
+  }
+
+  function make_file(arg) {
+    var p = parseFileArg(arg);
+    if (!p.items.length) {
+      return fail('需要至少一个条目，示例：title=续签材料清单 items=身份证明|雇佣合同|税单（用 | 分隔）');
+    }
+    var html = build_checklist_html(p.title, p.items, p.note);
+    var path = 'artifacts/' + slugify(p.title) + '.html';
+    var m = VFS.load();
+    m[path] = html;
+    VFS.save(m);
+    return 'ARTIFACT:' + JSON.stringify({
+      kind: 'checklist', title: p.title, items: p.items, path: path, note: p.note, html: html
+    });
+  }
+
+  function check_coupling(arg) {    var p = parseKV(arg);
     var cid = String(p.id || p.q || '').trim();
     var items = Object.keys(KB.couplingRules).map(function (k) { return [k, KB.couplingRules[k]]; });
     if (cid && cid.toLowerCase() !== 'all' && cid !== '全部') {
@@ -455,6 +533,9 @@
     this.register('check_compliance',
       '合规红线自检。参数如 applicantInHk=true employer.registeredMonths=3 mpfMonths=2', check_compliance);
     this.register('check_coupling', '查询耦合规则 C1~C15。参数：空（全部）或 id=C4 / q=关键词', check_coupling);
+    this.register('make_file',
+      '把清单/表格做成可下载的交互式 HTML 文件（勾选状态存本机）。参数：title=标题 items=项1|项2|项3，可选 kind=checklist',
+      make_file);
     this.register('search_schools',
       '按条件匹配香港学校。参数：stage=SECOND curriculum=EDU-DSE district=湾仔 maxTuition=100000', search_schools);
     this.register('rag_query', '检索本地知识库（政策/规则/学校/FAQ），参数为关键词', rag_query);
@@ -503,6 +584,7 @@
     ERR_PREFIX: ERR_PREFIX, ToolRegistry: ToolRegistry, calculator: calculator, get_time: get_time,
     legal_profile: legal_profile, compute_timeline: compute_timeline, compute_dwell: compute_dwell,
     check_compliance: check_compliance, check_coupling: check_coupling, search_schools: search_schools,
+    make_file: make_file, build_checklist_html: build_checklist_html,
     rag_query: rag_query, read_file: read_file, write_file: write_file, list_dir: list_dir,
     run_command: run_command, VFS: VFS
   };

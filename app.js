@@ -154,9 +154,10 @@
   }
 
   function setAnswer(shell, text) {
-    shell.article.textContent = text;
+    var shown = String(text == null ? '' : text).replace(/\n*ARTIFACT:\{[\s\S]*$/, '').trim();
+    shell.article.textContent = shown;
     shell.answer = text;
-    if (text) sealProc(shell);
+    if (shown) sealProc(shell);
     scrollBottom();
   }
 
@@ -202,11 +203,96 @@
       var kv = el('div', 'kv', '参数：' + ev.arg);
       body.appendChild(kv);
     }
-    var pre = el('pre', null, ev.result || '');
-    body.appendChild(pre);
+    var art = artifactFrom(ev.result);
+    if (art) {
+      card.classList.add('open');
+      body.appendChild(renderArtifact(art));
+    } else {
+      body.appendChild(el('pre', null, ev.result || ''));
+    }
     if (ev.ok === false) card.classList.add('fail');
-    if (ms > 220) card.classList.add('open');
+    if (ms > 220 || art) card.classList.add('open');
     scrollBottom();
+  }
+
+  /* ---------------- 生成的文件（可勾选清单） ---------------- */
+  function artifactFrom(result) {
+    var s = String(result == null ? '' : result);
+    var i = s.indexOf('ARTIFACT:');
+    if (i < 0) return null;
+    try { return JSON.parse(s.slice(i + 9)); } catch (e) { return null; }
+  }
+
+  function renderArtifact(spec) {
+    var box = el('div', 'artifact');
+    var head = el('div', 'ah');
+    head.appendChild(el('span', 'ic', '📄'));
+    head.appendChild(el('span', 'tt', spec.title || '清单'));
+    head.appendChild(el('span', 'sub', (spec.items || []).length + ' 项 · 勾选存本机'));
+    box.appendChild(head);
+
+    var key = 'ap:art:' + (spec.path || spec.title || 'list');
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { saved = {}; }
+    var list = el('div', 'alist');
+    var boxes = [];
+    (spec.items || []).forEach(function (t, i) {
+      var row = el('label', 'arow');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!saved[i];
+      cb.addEventListener('change', function () {
+        row.classList.toggle('done', cb.checked);
+        var o = {};
+        boxes.forEach(function (b, j) { o[j] = b.checked; });
+        try { localStorage.setItem(key, JSON.stringify(o)); } catch (e) { /* 配额满 */ }
+        updateCount();
+      });
+      if (cb.checked) row.classList.add('done');
+      boxes.push(cb);
+      row.appendChild(cb);
+      row.appendChild(el('span', 'at', t));
+      list.appendChild(row);
+    });
+    box.appendChild(list);
+
+    var bar = el('div', 'abar');
+    var bAll = el('button', 'abtn', '全选');
+    bAll.addEventListener('click', function () {
+      boxes.forEach(function (b) { b.checked = true; b.dispatchEvent(new Event('change')); });
+      updateCount();
+    });
+    var bNone = el('button', 'abtn', '清空');
+    bNone.addEventListener('click', function () {
+      boxes.forEach(function (b) { b.checked = false; b.dispatchEvent(new Event('change')); });
+      updateCount();
+    });
+    var bDl = el('button', 'abtn primary', '下载 HTML');
+    bDl.addEventListener('click', function () {
+      var html = spec.html || '';
+      if (!html) return;
+      var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (spec.title || 'checklist') + '.html';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    });
+    bar.appendChild(bAll);
+    bar.appendChild(bNone);
+    bar.appendChild(bDl);
+    box.appendChild(bar);
+
+    var foot = el('div', 'afoot');
+    box.appendChild(foot);
+    function updateCount() {
+      var n = boxes.filter(function (b) { return b.checked; }).length;
+      foot.textContent = '已勾选 ' + n + ' / ' + boxes.length + ' 项'
+        + (spec.path ? ' · 已存到沙箱 ' + spec.path : '');
+    }
+    updateCount();
+    return box;
   }
 
   /* ---------------- 发送 ---------------- */

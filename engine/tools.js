@@ -370,6 +370,32 @@
   }
 
   /* ---------------- 生成文件（清单 / 表格 → 可勾选的 HTML） ---------------- */
+  var CHECKLIST_PRESETS = {
+    renew: {
+      title: '续签材料清单',
+      items: ['有效旅行证件（含现时签证标签）', '雇佣合同 / 聘用书（注明职位与薪酬）',
+        '薪俸税评税通知书或报税表', '强积金供款记录', '住址证明（租约 + 最近一期水电煤单）',
+        '公司商业登记证（自雇适用）', '公司审计报告 / 银行流水（自雇适用）', '学历证书与专业资格证明']
+    },
+    student: {
+      title: '学生签证材料清单',
+      items: ['有效旅行证件', '院校录取通知书 / 在读证明', '学费缴付收据',
+        '住宿安排证明', '经济能力证明（存款或担保）', '学历与语言成绩证明']
+    },
+    rop145: {
+      title: 'ROP145 永居核实材料清单',
+      items: ['ROP145 申请表', '有效旅行证件与历年签证标签', '在港通常居住证明（租约／水电单／税单）',
+        '受雇证明 / 强积金记录', '配偶与子女关系证明（如适用）', '连续离港超过 6 个月的说明（如有）']
+    }
+  };
+
+  function pick_preset(text) {
+    var t = String(text || '');
+    if (/(ROP145|永居|永久)/.test(t)) return CHECKLIST_PRESETS.rop145;
+    if (/(学生|读书|院校|升学)/.test(t)) return CHECKLIST_PRESETS.student;
+    return CHECKLIST_PRESETS.renew;
+  }
+
   function parseFileArg(arg) {
     var s = String(arg == null ? '' : arg).trim(), o = {};
     if (s.charAt(0) === '{') {
@@ -435,8 +461,13 @@
 
   function make_file(arg) {
     var p = parseFileArg(arg);
+    var guessed = false;
     if (!p.items.length) {
-      return fail('需要至少一个条目，示例：title=续签材料清单 items=身份证明|雇佣合同|税单（用 | 分隔）');
+      /* 模型常只给标题不给条目：按标题猜模板兜底，绝不把错误抛给用户 */
+      var pr = pick_preset(p.title + ' ' + (arg || ''));
+      p.items = pr.items.slice();
+      if (!p.title || p.title === '续签材料清单' || p.title === '清单') p.title = pr.title;
+      guessed = true;
     }
     var html = build_checklist_html(p.title, p.items, p.note);
     var path = 'artifacts/' + slugify(p.title) + '.html';
@@ -444,7 +475,7 @@
     m[path] = html;
     VFS.save(m);
     return 'ARTIFACT:' + JSON.stringify({
-      kind: 'checklist', title: p.title, items: p.items, path: path, note: p.note, html: html
+      kind: 'checklist', title: p.title, items: p.items, path: path, note: p.note, html: html, guessed: guessed
     });
   }
 
@@ -585,6 +616,7 @@
     legal_profile: legal_profile, compute_timeline: compute_timeline, compute_dwell: compute_dwell,
     check_compliance: check_compliance, check_coupling: check_coupling, search_schools: search_schools,
     make_file: make_file, build_checklist_html: build_checklist_html,
+    pick_preset: pick_preset, CHECKLIST_PRESETS: CHECKLIST_PRESETS,
     rag_query: rag_query, read_file: read_file, write_file: write_file, list_dir: list_dir,
     run_command: run_command, VFS: VFS
   };

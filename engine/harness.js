@@ -22,12 +22,14 @@
     + '- 禁用表述：包过 / 保证通过 / 100% 成功 / 一定计入 / 一定不计入 / 确保获批。\n\n'
     + '【可溯源性】每条政策结论附出处与最后核验日期；不承诺审批结果，最终以入境事务处/教育局/劳工处官方为准。\n\n'
     + '工具使用：\n'
-    + '- 生成 7 年续签时间线：compute_timeline（identityType、activationDate）。\n'
+    + '- 生成 7 年续签时间线：compute_timeline（identityType、activationDate）。**用户给了身份+日期又问时间/永居/续签窗口时，这是唯一正确的选择，不要用其他工具。**\n'
     + '- 居住年限（② 层扣除/重算）：compute_dwell（segments JSON，可选 as_of）。\n'
     + '- 三层法定资格剖面：legal_profile（identityType、可选 segments）。\n'
     + '- 合规自检：check_compliance；耦合规则：check_coupling。\n'
     + '- 择校匹配：search_schools；政策/费用/条件：rag_query。\n'
     + '- 文件：read_file / write_file / list_dir；命令：run_command；到期扫描：conductor_scan。\n'
+    + '- 做成可勾选的清单文件：make_file（title、items 用 | 分隔）。**仅当用户明确要求生成/导出清单、表格或文件时使用**；\n'
+    + '  问日期、续签窗口、7 年届满请用 compute_timeline，不要用 make_file 代替。\n'
     + '- 记忆：remember / recall。\n\n'
     + '连续任务编排：任务需多步时请**连续调用**多个工具，基于上一步结果决定下一步，直到信息足够。';
 
@@ -90,24 +92,10 @@
   Agent.prototype.detect_identity = function (t) { return detect_identity(t); };
 
   /* ---------------- 规则路由（离线兜底） ---------------- */
-  var CHECKLIST_PRESETS = {
-    renew: {
-      title: '续签材料清单',
-      items: ['有效旅行证件（含现时签证标签）', '雇佣合同 / 聘用书（注明职位与薪酬）',
-        '薪俸税评税通知书或报税表', '强积金供款记录', '住址证明（租约 + 最近一期水电煤单）',
-        '公司商业登记证（自雇适用）', '公司审计报告 / 银行流水（自雇适用）', '学历证书与专业资格证明']
-    },
-    student: {
-      title: '学生签证材料清单',
-      items: ['有效旅行证件', '院校录取通知书 / 在读证明', '学费缴付收据',
-        '住宿安排证明', '经济能力证明（存款或担保）', '学历与语言成绩证明']
-    },
-    rop145: {
-      title: 'ROP145 永居核实材料清单',
-      items: ['ROP145 申请表', '有效旅行证件与历年签证标签', '在港通常居住证明（租约／水电单／税单）',
-        '受雇证明 / 强积金记录', '配偶与子女关系证明（如适用）', '连续离港超过 6 个月的说明（如有）']
-    }
-  };
+  function checklist_preset(text) {
+    if (AP.tools && AP.tools.pick_preset) return AP.tools.pick_preset(text);
+    return { title: '续签材料清单', items: ['身份证明文件', '雇佣合同或聘用书'] };
+  }
 
   /* 工具产出的「文件」结果转成人话（保留 ARTIFACT 标记给前端渲染卡片） */
   function friendly_tool_reply(result) {
@@ -121,10 +109,16 @@
       + '注意清单只是材料准备提示，具体要求以入境处最新公布为准。\n\n' + s;
   }
 
-  function checklist_preset(text) {    var t = String(text || '');
-    if (/(ROP145|永居|永久)/.test(t)) return CHECKLIST_PRESETS.rop145;
-    if (/(学生|读书|院校)/.test(t)) return CHECKLIST_PRESETS.student;
-    return CHECKLIST_PRESETS.renew;
+  /* 高置信度时间线路由：命中即走确定性引擎，不进 LLM 工具循环 */
+  function timeline_route(t) {
+    var text = String(t == null ? '' : t).trim();
+    if (!text) return null;
+    var ident = detect_identity(text);
+    var date = detect_date(text);
+    if (!ident || !date) return null;
+    if (/(空档|断签|断了|访客|游客|逾期|超期|不计入|算不算|算几年)/.test(text)) return null;
+    if (!/(什么时候|多久|何时|时间线|主航道|7\s*年|七年|永居|永久|续签窗口|到期|届满)/.test(text)) return null;
+    return { tool: 'compute_timeline', arg: 'identityType=' + ident + ' activationDate=' + date };
   }
 
   Agent.prototype._route = function (text) {
@@ -311,7 +305,7 @@
     var system = SYSTEM_PROMPT + (memory_context ? ('\n\n' + memory_context) : '');
     var messages = this.memory.short_term.get();
     var tools = this._tool_schemas();
-    var used_tools = [], last_results = [], steps = [], round_idx;
+    var used_tools = [], last_results = [], steps = [], round_idx, lastFailSig = '';
     var self = this;
 
     for (round_idx = 0; round_idx < AP.CFG.MAX_TOOL_ROUNDS; round_idx++) {
@@ -363,12 +357,22 @@
         round_results.push({ name: name, arg: arg, result: result, tool_call_id: call.id || '' });
       });
       if (!round_results.length) return null;
+      /* 同一工具同一参数连续失败：别再空转 8 轮，直接交回上层处理 */
+      var allErr = round_results.every(function (r) { return String(r.result).indexOf(ERR) === 0; });
+      var sig = round_results.map(function (r) { return r.name + '|' + r.arg; }).join(';');
+      if (allErr) {
+        if (sig === lastFailSig) return null;
+        lastFailSig = sig;
+      }
       last_results = round_results;
       this._record_tool_round(tool_calls, round_results);
       messages = this.memory.short_term.get();
     }
+    if (!last_results.length) return null;
+    var tail = last_results.map(function (r) { return r.result; }).join('\n\n');
+    if (String(tail).indexOf(ERR) === 0) return null;  /* 全失败：交回上层，别把错误当答案 */
     return {
-      reply: last_results.map(function (r) { return r.result; }).join('\n\n') || '（工具调用轮数过多，已停止）',
+      reply: tail || '（工具调用轮数过多，已停止）',
       tool_used: used_tools.length ? used_tools[used_tools.length - 1] : null, steps: steps
     };
   };
@@ -426,13 +430,34 @@
         };
       }
 
-      var llm_result = await this._chat_with_tools(user_input, memory_context, on_event, streamed);
+      /* 旗舰功能保护：身份 + 日期 + 时间线问题，直接由确定性引擎回答，
+       * 不交给大模型「自由发挥」——避免模型乱选工具把主航道问成文件生成。 */
+      var strong = timeline_route(user_input);
+      var llm_result = strong ? null : await this._chat_with_tools(user_input, memory_context, on_event, streamed);
       if (llm_result !== null) {
         reply = llm_result.reply;
         tool_used = llm_result.tool_used;
         steps = llm_result.steps || [];
+        /* 模型把工具调崩了就别把 __ERROR__ 抛给用户：退回确定性路由 */
+        if (String(reply).indexOf(ERR) === 0) {
+          var rescue = timeline_route(user_input) || this._route(user_input);
+          if (rescue) {
+            emit(on_event, { type: 'think', round: 1, text: '工具调用出错，已回退到确定性引擎重算。' });
+            emit(on_event, { type: 'tool_call', name: rescue.tool, arg: rescue.arg });
+            reply = this.tools.call(rescue.tool, rescue.arg);
+            var rok = String(reply).indexOf(ERR) !== 0;
+            emit(on_event, { type: 'tool_result', name: rescue.tool, arg: rescue.arg, result: reply, ok: rok });
+            steps.push({ name: rescue.tool, arg: rescue.arg, result: reply, ok: rok });
+            tool_used = rescue.tool;
+            reply = friendly_tool_reply(reply);
+            streamed[0] = false;
+          } else {
+            reply = '刚才的工具调用出错了，我没能给出可靠结论。可以换个说法再问一次（例如附上身份类型和激活日期），我不会凭猜测给日期。';
+            streamed[0] = false;
+          }
+        }
       } else {
-        var route = this._route(user_input);
+        var route = strong || this._route(user_input);
         if (route) {
           tool_used = route.tool;
           emit(on_event, { type: 'think', round: 1, text: '规则路由命中：' + route.tool + '，准备调用确定性引擎。' });

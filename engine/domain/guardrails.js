@@ -76,17 +76,26 @@
   function sanitize_tier_text(tier, text) {
     text = text || '';
     if (tier === 'dwell') {
+      /* ② 层只修年限、不拦服务：把「不可永居 / 拦截」类表述换成中性说法，
+       * 并保证一定出现「服务入口正常开放」——原实现会拼出「服务被提示。」这种病句。 */
+      /* 「被拦截」先退化成「拦截」，否则会拼出「服务被不受影响」 */
+      text = text.split('被拦截').join('拦截');
       DWELL_FORBIDDEN.forEach(function (bad) {
-        if (bad.indexOf('拦截') >= 0 || bad.indexOf('不可用') >= 0 || bad.indexOf('拒绝服务') >= 0) {
-          text = text.split(bad).join('提示');
+        if (bad.indexOf('拦截') >= 0 || bad.indexOf('不可用') >= 0 || bad.indexOf('拒绝服务') >= 0
+          || bad.indexOf('入口') >= 0 || bad.indexOf('不能续签') >= 0 || bad.indexOf('资格取消') >= 0) {
+          text = text.split(bad).join('不受影响');
         } else {
           text = text.split(bad).join('该期间不计入');
         }
       });
+      /* 去掉重复：「…不计入 7 年，该期间不计入」→ 只留一次 */
+      text = text.replace(/不计入([^，。；]*)[，、]\s*该(?:段)?期间不计入/g, '不计入$1');
+      text = text.replace(/(该(?:段)?期间不计入[^，。；]*)[，、]?\s*该(?:段)?期间不计入/g, '$1');
       if (text.indexOf('不计入') < 0) {
-        text = '该段期间不计入 7 年，服务入口正常开放。' + text;
-      } else if (text.indexOf('入口') < 0 && text.indexOf('服务') < 0) {
-        text = text.replace(/。+$/, '') + '。服务入口正常开放。';
+        text = '该段期间不计入 7 年。' + text;
+      }
+      if (!/服务入口正常开放/.test(text)) {
+        text = text.replace(/[。\s]*$/, '') + '。服务入口正常开放；其后合法居留期可重新起算 7 年。';
       }
     } else if (tier === 'deny') {
       if (text.indexOf('不产生永居') < 0) text = '【身份定性前置】该身份在法律上不产生永居路径。' + text;

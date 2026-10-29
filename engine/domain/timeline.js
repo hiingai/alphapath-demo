@@ -18,6 +18,52 @@
     return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
   }
   function daysInMonth(y, m) { return new Date(Date.UTC(y, m, 0)).getUTCDate(); }
+
+  /* ---------- 日期合法性校验 ----------
+   * Date.UTC 会把 2023-09-31 悄悄滚成 2023-10-01，静默算错一整天。
+   * 结论必须可信，所以非法日期一律不计算，先让用户确认。 */
+  function check_date(s) {
+    var raw = String(s == null ? '' : s).trim();
+    var m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (!m) {
+      return {
+        ok: false, input: raw, code: 'FORMAT',
+        message: '日期「' + raw + '」格式看不懂，我需要「年-月-日」这样写，例如 2023-09-30。',
+        suggestions: []
+      };
+    }
+    var y = parseInt(m[1], 10), mo = parseInt(m[2], 10), d = parseInt(m[3], 10);
+    if (y < 1900 || y > 2100) {
+      return {
+        ok: false, input: raw, code: 'YEAR_RANGE',
+        message: '年份 ' + y + ' 超出我能处理的范围（1900–2100），请确认激活签证的年份。',
+        suggestions: []
+      };
+    }
+    if (mo < 1 || mo > 12) {
+      return {
+        ok: false, input: raw, code: 'MONTH_RANGE',
+        message: '月份 ' + mo + ' 不存在：一年只有 12 个月。请确认激活日期是 ' + y + ' 年几月。',
+        suggestions: []
+      };
+    }
+    var dim = daysInMonth(y, mo);
+    if (d < 1 || d > dim) {
+      /* 给两个最可能的候选：本月最后一天 / 下月第一天 */
+      var lastDay = y + '-' + pad(mo) + '-' + pad(dim);
+      var nextY = mo === 12 ? y + 1 : y, nextM = mo === 12 ? 1 : mo + 1;
+      var firstNext = nextY + '-' + pad(nextM) + '-01';
+      return {
+        ok: false, input: raw, code: 'DAY_RANGE',
+        message: '日期「' + raw + '」不存在：' + y + ' 年 ' + mo + ' 月只有 ' + dim + ' 天，没有 ' + d + ' 号。'
+          + '你指的是 ' + lastDay + '（当月最后一天）还是 ' + firstNext + '（次日）？',
+        suggestions: [lastDay, firstNext]
+      };
+    }
+    return { ok: true, iso: y + '-' + pad(mo) + '-' + pad(d), input: raw };
+  }
+  function is_valid_date(s) { return check_date(s).ok; }
+
   function addMonthsDate(d, n) {
     var m = d.getUTCMonth() + n;
     var y = d.getUTCFullYear() + Math.floor(m / 12);
@@ -47,7 +93,15 @@
   function compute_visa_timeline(identity_type, activation_date) {
     var it = (KB.identityTypes || {})[identity_type];
     if (!it) throw new Error('UNKNOWN_IDENTITY_TYPE:' + identity_type);
-    var activation = activation_date;
+    /* 非法日期一律拒绝：宁可不答，也不能静默滚到次日算错一整天 */
+    var ck = check_date(activation_date);
+    if (!ck.ok) {
+      var err = new Error(ck.message);
+      err.code = 'BAD_DATE';
+      err.dateCheck = ck;
+      throw err;
+    }
+    var activation = ck.iso;
     var first_years = it.first_years;
     var first_expiry = add_months(activation, first_years * 12);
     var w0 = compute_window(first_expiry, it.window_days, it.lead_days, it.peak);
@@ -151,6 +205,7 @@
   AP.timeline = {
     FEE: FEE, p: p, iso: iso, add_days: add_days, add_months: add_months, add_years: add_years,
     diff_days: diff_days, months_between: months_between, _p: p, _iso: iso,
+    check_date: check_date, is_valid_date: is_valid_date,
     compute_window: compute_window, compute_visa_timeline: compute_visa_timeline,
     compute_dwell: compute_dwell, todayISO: todayISO
   };

@@ -283,6 +283,14 @@
     if (!identity_type || !activation) {
       return fail('需要参数 identityType 与 activationDate，例如 identityType=TTPS_A activationDate=2023-09-01');
     }
+    /* 日期不合法 → 直接回人话（不是 __ERROR__），让用户确认，绝不静默滚日期 */
+    if (AP.timeline.check_date) {
+      var ck = AP.timeline.check_date(activation);
+      if (!ck.ok) {
+        return ck.message
+          + '\n确认之后我再算 7 年主航道——日期我不会替你猜。';
+      }
+    }
     var t;
     try { t = AP.timeline.compute_visa_timeline(identity_type, activation); } catch (e) {
       return fail(e && e.message ? e.message : String(e));
@@ -313,6 +321,19 @@
       return fail('需要参数 segments，例如 {"segments":[{"kind":"visa","start":"2023-09-01","end":"2026-09-01"}]}');
     }
     var as_of = p.as_of || p.asOf;
+    /* 段内日期也逐条校验，拦住 2023-09-31 这类不存在的日期 */
+    if (AP.timeline.check_date) {
+      var badList = [];
+      if (as_of) { var ck0 = AP.timeline.check_date(as_of); if (!ck0.ok) badList.push(ck0); }
+      segments.forEach(function (s) {
+        ['start', 'end'].forEach(function (k) {
+          if (s && s[k]) { var ck = AP.timeline.check_date(s[k]); if (!ck.ok) badList.push(ck); }
+        });
+      });
+      if (badList.length) {
+        return badList[0].message + '\n确认之后我再算居住年限——日期我不会替你猜。';
+      }
+    }
     var res;
     try { res = AP.timeline.compute_dwell(segments, as_of); } catch (e) {
       return fail('居住年限计算失败：' + (e && e.message ? e.message : e));
@@ -585,6 +606,13 @@
       });
       this.register('recall', '从长期记忆检索信息（参数为关键词）', function (q) {
         var items = mm.recall(q, 5);
+        /* 「你还记得吗 / 我说过什么」这类元问题没有可检索的词，退回最近记忆 */
+        if (!items.length && /(记得|记忆|说过|提过|告诉过|回顾|之前)/.test(String(q || ''))) {
+          items = mm.long_term.all_items()
+            .filter(function (it) { return it.status === 'active'; })
+            .sort(function (a, b) { return (b.created_at || 0) - (a.created_at || 0); })
+            .slice(0, 5);
+        }
         if (!items.length) return '没有找到相关记忆。';
         return '找到相关记忆：\n' + items.map(function (it) { return '- [' + it.type + '] ' + it.content; }).join('\n');
       });

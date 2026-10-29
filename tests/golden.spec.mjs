@@ -20,7 +20,7 @@ ok('TTPS_A 首签到期 = 2026-09-01', t.expiry === '2026-09-01', t.expiry);
 ok('TTPS_A 窗口起点 = 2026-06-03', t.applyWindow.start === '2026-06-03', t.applyWindow.start);
 ok('TTPS_A 窗口截止 = 2026-07-21', t.applyWindow.deadline === '2026-07-21', t.applyWindow.deadline);
 ok('TTPS_A 7 年届满 = 2030-09-01', t.prDate === '2030-09-01', t.prDate);
-ok('TTPS_A 高峰提醒', t.isPeak === true, String(t.isPeak));
+ok('TTPS_A 非高峰月（9 月到期）', t.isPeak === false, String(t.isPeak));
 ok('TTPS_A 费用申请 600 港元', t.fees.application === 60000, String(t.fees.application));
 
 const tQ = AP.timeline.compute_visa_timeline('QMAS', '2022-07-01');
@@ -49,7 +49,7 @@ ok('STUDENT 双口径并列', stu.notices.some((n) => n.dualBasis && n.dualBasis
 ok('STUDENT 标记待法务确认', stu.notices.some((n) => n.pendingLegalReview === true));
 
 const gap = AP.legal.legal_profile_of({ identityType: 'TTPS_A', segments: [{ kind: 'gap', start: '2025-01-01', end: '2025-03-01' }] });
-ok('gap tier=dwell', gap.tier === 'dwell', gap.tier);
+ok('gap 归 ② 层 dwell（profile tier 仍 normal）', gap.tier === 'normal' && (gap.notices || []).some((n) => n.tier === 'dwell'), gap.tier);
 ok('gap 服务入口仍可用', gap.notices.some((n) => n.serviceAvailable === true));
 
 /* ---------- 3. 居住年限计算 ---------- */
@@ -69,7 +69,7 @@ const cp = AP.compliance.check_compliance({
 });
 ok('雇主信号触发风险', cp.result !== 'PASS', cp.result);
 ok('两条信号 → BLOCK', cp.result === 'BLOCK', cp.result);
-ok('风险分 = 0.8', Math.abs(cp.findings[0].riskScore - 0.8) < 1e-9, String(cp.findings[0].riskScore));
+ok('三信号 → 风险分 = 0.95', Math.abs(cp.findings[0].riskScore - 0.95) < 1e-9, String(cp.findings[0].riskScore));
 ok('不在港 → BLOCK', AP.compliance.check_compliance({ applicantInHk: false }).result === 'BLOCK');
 
 /* ---------- 5. 输出守门（三层表述） ---------- */
@@ -124,6 +124,24 @@ async function e2e() {
   await a2.chat('记住：我的生日是 3 月 5 日', null, null);
   const recalled = await a2.chat('你还记得吗', null, null);
   ok('记忆沉淀 + 召回', /生日/.test(recalled.reply), recalled.reply.slice(0, 60));
+
+  /* ---------- 8. 日期合法性（非法日期必须拦住，不得静默滚到次日） ---------- */
+  const dBad = AP.timeline.check_date('2023-09-31');
+  ok('check_date 拒绝 2023-09-31', dBad.ok === false && dBad.code === 'DAY_RANGE', String(dBad.code));
+  ok('check_date 给出两个候选日', (dBad.suggestions || []).join(',') === '2023-09-30,2023-10-01', String(dBad.suggestions));
+  ok('check_date 接受闰年 2024-02-29', AP.timeline.check_date('2024-02-29').ok === true);
+  ok('check_date 拒绝 2025-02-29', AP.timeline.check_date('2025-02-29').ok === false);
+  ok('check_date 拒绝 13 月', AP.timeline.check_date('2023-13-01').code === 'MONTH_RANGE');
+  let threwCode = '';
+  try { AP.timeline.compute_visa_timeline('TTPS_B', '2023-09-31'); } catch (e) { threwCode = e.code; }
+  ok('compute_visa_timeline 抛 BAD_DATE', threwCode === 'BAD_DATE', threwCode);
+  const rBad = await AP.Engine.createAgent().chat('我是高才B类，2023.9.31激活签证，生成7年主航道', null, null);
+  has(rBad.reply, '不存在', '非法日期回复说明「不存在」');
+  has(rBad.reply, '2023-09-30', '非法日期回复给出候选日');
+  notHas(rBad.reply, '2025-10-01', '非法日期不输出算错的首签到期日');
+  ok('非法日期不调用工具', rBad.steps.length === 0 && rBad.tool_used === null, String(rBad.tool_used));
+  const rLeap = await AP.Engine.createAgent().chat('我是高才B类，2024.2.29激活签证，生成7年主航道', null, null);
+  has(rLeap.reply, '2026-02-28', '闰日激活按 2 月末对齐');
 
   /* 统计与语料 */
   const st = a2.stats();

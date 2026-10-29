@@ -416,6 +416,28 @@
       var G = AP.guardrails;
       var tool_used = null, reply = null, steps = [], streamed = [false];
 
+      /* 日期合法性前置检查：用户写了不存在的日期（2023-09-31、2025-02-30…）时，
+       * 不进入任何计算，直接把「哪一天不存在 + 两个候选」说清楚，让用户确认。 */
+      var dateCheck = null;
+      var rawDate = detect_date(user_input);
+      if (rawDate && AP.timeline && AP.timeline.check_date) dateCheck = AP.timeline.check_date(rawDate);
+      if (dateCheck && !dateCheck.ok) {
+        emit(on_event, { type: 'think', round: 1, text: '日期「' + dateCheck.input + '」不合法，先向用户确认，不做计算。' });
+        var dReply = dateCheck.message
+          + (dateCheck.suggestions && dateCheck.suggestions.length
+            ? '\n确认是哪一个？回复日期我立刻算 7 年主航道。'
+            : '\n请补一个真实日期，我再算 7 年主航道。')
+          + '\n我不会替你猜日期——猜错一天，续签窗口就全错。';
+        emit(on_event, { type: 'answer', text: dReply });
+        this.memory.short_term.add('assistant', dReply);
+        emit(on_event, { type: 'done' });
+        return {
+          reply: dReply, tool_used: null, steps: [], tier: this._tier_for(null, applicant),
+          escalation: null, memories: recalled.map(function (m) { return m.to_dict(); }),
+          auto_saved: null, blocked: null
+        };
+      }
+
       if (G.is_evasion_request(user_input)) {
         emit(on_event, { type: 'think', round: 1, text: '命中 C-015：拒绝规避请求，仅陈述法律事实。' });
         reply = G.C015_REASON;

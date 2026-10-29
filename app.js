@@ -115,25 +115,54 @@
     var wrap = el('div', 'msg assistant');
     wrap.appendChild(el('div', 'avatar', '🧭'));
     var bubble = el('div', 'bubble');
+    /* 过程区（步骤 + 工具卡片）固定在回答上方，回答只追加在它下面 */
+    var proc = el('div', 'proc');
+    bubble.appendChild(proc);
+    var article = el('p', 'ans');
+    bubble.appendChild(article);
     wrap.appendChild(bubble);
     $('chat').appendChild(wrap);
     scrollBottom();
-    return { wrap: wrap, bubble: bubble, answer: null, article: null };
+    return { wrap: wrap, bubble: bubble, proc: proc, answer: null, article: article, steps: 0, sealed: false };
+  }
+
+  function sealProc(shell) {
+    if (shell.sealed || !shell.proc.children.length) return;
+    shell.sealed = true;
+    var head = el('div', 'prochead');
+    var dot = el('span', 'dot');
+    var t = el('span', 'pt');
+    head.appendChild(dot);
+    head.appendChild(t);
+    shell.procHead = head;
+    shell.pt = t;
+    var sync = function () {
+      var n = shell.proc.children.length - 1;
+      t.textContent = '推理过程 · ' + n + ' 项 · ' + (shell.proc.classList.contains('fold') ? '点击展开' : '点击收起');
+    };
+    head.addEventListener('click', function () {
+      shell.proc.classList.toggle('fold');
+      sync();
+    });
+    shell.proc.insertBefore(head, shell.proc.firstChild);
+    shell.proc.classList.add('done');
+    sync();
   }
 
   function setAnswer(shell, text) {
-    if (!shell.article) {
-      shell.article = el('p');
-      shell.bubble.appendChild(shell.article);
-    }
     shell.article.textContent = text;
     shell.answer = text;
+    if (text) sealProc(shell);
     scrollBottom();
   }
 
   function appendStep(shell, text) {
     var s = el('div', 'step', '· ' + text);
-    shell.bubble.appendChild(s);
+    shell.proc.appendChild(s);
+    if (shell.sealed && shell.pt) {
+      shell.pt.textContent = '推理过程 · ' + (shell.proc.children.length - 1) + ' 项 · '
+        + (shell.proc.classList.contains('fold') ? '点击展开' : '点击收起');
+    }
     scrollBottom();
   }
 
@@ -153,7 +182,7 @@
     card._body = body;
     card._t0 = performance.now();
     card._name = ev.name;
-    shell.bubble.appendChild(card);
+    shell.proc.appendChild(card);
     shell.lastCard = card;
     scrollBottom();
     return card;

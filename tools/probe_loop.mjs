@@ -18,7 +18,7 @@ const ev = async (x) => (await send('Runtime.evaluate', { expression: x, returnB
 
 const INJECT = `
 (function(){
-  try { localStorage.setItem('ap:llm:key','sk-fake-loop'); } catch(e){}
+  try { localStorage.setItem('ap:llm:key','sk-fake-loop'); localStorage.removeItem('ap:sessions'); } catch(e){}
   window.__llmCalls = 0;
   window.fetch = function(url){
     if (String(url).indexOf('version.json') >= 0) return Promise.resolve({ ok:false, json:function(){return Promise.resolve(null);} });
@@ -38,8 +38,8 @@ await send('Runtime.enable'); await send('Page.enable'); await send('Network.ena
 await send('Network.setCacheDisabled', { cacheDisabled: true });
 await send('Page.addScriptToEvaluateOnNewDocument', { source: INJECT });
 await send('Page.navigate', { url: BASE });
-await sleep(4000);
-await ev('(()=>{const t=document.getElementById("input");t.value=' + JSON.stringify(Q) + ';return 1;})()');
+await sleep(6500);
+await ev('(()=>{const t=document.getElementById("input");t.value=' + JSON.stringify(Q) + ';t.dispatchEvent(new Event("input",{bubbles:true}));return 1;})()');
 await sleep(150);
 await ev('document.getElementById("send").click()');
 await sleep(6000);

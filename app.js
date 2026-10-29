@@ -146,6 +146,7 @@
     });
     shell.proc.insertBefore(head, shell.proc.firstChild);
     shell.proc.classList.add('done');
+    shell.proc.classList.add('fold');   /* 出答案后默认收起：结论优先，过程点开看 */
     sync();
   }
 

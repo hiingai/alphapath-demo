@@ -140,13 +140,16 @@
       var n = shell.proc.children.length - 1;
       t.textContent = '推理过程 · ' + n + ' 项 · ' + (shell.proc.classList.contains('fold') ? '点击展开' : '点击收起');
     };
+    shell.sync = sync;
     head.addEventListener('click', function () {
+      shell.userToggled = true;
       shell.proc.classList.toggle('fold');
       sync();
     });
     shell.proc.insertBefore(head, shell.proc.firstChild);
     shell.proc.classList.add('done');
-    shell.proc.classList.add('fold');   /* 出答案后默认收起：结论优先，过程点开看 */
+    /* 过程很短（单次工具调用）就保持展开，留住「真调用」的可信感；长过程默认收起 */
+    if (shell.proc.children.length - 1 >= 3) shell.proc.classList.add('fold');
     sync();
   }
 
@@ -254,6 +257,11 @@
       }
     } finally {
       if (!shell.answer) setAnswer(shell, '（没有生成内容）');
+      /* 一轮结束后再判断折叠：过程长就收起，只留结论在最后一行 */
+      if (shell.sealed && !shell.userToggled && shell.proc.children.length - 1 >= 3) {
+        shell.proc.classList.add('fold');
+        shell.sync();
+      }
       renderMem();
       renderStats();
       sending = false;

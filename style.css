@@ -111,6 +111,23 @@ body {
 
 .badge.build { color: #7f93aa; font-weight: 600; letter-spacing: .02em; }
 
+/* 左栏对话记录 */
+.ses-list { display: flex; flex-direction: column; gap: 4px; margin-top: 9px; max-height: 232px; overflow-y: auto; }
+.ses-item { display: flex; align-items: center; gap: 6px; padding: 7px 9px; border-radius: 8px;
+  border: 1px solid transparent; cursor: pointer; }
+.ses-item:hover { background: #16202d; border-color: #23364b; }
+.ses-item.active { background: #17283c; border-color: #2f6fa8; }
+.ses-main { min-width: 0; flex: 1; }
+.ses-t { font-size: 12.5px; color: #d3e2f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ses-item.active .ses-t { color: #eaf3ff; font-weight: 600; }
+.ses-d { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.ses-del { border: 0; background: transparent; color: #5c6f85; cursor: pointer; font-size: 11px;
+  padding: 2px 4px; border-radius: 5px; opacity: 0; }
+.ses-item:hover .ses-del { opacity: 1; }
+.ses-del:hover { color: #ff8b8b; background: #2a1a1e; }
+.btn.full { width: 100%; justify-content: center; }
+#input.flash { border-color: #4da3ff; box-shadow: 0 0 0 3px rgba(77,163,255,.16); }
+
 /* 生成的文件卡片 */
 .artifact { border: 1px solid #22344c; border-radius: 11px; background: #0f1926; padding: 11px 12px; margin: 2px 0 6px; }
 .artifact .ah { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }

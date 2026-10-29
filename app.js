@@ -7,7 +7,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var agent = null;
   var sending = false;
-  var turnToolMs = 0;
+  var sessionStarted = false;
 
   var EXAMPLES = [
     '我是高才B类，2025.2.1激活签证，什么时候能拿永居？',
@@ -19,9 +19,137 @@
     '受雇续签，雇主刚成立 3 个月且无租约，有风险吗',
     '学生签证期间算不算 7 年',
     '耦合 C4 是什么意思',
+    '把续签材料清单做成带勾选的 HTML',
     '怎么把逾期记录处理掉？',
     '计算 12*(3+4)'
   ];
+
+  /* ---------------- 会话（左栏历史） ---------------- */
+  var SES_KEY = 'ap:sessions';
+  var SES_MAX = 30;
+  var sessions = [];
+  var curId = null;
+
+  function loadSessions() {
+    var a = [];
+    try { a = JSON.parse(localStorage.getItem(SES_KEY) || '[]'); } catch (e) { a = []; }
+    if (!Array.isArray(a)) a = [];
+    return a.filter(function (s) { return s && s.id && Array.isArray(s.msgs); });
+  }
+  function saveSessions() {
+    try { localStorage.setItem(SES_KEY, JSON.stringify(sessions.slice(0, SES_MAX))); } catch (e) { /* 配额满就放弃 */ }
+  }
+  function curSession() {
+    for (var i = 0; i < sessions.length; i++) if (sessions[i].id === curId) return sessions[i];
+    return null;
+  }
+  function newSession() {
+    /* 顺手清掉之前的空会话，避免点几次「新对话」堆一堆 */
+    sessions = sessions.filter(function (s) { return s.msgs && s.msgs.length; });
+    var s = { id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), title: '新对话', at: Date.now(), msgs: [] };
+    sessions.unshift(s);
+    curId = s.id;
+    saveSessions();
+    renderSessions();
+    return s;
+  }
+  function pushMsg(m) {
+    var s = curSession();
+    if (!s) s = newSession();
+    m.at = Date.now();
+    s.msgs.push(m);
+    s.at = m.at;
+    if (m.role === 'user' && (s.title === '新对话' || !s.title)) {
+      s.title = String(m.text || '').replace(/\s+/g, ' ').slice(0, 22) || '新对话';
+    }
+    /* 最近活跃的排最前 */
+    sessions.sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+    saveSessions();
+    renderSessions();
+  }
+  function fmtDay(ts) {
+    var d = new Date(ts || Date.now());
+    var now = new Date();
+    function p(n) { return n < 10 ? '0' + n : '' + n; }
+    if (d.toDateString() === now.toDateString()) return p(d.getHours()) + ':' + p(d.getMinutes());
+    return (d.getMonth() + 1) + '/' + d.getDate();
+  }
+  function renderSessions() {
+    var box = $('sesList');
+    if (!box) return;
+    box.textContent = '';
+    $('sesStat').textContent = sessions.length ? '（' + sessions.length + '）' : '';
+    if (!sessions.length) {
+      box.appendChild(el('p', 'hint', '还没有对话记录。发第一句就会存到这里，刷新也不丢。'));
+      return;
+    }
+    sessions.forEach(function (s) {
+      var row = el('div', 'ses-item' + (s.id === curId ? ' active' : ''));
+      var main = el('div', 'ses-main');
+      main.appendChild(el('div', 'ses-t', s.title || '新对话'));
+      main.appendChild(el('div', 'ses-d', fmtDay(s.at) + ' · ' + (s.msgs.length ? Math.ceil(s.msgs.filter(function (m) { return m.role === 'user'; }).length) + ' 问' : '空')));
+      row.appendChild(main);
+      var del = el('button', 'ses-del', '✕');
+      del.title = '删除这条对话';
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!confirm('删除这条对话？（不影响长期记忆）')) return;
+        sessions = sessions.filter(function (x) { return x.id !== s.id; });
+        if (curId === s.id) { curId = null; startBlank(); }
+        saveSessions();
+        renderSessions();
+      });
+      row.appendChild(del);
+      row.addEventListener('click', function () { openSession(s.id); });
+      box.appendChild(row);
+    });
+  }
+  function startBlank() {
+    agent.clear_short_term();
+    $('chat').innerHTML = homeHTML;
+    if (!curSession()) newSession();
+  }
+  function openSession(id) {
+    if (id === curId && curSession()) { $('sidebar').classList.remove('open'); return; }
+    curId = id;
+    var s = curSession();
+    if (!s) return;
+    agent.clear_short_term();
+    $('chat').innerHTML = '';
+    s.msgs.forEach(function (m) {
+      if (m.role === 'user') {
+        addUser(m.text);
+        agent.memory.short_term.add('user', m.text);
+      } else if (m.role === 'assistant') {
+        renderSavedAnswer(m);
+        agent.memory.short_term.add('assistant', m.text || '');
+      } else if (m.role === 'notice') {
+        appendNotice(m.text);
+      }
+    });
+    if (!s.msgs.length) $('chat').innerHTML = homeHTML;
+    renderSessions();
+    scrollBottom();
+    $('sidebar').classList.remove('open');
+  }
+  function renderSavedAnswer(m) {
+    var shell = addAssistantShell();
+    (m.steps || []).forEach(function (t) { appendStep(shell, t); });
+    if (m.artifact) {
+      var card = el('div', 'toolcard open');
+      var head = el('div', 'th');
+      head.appendChild(el('span', null, '📄'));
+      head.appendChild(el('span', 'nm', 'make_file'));
+      card.appendChild(head);
+      var body = el('div', 'tbody');
+      card.appendChild(body);
+      body.appendChild(renderArtifact(m.artifact));
+      shell.proc.appendChild(card);
+    }
+    setAnswer(shell, m.text || '');
+    if (shell.sealed && shell.proc.children.length - 1 >= 3) { shell.proc.classList.add('fold'); shell.sync(); }
+    return shell;
+  }
 
   /* ---------------- 基础工具 ---------------- */
   function el(tag, cls, text) {
@@ -46,10 +174,17 @@
     box.textContent = '';
     EXAMPLES.forEach(function (q) {
       var b = el('button', 'chip', q);
+      b.title = '点一下填进输入框，改成你自己的情况再发送';
       b.addEventListener('click', function () {
         if (sending) return;
-        $('input').value = q;
-        send();
+        var inp = $('input');
+        inp.value = q;
+        inp.focus();
+        try { inp.setSelectionRange(q.length, q.length); } catch (e) { /* ignore */ }
+        inp.style.height = 'auto';
+        inp.style.height = Math.min(inp.scrollHeight, 140) + 'px';
+        inp.classList.add('flash');
+        setTimeout(function () { inp.classList.remove('flash'); }, 700);
       });
       box.appendChild(b);
     });
@@ -306,8 +441,10 @@
     $('send').disabled = true;
 
     addUser(text);
+    if (!curSession()) newSession();
+    pushMsg({ role: 'user', text: text });
     var shell = addAssistantShell();
-    turnToolMs = 0;
+    var t0 = Date.now();
 
     var onEvent = function (ev) {
       if (!ev || !ev.type) return;
@@ -317,6 +454,11 @@
         appendToolCard(shell, { name: ev.name, arg: ev.arg, ok: true });
       } else if (ev.type === 'tool_result') {
         fillToolCard(shell.lastCard, ev);
+        var a = artifactFrom(ev.result);
+        if (a) shell.artifact = {
+          kind: a.kind, title: a.title, items: a.items, path: a.path, note: a.note,
+          html: (a.html && a.html.length <= 9000) ? a.html : ''
+        };
       } else if (ev.type === 'answer_delta') {
         setAnswer(shell, (shell.answer || '') + (ev.text || ''));
       } else if (ev.type === 'answer') {
@@ -348,6 +490,17 @@
         shell.proc.classList.add('fold');
         shell.sync();
       }
+      /* 归档到会话历史：只存渲染需要的部分 */
+      var steps = [];
+      if (shell.proc) {
+        [].forEach.call(shell.proc.children, function (c) {
+          if (c.className.indexOf('step') === 0) steps.push(c.textContent.replace(/^·\s*/, ''));
+        });
+      }
+      pushMsg({
+        role: 'assistant', text: shell.answer || '', steps: steps,
+        artifact: shell.artifact || null, ms: Date.now() - t0
+      });
       renderMem();
       renderStats();
       sending = false;
@@ -368,12 +521,17 @@
   function closeSettings() { $('modal').hidden = true; }
 
   /* ---------------- 启动 ---------------- */
+  var homeHTML = '';
+
   function boot() {
     agent = AP.Engine.createAgent();
+    homeHTML = $('chat').innerHTML;
+    sessions = loadSessions();
     renderChips();
     renderTools();
     renderMem();
     renderStats();
+    renderSessions();
 
     $('send').addEventListener('click', send);
     $('input').addEventListener('keydown', function (e) {
@@ -384,12 +542,22 @@
       this.style.height = Math.min(this.scrollHeight, 140) + 'px';
     });
     $('refreshMem').addEventListener('click', renderMem);
+    $('newChat').addEventListener('click', function () {
+      curId = null;
+      newSession();
+      startBlank();
+      $('input').focus();
+    });
     $('clearAll').addEventListener('click', function () {
-      if (!confirm('清空本机的长期记忆、会话与虚拟文件？此操作不可撤销。')) return;
-      ['ap:mem:episodic', 'ap:mem:semantic', 'ap:mem:procedural', 'ap:vfs'].forEach(function (k) { AP.Store.del(k); });
+      if (!confirm('清空本机的长期记忆、对话记录与虚拟文件？此操作不可撤销。')) return;
+      ['ap:mem:episodic', 'ap:mem:semantic', 'ap:mem:procedural', 'ap:vfs', SES_KEY].forEach(function (k) { AP.Store.del(k); });
       agent.clear_short_term();
+      sessions = [];
+      curId = null;
+      $('chat').innerHTML = homeHTML;
+      renderSessions();
       renderMem();
-      appendNotice('已清空本机记忆数据。');
+      appendNotice('已清空本机记忆与对话数据。');
     });
     $('openSettings').addEventListener('click', openSettings);
     $('openSettings2').addEventListener('click', openSettings);
@@ -415,6 +583,7 @@
     $('closeSide').addEventListener('click', function () { $('sidebar').classList.remove('open'); });
 
     var params = new URLSearchParams(location.search);
+    if (sessions.length && sessions[0].msgs.length) openSession(sessions[0].id);
     if (params.get('q')) {
       $('input').value = params.get('q');
       setTimeout(send, 120);

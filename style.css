@@ -109,6 +109,8 @@ body {
 .prochead .dot { width: 5px; height: 5px; border-radius: 50%; background: #3d6f9e; flex: 0 0 5px; }
 .bubble .ans { margin: 0; }
 
+.badge.build { color: #7f93aa; font-weight: 600; letter-spacing: .02em; }
+
 /* 生成的文件卡片 */
 .artifact { border: 1px solid #22344c; border-radius: 11px; background: #0f1926; padding: 11px 12px; margin: 2px 0 6px; }
 .artifact .ah { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }

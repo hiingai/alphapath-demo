@@ -70,17 +70,28 @@
     };
   }
 
-  /* 引述用户原话不算「提供手段」：这里与 guardrails.is_evasion_output 保持同一口径 */
+  /* 引述用户原话、或自己正在拒绝（不提供／不会／无法…）都不算「提供手段」。
+   * 这一层曾经把「本平台不提供处理掉记录的建议」这类正常拒绝也判成违规，
+   * 导致整段回答被替换成 C-015 模板 —— 用户看到的就是「什么都不肯做」。 */
   var QUOTE_MARK = new RegExp(
     '((你|您|用户|客户)(之前|刚才|刚刚|上面|前面)?(问|说|提到|询|要求)|你说的|你提到的'
     + '|「[^」]{0,40}(逾期|超期|规避|处理掉|洗白)[^」]{0,40}」'
     + '|"[^"]{0,40}(逾期|超期|规避)[^"]{0,40}")'
   );
+  var REFUSAL_MARK = /(不提供|不予|不会|不能|无法|不帮|不做|拒绝|禁止|不允许|不可以)/;
 
   function is_evasion_output(text) {
     var t = String(text == null ? '' : text);
     if (!is_evasion_request(t)) return false;
-    return !QUOTE_MARK.test(t);
+    if (QUOTE_MARK.test(t)) return false;
+    for (var i = 0; i < EVASION_RE.length; i++) {
+      var m = EVASION_RE[i].exec(t);
+      if (!m) continue;
+      var ctx = t.slice(Math.max(0, m.index - 20), m.index + m[0].length);
+      if (REFUSAL_MARK.test(ctx)) return false;
+      return true;
+    }
+    return false;
   }
 
   function guard_output(text) {

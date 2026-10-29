@@ -178,6 +178,36 @@ async function e2e() {
   has(rAmbig.reply, 'A / B / C', '「高才」不分类别时先问清');
   ok('歧义时不进入计算', rAmbig.steps.length === 0 && rAmbig.tool_used === null);
 
+  /* ---------- 10. 续签口径（B 类 2+2+3；模型不得覆盖引擎） ---------- */
+  const rSign = await AP.Engine.createAgent().chat('高才B 2025.9.1 激活的，什么时候续签？', null, null);
+  has(rSign.reply, '2027-09-01', 'B 类首签到期 2027-09-01');
+  has(rSign.reply, '2029-09-01', 'B 类续签 1 到期 2029-09-01（2+2+3）');
+  has(rSign.reply, '2032-09-01', 'B 类续签 2 到期 2032-09-01');
+  notHas(rSign.reply, '2028-09-01', '不得出现 A 类口径的 2028-09-01');
+  ok('续签问句走 compute_timeline', rSign.tool_used === 'compute_timeline', String(rSign.tool_used));
+
+  const rSign2 = await AP.Engine.createAgent().chat('高才B 2025.9.1 激活的，续签时间是什么', null, null);
+  ok('「续签时间」不被 get_time 劫持', rSign2.tool_used === 'compute_timeline', String(rSign2.tool_used));
+  has(rSign2.reply, '2029-09-01', '「续签时间」也给出续签 1 日期');
+
+  const vAgent = AP.Engine.createAgent();
+  const vBad = vAgent.verify_timeline('高才B 2025.9.1 激活的，什么时候续签？', '首签续签到期 2028-09-01，续签 2 到 2033-09-01');
+  ok('模型日期与引擎不一致 → 拦截', vBad.replaced === true, JSON.stringify(vBad.bad));
+  has(vBad.reply, '2027-09-01', '拦截后改用引擎首签日期');
+  notHas(vBad.reply, '2028-09-01', '拦截后不残留模型错误日期');
+  const vOk = vAgent.verify_timeline('高才B 2025.9.1 激活的，什么时候续签？', '首签到期 2027-09-01，7 年届满 2032-09-01');
+  ok('模型日期与引擎一致 → 放行', vOk.checked === true && vOk.replaced === false);
+  const vNone = vAgent.verify_timeline('高才B 2025.9.1 激活的，什么时候续签？', '我算不出来，请你耐心等待');
+  ok('模型没给日期 → 也要用引擎补齐', vNone.replaced === true && vNone.missing === true);
+  const vMat = vAgent.verify_timeline('高才B 2025.9.1 激活的，续签要准备什么材料', '材料清单：申请表、雇佣证明、强积金记录。');
+  ok('问材料且无日期冲突 → 不覆盖模型答案', vMat.replaced === false);
+  const vMatBad = vAgent.verify_timeline('高才B 2025.9.1 激活的，续签要准备什么材料', '材料清单：申请表。顺便说续签到 2028-09-01。');
+  ok('问材料但夹了错日期 → 仍然更正', vMatBad.replaced === true);
+
+  const rNoDate = await AP.Engine.createAgent().chat('我是高才B，什么时候续签？', null, null);
+  has(rNoDate.reply, '签证激活日期', '没给激活日 → 索取日期而不是让模型猜');
+  ok('缺日期时不进模型、不计算', rNoDate.tool_used === null && rNoDate.steps.length === 0);
+
   /* 统计与语料 */
   const st = a2.stats();
   ok('语料 89 条', st.rag_coverage.total === 89, String(st.rag_coverage.total));

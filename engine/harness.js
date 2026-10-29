@@ -23,6 +23,10 @@
     + '【可溯源性】每条政策结论附出处与最后核验日期；不承诺审批结果，最终以入境事务处/教育局/劳工处官方为准。\n\n'
     + '工具使用：\n'
     + '- 生成 7 年续签时间线：compute_timeline（identityType、activationDate）。**用户给了身份+日期又问时间/永居/续签窗口时，这是唯一正确的选择，不要用其他工具。**\n'
+    + '**【日期零心算】**任何时候不得凭记忆推算到期日、递交窗口、7 年届满；不得使用「2+3+3」「通常 3 年」这类外部印象，\n'
+    + '  只认 compute_timeline 返回值（本系统 policy.2026-10-06 高才通为 2+2+3 / A 类 3+3+3）。\n'
+    + '  被用户指出算错时，第一步是重新调用工具取权威值，不得在原有心算上做二次修正。\n'
+    + '  输出中出现的每一个日期都必须能在工具返回里找到对应字段，对不上就不写。\n'
     + '- 居住年限（② 层扣除/重算）：compute_dwell（segments JSON，可选 as_of）。\n'
     + '- 三层法定资格剖面：legal_profile（identityType、可选 segments）。\n'
     + '- 合规自检：check_compliance；耦合规则：check_coupling。\n'
@@ -123,6 +127,42 @@
   Agent.prototype.detect_identity = function (t) { return detect_identity(t); };
   Agent.prototype.detect_identity_detail = function (t) { return detect_identity_detail(t); };
 
+  /* ---------------- 模型答案 ↔ 规则引擎一致性校验 ----------------
+   * 只要能从「身份 + 激活日」算出时间线，就不允许模型自己心算日期：
+   * 模型给出的日期只要有一个不在引擎结果里（或者干脆没给日期），
+   * 整段回答替换成引擎输出。这是最后一道闸，防的是「模型凭 2+3+3 之类印象改口径」。 */
+  function dates_in(text) {
+    var m = String(text == null ? '' : text).match(/20\d\d-\d\d-\d\d/g) || [];
+    var seen = {}, out = [];
+    m.forEach(function (d) { if (!seen[d]) { seen[d] = 1; out.push(d); } });
+    return out;
+  }
+
+  Agent.prototype.verify_timeline = function (user_input, reply, identHint) {
+    var text = String(user_input == null ? '' : user_input);
+    var ident = detect_identity(text) || identHint || (this.current_identity() || {}).code || null;
+    var date = detect_date(text);
+    if (!ident || !date) return { checked: false, replaced: false, reply: reply };
+    if (/(空档|断签|断了|访客|游客|逾期|超期|不计入|算几年)/.test(text)) {
+      return { checked: false, replaced: false, reply: reply };
+    }
+    var eng = String(this.tools.call('compute_timeline', 'identityType=' + ident + ' activationDate=' + date));
+    if (eng.indexOf(ERR) === 0) return { checked: false, replaced: false, reply: reply };
+    var auth = dates_in(eng);
+    var got = dates_in(reply);
+    var bad = got.filter(function (d) { return auth.indexOf(d) < 0; });
+    var timing = /(什么时候|多久|何时|几时|到期|窗口|递交|递件|届满|主航道|时间线|续签时间|7\s*年|七年)/.test(text);
+    /* 规则一：模型写了引擎里没有的日期 → 一律更正（错日期比没日期危害大得多） */
+    /* 规则二：问的就是时间，模型却一个日期都没给 → 用引擎补齐 */
+    if (!bad.length && (got.length || !timing)) {
+      return { checked: true, replaced: false, reply: reply, engine: eng, bad: [], missing: !got.length };
+    }
+    return {
+      checked: true, replaced: true, engine: eng, bad: bad, missing: !got.length,
+      reply: '（模型给出的日期与规则引擎 policy.2026-10-06 不一致，已按引擎口径更正）\n' + eng
+    };
+  };
+
   /* ---------------- 身份档案（长期记忆里的单一事实） ----------------
    * 用户说「我是高才B类」就记一条 identity-profile；之后改口成 A 类，
    * 旧记录标记 superseded 而不是删除（可追溯），并在回答里明示已更新。 */
@@ -183,7 +223,7 @@
     var date = detect_date(text);
     if (!ident || !date) return null;
     if (/(空档|断签|断了|访客|游客|逾期|超期|不计入|算不算|算几年)/.test(text)) return null;
-    if (!/(什么时候|多久|何时|时间线|主航道|7\s*年|七年|永居|永久|续签窗口|到期|届满)/.test(text)) return null;
+    if (!/(什么时候|多久|何时|时间线|主航道|7\s*年|七年|永居|永久|续签窗口|续签时间|到期|届满)/.test(text)) return null;
     return {
       tool: 'compute_timeline',
       arg: 'identityType=' + ident + ' activationDate=' + date,
@@ -206,7 +246,10 @@
     if (m) return { tool: 'calculator', arg: m[1].trim() };
     if (/^[\d\s+\-*/().%^]+$/.test(t) && /[+\-*/]/.test(t)) return { tool: 'calculator', arg: t };
 
-    if (TIME_KEYWORDS.some(function (k) { return t.indexOf(k) >= 0; })) return { tool: 'get_time', arg: '' };
+    /* 问「现在几点/今天几号」才走 get_time；带身份/日期/续签语境时不许被「时间」二字劫持 */
+    if (TIME_KEYWORDS.some(function (k) { return t.indexOf(k) >= 0; })
+        && !date && !detect_identity(t)
+        && !/(续签|到期|窗口|递交|主航道|永居|届满|激活)/.test(t)) return { tool: 'get_time', arg: '' };
 
     /* 要做清单/表格/文件 → 生成可勾选的 HTML（MVP 不限制这类正常需求） */
     if (/(清单|表格|文件|checklist|导出|勾选|html)/i.test(t)
@@ -549,6 +592,23 @@
         };
       }
 
+      /* 有时间线意图但没给激活日 → 要日期，不让模型猜（模型最容易在这里编日期） */
+      if (!rawDate && (idDetail.code || this.current_identity())
+          && /(什么时候|多久|何时|到期|窗口|递交|届满|主航道|时间线)/.test(user_input)
+          && !/(空档|断签|断了|访客|游客|逾期|超期|算不算|不计入|算几年)/.test(user_input)) {
+        var needDate = '算续签时间我需要**签证激活日期**（是入境激活那天，不是获批日）。给我日期我立刻算：首签到期、递交窗口、7 年届满。\n'
+          + '日期我不会替你估——估错一天，整个续签窗口就全错。';
+        emit(on_event, { type: 'think', round: 1, text: '缺激活日期，先向用户索取，不做计算。' });
+        emit(on_event, { type: 'answer', text: needDate });
+        this.memory.short_term.add('assistant', needDate);
+        emit(on_event, { type: 'done' });
+        return {
+          reply: needDate, tool_used: null, steps: [], tier: this._tier_for(null, applicant),
+          escalation: null, memories: recalled.map(function (m) { return m.to_dict(); }),
+          auto_saved: null, blocked: null
+        };
+      }
+
       if (G.is_evasion_request(user_input)) {
         emit(on_event, { type: 'think', round: 1, text: '命中 C-015：拒绝规避请求，仅陈述法律事实。' });
         reply = G.C015_REASON;
@@ -575,6 +635,7 @@
         reply = llm_result.reply;
         tool_used = llm_result.tool_used;
         steps = llm_result.steps || [];
+
         /* 模型把工具调崩了就别把 __ERROR__ 抛给用户：退回确定性路由 */
         if (String(reply).indexOf(ERR) === 0) {
           var rescue = timeline_route(user_input, (this.current_identity() || {}).code || null) || this._route(user_input);
@@ -618,6 +679,17 @@
         }
       }
 
+      /* 最后一道闸：不管走工具循环还是直连模型，模型给的日期都必须与规则引擎一致 */
+      if (tool_used !== 'compute_timeline') {
+        var vfy = this.verify_timeline(user_input, reply, (this.current_identity() || {}).code || null);
+        if (vfy.checked && vfy.replaced) {
+          emit(on_event, { type: 'think', round: 1, text: '模型输出与规则引擎不一致（' + (vfy.bad.join('、') || '未给日期') + '），已按引擎口径重算。' });
+          reply = vfy.reply;
+          tool_used = 'compute_timeline';
+          steps.push({ name: 'compute_timeline', arg: 'verify', result: vfy.engine, ok: true });
+          streamed[0] = false;
+        }
+      }
       if (!reply) reply = '（没有生成回复，请重试或换一种说法。）';
       if (identityNote && String(reply).indexOf(identityNote.trim()) < 0) reply = identityNote + reply;
 

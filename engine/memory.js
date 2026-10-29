@@ -191,6 +191,22 @@
     if (!found) data.push(item.to_dict());
     this._writeList(key, data);
   };
+  /* 归档：把某条记忆标记为 superseded（用户改口后旧身份不再生效），不删除证据 */
+  LongTermMemory.prototype.archive = function (id, reason) {
+    var hit = null;
+    this.all_items().forEach(function (item) {
+      if (item.id === id && item.status === 'active') {
+        item.status = 'superseded';
+        item.updated_at = nowISO();
+        if (reason) item.tags = (item.tags || []).concat(['superseded:' + reason]);
+        this._update_persisted(item);
+        delete this._vec_cache[item.id];
+        hit = item;
+      }
+    }, this);
+    return hit;
+  };
+
   LongTermMemory.prototype.all_items = function () {
     var out = [];
     ['episodic', 'semantic', 'procedural'].forEach(function (t) {

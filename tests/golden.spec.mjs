@@ -143,6 +143,41 @@ async function e2e() {
   const rLeap = await AP.Engine.createAgent().chat('我是高才B类，2024.2.29激活签证，生成7年主航道', null, null);
   has(rLeap.reply, '2026-02-28', '闰日激活按 2 月末对齐');
 
+  /* ---------- 9. 身份口径（高才 A/B/C 不得混淆；改口要更新记忆） ---------- */
+  const identCases = [
+    ['我是高才B类，2025.9.1激活签证', 'TTPS_B'],
+    ['我是高才 B 类，2025.9.1激活签证', 'TTPS_B'],
+    ['我是高才B類，2025.9.1激活簽證', 'TTPS_B'],
+    ['我是高才通计划 B 类，2025年9月1日激活', 'TTPS_B'],
+    ['我是高端人才通行证计划B类，2025.9.1激活', 'TTPS_B'],
+    ['我是A类高才', 'TTPS_A'],
+    ['我是专才签证', 'ASMTP'],
+    ['我是優才計劃', 'QMAS'],
+    ['受養人簽證', 'DEPENDANT']
+  ];
+  identCases.forEach(function (c) {
+    ok('身份识别「' + c[0].slice(0, 12) + '」→ ' + c[1], AP.Agent.detect_identity(c[0]) === c[1], String(AP.Agent.detect_identity(c[0])));
+  });
+  ok('「高才」不分类别 → 判为歧义', new AP.Agent().detect_identity_detail('我是高才，2025.9.1激活').ambiguous === true);
+
+  const idAgent = AP.Engine.createAgent();
+  const rIdB = await idAgent.chat('我是高才B类，2025.9.1激活签证，生成7年主航道', null, null);
+  has(rIdB.reply, '2027-09-01', 'B 类首签 2 年 → 2027-09-01');
+  ok('身份写入长期记忆档案', (idAgent.current_identity() || {}).code === 'TTPS_B', String((idAgent.current_identity() || {}).code));
+  const rIdA = await idAgent.chat('我是高才A类，2025.9.1激活签证，生成7年主航道', null, null);
+  has(rIdA.reply, '2028-09-01', 'A 类首签 3 年 → 2028-09-01');
+  has(rIdA.reply, '已更新你的身份记录', '改口时明确告知记忆已更新');
+  const idItems = idAgent.memory.long_term.all_items().filter(function (it) { return (it.tags || []).indexOf('identity-profile') >= 0; });
+  ok('旧身份归档 superseded、新身份唯一 active',
+    idItems.filter(function (it) { return it.status === 'superseded'; }).length >= 1
+    && idItems.filter(function (it) { return it.status === 'active'; }).length === 1,
+    idItems.map(function (it) { return it.status; }).join(','));
+  const rIdOnly = await idAgent.chat('我 2025.9.1 激活的，什么时候到期？', null, null);
+  has(rIdOnly.reply, '按你之前的记录', '只说日期时复用档案并明示来源');
+  const rAmbig = await AP.Engine.createAgent().chat('我是高才，2025.9.1激活签证，生成7年主航道', null, null);
+  has(rAmbig.reply, 'A / B / C', '「高才」不分类别时先问清');
+  ok('歧义时不进入计算', rAmbig.steps.length === 0 && rAmbig.tool_used === null);
+
   /* 统计与语料 */
   const st = a2.stats();
   ok('语料 89 条', st.rag_coverage.total === 89, String(st.rag_coverage.total));

@@ -42,21 +42,62 @@
     [['高才通b', '高才b', 'ttps_b'], 'TTPS_B'],
     [['高才通c', '高才c', 'ttps_c'], 'TTPS_C'],
     [['高才通', '高才', 'ttps'], 'TTPS_A'],
-    [['成就计分', 'qmas_ach'], 'QMAS_ACH'],
-    [['优才', 'qmas'], 'QMAS'],
-    [['非本地毕业生', 'iang'], 'IANG'],
-    [['一般就业', 'gep'], 'GEP'],
-    [['专才', 'asmpt', '输入内地人才'], 'ASMTP'],
-    [['非学位专才'], 'NON_DEGREE'],
-    [['资本投资', 'cies', '投资移民'], 'CIES'],
-    [['受养人', 'dependant', 'depend'], 'DEPENDANT'],
-    [['单程证', 'oneway'], 'ONEWAY'],
-    [['外籍家庭佣工', '家庭佣工', '佣工', '外佣', 'fdh'], 'FDH'],
-    [['补充劳工', 'esls', '优化计划', '外劳'], 'ESLS'],
-    [['输入劳工', '行业输入', 'sils', '劳工'], 'SILS'],
-    [['学生签', '学生签证', '留学', '进修', '读书', '读了', '读研', '就读', '在读', '研究生', '本科', '硕士'], 'STUDENT'],
-    [['访客', '游客', 'visitor'], 'VISITOR']
+    [['成就计分', '成就計分', 'qmas_ach'], 'QMAS_ACH'],
+    [['优才', '優才', 'qmas'], 'QMAS'],
+    [['非本地毕业生', '非本地畢業生', 'iang'], 'IANG'],
+    [['一般就业', '一般就業', 'gep'], 'GEP'],
+    [['专才', '專才', 'asmpt', '输入内地人才', '輸入內地人才'], 'ASMTP'],
+    [['非学位专才', '非學位專才'], 'NON_DEGREE'],
+    [['资本投资', '資本投資', 'cies', '投资移民', '投資移民'], 'CIES'],
+    [['受养人', '受養人', 'dependant', 'depend'], 'DEPENDANT'],
+    [['单程证', '單程證', 'oneway'], 'ONEWAY'],
+    [['外籍家庭佣工', '外籍家庭傭工', '家庭佣工', '家庭傭工', '佣工', '傭工', '外佣', '外傭', 'fdh'], 'FDH'],
+    [['补充劳工', '補充勞工', 'esls', '优化计划', '優化計劃', '外劳', '外勞'], 'ESLS'],
+    [['输入劳工', '輸入勞工', '行业输入', '行業輸入', 'sils', '劳工', '勞工'], 'SILS'],
+    [['学生签', '學生簽', '学生签证', '學生簽證', '留学', '留學', '进修', '進修', '读书', '讀書', '读了', '讀了', '读研', '讀研', '就读', '就讀', '在读', '在讀', '研究生', '本科', '硕士', '碩士'], 'STUDENT'],
+    [['访客', '訪客', '游客', '遊客', 'visitor'], 'VISITOR']
   ];
+
+  /* 输入归一化：全角转半角 + 去掉所有空白（「高才 B 类」曾因空格被判成 A 类） */
+  function norm_cn(text) {
+    var s = String(text == null ? '' : text);
+    s = s.replace(/[\uFF01-\uFF5E]/g, function (ch) {
+      return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0);
+    }).replace(/\u3000/g, ' ');
+    return s.replace(/\s+/g, '').toLowerCase();
+  }
+
+  var HIGH_TALENT_BEFORE = /(?:高端人才通行证|高端人才通行證|高才通|高才)(?:计划|計劃)?([abc])[类類]/;
+  var HIGH_TALENT_AFTER = /([abc])[类類](?:高才通|高才)/;
+  var HIGH_TALENT_LOOSE = /(?:高才通|高才)([abc])(?![\u4e00-\u9fa5])/;
+  var HIGH_TALENT_ANY = /(?:高端人才通行证|高端人才通行證|高才通|高才)/;
+
+  /* 返回 {code, ambiguous, matched}：身份没写清时不再默默当 A 类 */
+  function detect_identity_detail(text) {
+    var low = norm_cn(text);
+    var m = low.match(HIGH_TALENT_BEFORE) || low.match(HIGH_TALENT_AFTER) || low.match(HIGH_TALENT_LOOSE);
+    if (m) return { code: 'TTPS_' + m[1].toUpperCase(), ambiguous: false, matched: m[0] };
+    var t = low.match(/ttps[-_]?([abc])/);
+    if (t) return { code: 'TTPS_' + t[1].toUpperCase(), ambiguous: false, matched: t[0] };
+    for (var i = 0; i < IDENTITY_KEYWORDS.length; i++) {
+      var keys = IDENTITY_KEYWORDS[i][0];
+      for (var j = 0; j < keys.length; j++) {
+        if (low.indexOf(norm_cn(keys[j])) >= 0) {
+          var code = IDENTITY_KEYWORDS[i][1];
+          /* 「高才」「高才通」不带 A/B/C：属于歧义，不能猜 */
+          if (HIGH_TALENT_ANY.test(low) && /^TTPS_[ABC]$/.test(code)) {
+            return { code: null, ambiguous: true, matched: keys[j] };
+          }
+          return { code: code, ambiguous: false, matched: keys[j] };
+        }
+      }
+    }
+    return { code: null, ambiguous: false, matched: null };
+  }
+
+  function detect_identity(text) {
+    return detect_identity_detail(text).code;
+  }
 
   function Agent(opts) {
     opts = opts || {};
@@ -70,16 +111,6 @@
     this.session_id = null;
   }
 
-  function detect_identity(text) {
-    var low = String(text || '').toLowerCase();
-    for (var i = 0; i < IDENTITY_KEYWORDS.length; i++) {
-      var keys = IDENTITY_KEYWORDS[i][0];
-      for (var j = 0; j < keys.length; j++) {
-        if (low.indexOf(keys[j]) >= 0) return IDENTITY_KEYWORDS[i][1];
-      }
-    }
-    return null;
-  }
   function detect_date(text) {
     var m = String(text || '').match(/(\d{4})[-/年.](\d{1,2})[-/月.](\d{1,2})/);
     if (!m) return null;
@@ -90,6 +121,39 @@
   Agent.detect_identity = detect_identity;
   Agent._detect_date = detect_date;
   Agent.prototype.detect_identity = function (t) { return detect_identity(t); };
+  Agent.prototype.detect_identity_detail = function (t) { return detect_identity_detail(t); };
+
+  /* ---------------- 身份档案（长期记忆里的单一事实） ----------------
+   * 用户说「我是高才B类」就记一条 identity-profile；之后改口成 A 类，
+   * 旧记录标记 superseded 而不是删除（可追溯），并在回答里明示已更新。 */
+  Agent.IDENTITY_TAG = 'identity-profile';
+
+  function identity_label(code) {
+    var it = ((AP_KB && AP_KB.identityTypes) || {})[code];
+    return it ? it.name : code;
+  }
+
+  Agent.prototype.current_identity = function () {
+    var best = null;
+    this.memory.long_term.all_items().forEach(function (it) {
+      if (it.status !== 'active') return;
+      if ((it.tags || []).indexOf(Agent.IDENTITY_TAG) < 0) return;
+      var m = String(it.content || '').match(/（([A-Z_]+)）/);
+      if (!m) return;
+      if (!best || String(it.created_at) > String(best.item.created_at)) best = { code: m[1], item: it };
+    });
+    return best;
+  };
+
+  Agent.prototype.remember_identity = function (code) {
+    if (!code) return { changed: false, code: null, from: null };
+    var cur = this.current_identity();
+    if (cur && cur.code === code) return { changed: false, code: code, from: code };
+    if (cur) this.memory.long_term.archive(cur.item.id, 'identity-changed');
+    this.memory.long_term.add('身份类型：' + identity_label(code) + '（' + code + '）', 'semantic', null,
+      ['profile', Agent.IDENTITY_TAG], 0.9, 'user');
+    return { changed: true, code: code, from: cur ? cur.code : null };
+  };
 
   /* ---------------- 规则路由（离线兜底） ---------------- */
   function checklist_preset(text) {
@@ -109,21 +173,32 @@
       + '注意清单只是材料准备提示，具体要求以入境处最新公布为准。\n\n' + s;
   }
 
-  /* 高置信度时间线路由：命中即走确定性引擎，不进 LLM 工具循环 */
-  function timeline_route(t) {
+  /* 高置信度时间线路由：命中即走确定性引擎，不进 LLM 工具循环。
+   * fallbackIdent 来自身份档案（用户这轮没重复身份时用），会带上「按记忆」提示。 */
+  function timeline_route(t, fallbackIdent) {
     var text = String(t == null ? '' : t).trim();
     if (!text) return null;
-    var ident = detect_identity(text);
+    var identOwn = detect_identity(text);
+    var ident = identOwn || fallbackIdent || null;
     var date = detect_date(text);
     if (!ident || !date) return null;
     if (/(空档|断签|断了|访客|游客|逾期|超期|不计入|算不算|算几年)/.test(text)) return null;
     if (!/(什么时候|多久|何时|时间线|主航道|7\s*年|七年|永居|永久|续签窗口|到期|届满)/.test(text)) return null;
-    return { tool: 'compute_timeline', arg: 'identityType=' + ident + ' activationDate=' + date };
+    return {
+      tool: 'compute_timeline',
+      arg: 'identityType=' + ident + ' activationDate=' + date,
+      fromProfile: !identOwn && !!fallbackIdent
+    };
   }
 
   Agent.prototype._route = function (text) {
     var t = String(text == null ? '' : text).trim();
     var ident = detect_identity(t);
+    /* 用户这轮没说身份 → 用记忆里的身份档案（只说「我的签证什么时候到期」也能算对类别） */
+    if (!ident) {
+      var prof = this.current_identity();
+      if (prof) ident = prof.code;
+    }
     var date = detect_date(t);
     var m;
 
@@ -145,7 +220,8 @@
     if (/(我(之前)?(说|提)过什么|我喜欢什么|回忆|还记得)/.test(t)) return { tool: 'recall', arg: t };
 
     if (/(到期扫描|扫描(到期)?任务|待办扫描|conductor)/.test(t)) {
-      var arg = 'identityType=' + (ident || 'TTPS_A');
+      if (!ident) return null;
+      var arg = 'identityType=' + ident;
       if (date) arg += ' activationDate=' + date;
       return { tool: 'conductor_scan', arg: arg };
     }
@@ -164,12 +240,16 @@
       return { tool: 'compute_timeline', arg: 'identityType=' + ident + ' activationDate=' + date };
     }
 
-    if (ident && /(永居|永久|通常居住|能拿|能不能|可不可以|算不算|什么身份|资格|续签|怎么办)/.test(t)) {
+    if ((ident || detect_identity_detail(t).ambiguous)
+        && /(永居|永久|通常居住|能拿|能不能|可不可以|算不算|什么身份|资格|续签|怎么办)/.test(t)) {
+      /* 「高才」没写 A/B/C 时，资格层面（tier / 可否永居）三类相同，仅年期不同，
+       * 按 A 类口径给剖面并在文案里标注；涉及具体日期则先问类别，绝不猜。 */
+      var profIdent = ident || 'TTPS_A';
       var seg = '';
       if (/(空档|断签|断了)/.test(t)) seg = ' segments=[{"kind":"gap","start":"2025-01-01","end":"2025-03-01"}]';
       if (/(访客|游客)/.test(t)) seg = ' segments=[{"kind":"visitor","start":"2024-01-01","end":"2024-04-01"}]';
       if (/(逾期|超期)/.test(t)) seg = ' segments=[{"kind":"overstay","start":"2024-05-01","end":"2024-06-01"}]';
-      return { tool: 'legal_profile', arg: 'identityType=' + ident + seg };
+      return { tool: 'legal_profile', arg: 'identityType=' + profIdent + seg };
     }
 
     if (/(空档|断签|访客|游客|逾期|超期|居住年限|住了多久|算几年|不计入)/.test(t)) {
@@ -192,7 +272,7 @@
 
     if (/(时间线|主航道|续签窗口|续签|7\s*年|七年|永居|什么时候|还有多久|到期)/.test(t)) {
       if (ident && date) return { tool: 'compute_timeline', arg: 'identityType=' + ident + ' activationDate=' + date };
-      if (date) return { tool: 'compute_timeline', arg: 'identityType=' + (ident || 'TTPS_A') + ' activationDate=' + date };
+      if (date && ident) return { tool: 'compute_timeline', arg: 'identityType=' + ident + ' activationDate=' + date };
     }
 
     if (/(耦合|C1|C4|C5|C10|C15|相互影响)/.test(t)) {
@@ -438,6 +518,37 @@
         };
       }
 
+      /* 身份口径前置检查：
+       * ① 身份写清（高才B类 / 高端人才通行证计划 B 类…）→ 写入长期记忆的 identity-profile，
+       *    改了类别的旧记录标记 superseded，并在回答里明示「已更新」。
+       * ② 只写「高才」不带 A/B/C → 不猜、不默认 A 类，直接问清是哪一类（首签年期不同）。 */
+      var identityNote = '';
+      var idDetail = detect_identity_detail(user_input);
+      var timelineIntent = /(什么时候|多久|何时|时间线|主航道|7\s*年|七年|永居|永久|续签窗口|到期|届满)/.test(user_input);
+      if (idDetail.code && !idDetail.ambiguous) {
+        var idUpd = this.remember_identity(idDetail.code);
+        if (idUpd.changed && idUpd.from) {
+          identityNote = '（已更新你的身份记录：' + identity_label(idUpd.from) + ' → ' + identity_label(idUpd.code)
+            + '，后续按新类别计算）\n';
+          emit(on_event, { type: 'think', round: 1, text: '身份档案更新：' + idUpd.from + ' → ' + idUpd.code + '。' });
+        }
+      } else if (idDetail.ambiguous && (rawDate || /(到期|续签窗口|主航道|时间线|首签|届满)/.test(user_input))) {
+        var aReply = '你说的「高才」我这边分 A / B / C 三类，**首签年期不一样，算出来的到期日会差一年**：\n'
+          + '- A 类：前一年收入 ≥ 250 万港元 → 首签 3 年（3+3+3）\n'
+          + '- B 类：合资格大学学士 + 前 5 年累计 ≥ 3 年经验 → 首签 2 年（2+3+3）\n'
+          + '- C 类：合资格大学学士、经验 < 3 年（有配额）→ 首签 2 年（2+3+3）\n'
+          + '你是哪一类？告诉我我就按对应年期算，不会替你按 A 类猜。';
+        emit(on_event, { type: 'think', round: 1, text: '只提到「高才」未指明 A/B/C，先确认类别，不做计算。' });
+        emit(on_event, { type: 'answer', text: aReply });
+        this.memory.short_term.add('assistant', aReply);
+        emit(on_event, { type: 'done' });
+        return {
+          reply: aReply, tool_used: null, steps: [], tier: this._tier_for(null, applicant),
+          escalation: null, memories: recalled.map(function (m) { return m.to_dict(); }),
+          auto_saved: null, blocked: null
+        };
+      }
+
       if (G.is_evasion_request(user_input)) {
         emit(on_event, { type: 'think', round: 1, text: '命中 C-015：拒绝规避请求，仅陈述法律事实。' });
         reply = G.C015_REASON;
@@ -454,7 +565,11 @@
 
       /* 旗舰功能保护：身份 + 日期 + 时间线问题，直接由确定性引擎回答，
        * 不交给大模型「自由发挥」——避免模型乱选工具把主航道问成文件生成。 */
-      var strong = timeline_route(user_input);
+      var profIdent = this.current_identity();
+      var strong = timeline_route(user_input, profIdent ? profIdent.code : null);
+      if (strong && strong.fromProfile) {
+        identityNote += '（按你之前的记录：' + identity_label(profIdent.code) + '；不对就说「我是X类」我改过来）\n';
+      }
       var llm_result = strong ? null : await this._chat_with_tools(user_input, memory_context, on_event, streamed);
       if (llm_result !== null) {
         reply = llm_result.reply;
@@ -462,7 +577,7 @@
         steps = llm_result.steps || [];
         /* 模型把工具调崩了就别把 __ERROR__ 抛给用户：退回确定性路由 */
         if (String(reply).indexOf(ERR) === 0) {
-          var rescue = timeline_route(user_input) || this._route(user_input);
+          var rescue = timeline_route(user_input, (this.current_identity() || {}).code || null) || this._route(user_input);
           if (rescue) {
             emit(on_event, { type: 'think', round: 1, text: '工具调用出错，已回退到确定性引擎重算。' });
             emit(on_event, { type: 'tool_call', name: rescue.tool, arg: rescue.arg });
@@ -504,6 +619,7 @@
       }
 
       if (!reply) reply = '（没有生成回复，请重试或换一种说法。）';
+      if (identityNote && String(reply).indexOf(identityNote.trim()) < 0) reply = identityNote + reply;
 
       var last_arg = steps.length ? steps[steps.length - 1].arg : '';
       var tier = this._tier_for({ tool: tool_used, arg: last_arg }, applicant);

@@ -518,3 +518,25 @@ body.fish-open .fish-toggle {
   .auth-box { padding: 16px; }
   .auth-tab { padding: 8px 9px; font-size: 12.5px; }
 }
+
+/* ---------------- 留资画像（我的档案内） ---------------- */
+.lead-box { margin: 12px 0 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); }
+.lead-head { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+.lead-stage { padding: 2px 9px; border-radius: 999px; font-size: 11.5px; line-height: 1.6; background: var(--brand-soft); border: 1px solid var(--brand-line); color: var(--on-accent); }
+.lead-stage[data-stage="qualified"] { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok-2); }
+.lead-stage[data-stage="contacted"], .lead-stage[data-stage="consulting"] { background: rgba(179,118,15,.12); border-color: rgba(179,118,15,.35); color: var(--warn); }
+.lead-stage[data-stage="converted"] { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok-2); font-weight: 600; }
+.lead-stage[data-stage="lost"] { background: var(--danger-bg); border-color: var(--danger-line); color: var(--danger-text); }
+.lead-bar { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 12px; color: var(--muted-2); }
+.lead-bar > span { flex: 0 0 42px; }
+.lead-bar .track { flex: 1; height: 6px; border-radius: 999px; background: var(--inset); overflow: hidden; }
+.lead-bar .track > i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--brand), var(--brand-grad-2)); transition: width .45s ease; }
+.lead-bar > b { flex: 0 0 40px; text-align: right; color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.lead-consent { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--muted-2); margin: 9px 0 6px; line-height: 1.5; }
+.lead-consent input { margin: 2px 0 0; flex: 0 0 auto; }
+.lead-acts { gap: 6px; flex-wrap: wrap; }
+.lead-acts a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* 深色下品牌蓝更亮，主按钮白字对比度不足，改用深色字 */
+:root[data-theme="dark"] .btn.primary,
+:root[data-theme="dark"] .btn.primary:hover { color: #08192e; }

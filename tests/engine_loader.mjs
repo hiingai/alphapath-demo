@@ -18,6 +18,7 @@ const FILES = [
   'engine/domain/rag.js',
   'engine/domain/fishbone.js',
   'engine/userdb.js',
+  'engine/leaddb.js',
   'engine/memory.js',
   'engine/conductor.js',
   'engine/tools.js',

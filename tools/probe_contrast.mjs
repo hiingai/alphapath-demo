@@ -1,11 +1,11 @@
-/* 对比度体检（含半透明背景合成）：node tools/probe_contrast.mjs <port> <url> <light|dark> [modal] */
+﻿/* 对比度体检（含半透明背景合成）：node tools/probe_contrast.mjs <port> <url> <light|dark> [modal] */
 const PORT = Number(process.argv[2] || 9241);
 const BASE = process.argv[3] || 'http://127.0.0.1:8123/console.html';
 const THEME = process.argv[4] || 'light';
 const OPEN_MODAL = process.argv[5] === 'modal';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const l = await (await fetch('http://127.0.0.1:' + PORT + '/json/list')).json();
-const p = l.find((t) => t.type === 'page');
+const p = l.find((t) => t.type === 'page' && t.url.indexOf('127.0.0.1') >= 0) || l.find((t) => t.type === 'page');
 const ws = new WebSocket(p.webSocketDebuggerUrl);
 let id = 0; const pd = new Map(); const errs = [];
 ws.addEventListener('message', (e) => {
@@ -60,7 +60,7 @@ const res = await ev(`(function(){
     if (st.display === 'none' || st.visibility === 'hidden' || parseFloat(st.opacity) < 0.15) return;
     seen++;
     var fg = parse(st.color); if (!fg) return;
-    var bg = realBg(el.parentElement || el);
+    var bg = realBg(el);   /* 从元素自身开始合成，否则会把按钮自己的底色漏掉 → 假阳性 */
     var fgL = lum(fg), bgL = lum(bg);
     var hi = Math.max(fgL, bgL), lo = Math.min(fgL, bgL);
     var ratio = (hi + .05) / (lo + .05);

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-Hans" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>留资管理后台 · AlphaPath</title>
+<script>
+(function () { var t = 'light'; try { t = localStorage.getItem('ap:theme') === 'dark' ? 'dark' : 'light'; } catch (e) { } document.documentElement.setAttribute('data-theme', t); })();
+</script>
+<link rel="stylesheet" href="admin.css?v=20261030c">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">🐟</span>
+    <div>
+      <h1>留资管理后台</h1>
+      <p class="sub">对话 → 结构化线索 → 用户信息库　<span class="build" id="build">build —</span></p>
+    </div>
+  </div>
+  <div class="tools">
+    <button class="btn ghost" id="btnTheme">🌙 深色</button>
+    <button class="btn ghost" id="btnDemo">载入演示数据</button>
+    <button class="btn ghost" id="btnRefresh">刷新</button>
+    <button class="btn primary" id="btnExport">导出 CSV</button>
+  </div>
+</header>
+
+<div class="banner" id="demoBanner" hidden>
+  <b>DEMO DATA</b>　当前混入了演示种子数据（姓名与联系方式均为虚构），仅用于展示产品能力，不代表真实用户。
+  <button class="link" id="btnClearDemo">清除演示数据</button>
+</div>
+
+<main>
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grid2">
+    <div class="card">
+      <div class="card-h"><h2>转化漏斗</h2><span class="hint" id="funnelHint"></span></div>
+      <div class="funnel" id="funnel"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>身份分布</h2></div>
+      <div class="donut-wrap">
+        <div class="donut" id="donut"><span class="donut-c" id="donutCenter">0<br><i>人</i></span></div>
+        <ul class="legend" id="legend"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <div class="card">
+      <div class="card-h"><h2>诉求分布</h2></div>
+      <div class="bars" id="goalBars"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>近 14 天新增线索</h2></div>
+      <div class="trend" id="trend"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-h">
+      <h2>线索列表 <span class="count" id="leadCount">0</span></h2>
+      <div class="filters">
+        <input id="q" type="search" placeholder="搜称呼 / 身份 / 诉求 / 邮箱" spellcheck="false">
+        <select id="stageSel"></select>
+        <select id="sortSel">
+          <option value="intent">按意向分</option>
+          <option value="recent">按最近活跃</option>
+          <option value="complete">按完整度</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>称呼</th><th>身份</th><th>诉求</th><th>受养人</th>
+            <th>完整度</th><th>意向分</th><th>阶段</th><th>轮次</th><th>最近活跃</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <p class="empty" id="empty" hidden>还没有线索。去 <a href="console.html" target="_blank" rel="noopener">控制台</a> 聊两句，或点右上角「载入演示数据」。</p>
+    </div>
+  </section>
+</main>
+
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawer-box">
+    <button class="drawer-x" id="drawerX">✕</button>
+    <div id="drawerBody"></div>
+  </div>
+</aside>
+
+<footer class="foot">
+  <span>数据来源：本机 IndexedDB（<code>alphapath_leads</code>）· 仅结构化字段 + 证据片段，不含原始对话</span>
+  <span><a href="console.html">← 回到对话</a></span>
+</footer>
+
+<script src="engine/data/kb.js?v=20261030c"></script>
+<script src="engine/leaddb.js?v=20261030c"></script>
+<script src="admin.js?v=20261030c"></script>
+</body>
+</html>

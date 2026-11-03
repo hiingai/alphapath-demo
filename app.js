@@ -831,6 +831,7 @@
     renderFish();
     if (sessions.length && sessions[0].msgs && sessions[0].msgs.length) openSession(sessions[0].id);
     else { agent.clear_short_term(); $('chat').innerHTML = homeHTML; scrollBottom(); }
+    refreshLeadBox();
     return o;
   }
 
@@ -880,6 +881,7 @@
     try {
       d.profile.learn(text).then(function (picked) {
         if (Object.keys(picked || {}).length && !$('authModal').hidden) refreshProfile();
+        refreshLeadBox();
       }, function () { /* 学不到就算了 */ });
     } catch (e) { /* ignore */ }
   }
@@ -954,8 +956,101 @@
     });
   }
 
-  function readMemories() {
-    try { return AP.Store.get('ap:mem:semantic', []) || []; } catch (e) { return []; }
+  /* ---------------- 对话留资（lead） ---------------- */
+  var LEAD_CONSENT_KEY = 'ap:lead:consent';
+  var lastLead = null;
+
+  function loadConsent() {
+    try { return JSON.parse(localStorage.getItem(scoped(LEAD_CONSENT_KEY)) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function saveConsent(c) {
+    try { localStorage.setItem(scoped(LEAD_CONSENT_KEY), JSON.stringify(c)); } catch (e) { }
+  }
+
+  /* 把档案+会话同步成一条线索，并渲染到「我的档案」里的留资块 */
+  function refreshLeadBox() {
+    var L = AP.Lead, d = db();
+    if (!L || !d) return Promise.resolve(null);
+    var u = d.auth.current();
+    if (!u) {
+      /* 未登录：不生成留资记录（避免把访客当线索） */
+      if ($('leadStage')) {
+        $('leadStage').textContent = '登录后生成';
+        $('leadStage').removeAttribute('data-stage');
+        $('leadBarC').style.width = '0%'; $('leadPctC').textContent = '—';
+        $('leadBarS').style.width = '0%'; $('leadPctS').textContent = '—';
+      }
+      return Promise.resolve(null);
+    }
+    return d.profile.all().then(function (rows) {
+      var facts = {}, extra = {};
+      rows.forEach(function (f) {
+        if (facts[f.key] === undefined) facts[f.key] = f.value;
+        if (!extra[f.key]) extra[f.key] = { source: f.source, updatedAt: f.updatedAt, confidence: f.confidence };
+      });
+      var consent = loadConsent();
+      return L.syncFrom({ user: u, facts: facts, factExtra: extra, sessions: sessions, consent: consent });
+    }).then(function (lead) {
+      lastLead = lead;
+      if (!$('leadStage')) return lead;
+      $('leadStage').textContent = AP.Lead.STAGE_LABEL[lead.stage] || lead.stage;
+      $('leadStage').setAttribute('data-stage', lead.stage);
+      $('leadBarC').style.width = Math.max(2, lead.completeness) + '%';
+      $('leadPctC').textContent = lead.completeness + '%';
+      $('leadBarS').style.width = Math.max(2, lead.intent_score) + '%';
+      $('leadPctS').textContent = String(lead.intent_score);
+      return lead;
+    }).catch(function () { return null; });
+  }
+
+  function download(name, text, type) {
+    try {
+      var blob = new Blob([text], { type: type || 'application/json;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function initLead() {
+    if (!AP.Lead) return;
+    var chk = $('leadConsent');
+    if (chk) {
+      chk.checked = !!loadConsent().contact;
+      chk.addEventListener('change', function () {
+        saveConsent({ contact: chk.checked, analytics: true, at: new Date().toISOString() });
+        refreshLeadBox();
+        appendNotice(chk.checked ? '已同意记录我的情况并接受联系（数据仍只存在本机）。' : '已撤回同意：联系方式不再写入留资记录。');
+      });
+    }
+    if ($('leadExport')) {
+      $('leadExport').addEventListener('click', function () {
+        refreshLeadBox().then(function (lead) {
+          if (!lead) return;
+          download('alphapath-my-data-' + new Date().toISOString().slice(0, 10) + '.json',
+            AP.Lead.exportJson([lead]), 'application/json;charset=utf-8');
+          appendNotice('已导出我的留资数据（JSON）。');
+        });
+      });
+    }
+    if ($('leadWipe')) {
+      $('leadWipe').addEventListener('click', function () {
+        if (!confirm('删除本机保存的留资记录（档案字段不受影响）？')) return;
+        var u = db().auth.current();
+        AP.Lead.clearMine(u ? u.id : '').then(function () {
+          saveConsent({});
+          if ($('leadConsent')) $('leadConsent').checked = false;
+          appendNotice('留资记录已删除。');
+          refreshLeadBox();
+        });
+      });
+    }
+    refreshLeadBox();
+  }
+
+  function readMemories() {    try { return AP.Store.get('ap:mem:semantic', []) || []; } catch (e) { return []; }
   }
 
   /* ---------------- 启动 ---------------- */
@@ -972,6 +1067,7 @@
     renderSessions();
     initTheme();
     initAuth();
+    initLead();
     initFish();
 
     $('send').addEventListener('click', send);

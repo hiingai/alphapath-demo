@@ -241,6 +241,19 @@ async function e2e() {
   ok('骨图：满 7 年进度 100%', fbOld.progressPct === 100, String(fbOld.progressPct));
   ok('骨图：摘要说明已届满', AP.fishbone.summary(fbOld).indexOf('7 年已届满') >= 0, AP.fishbone.summary(fbOld));
 
+  /* 第 11.1 节：开始申请节点（选填，不参与推算） */
+  const fbApp = AP.fishbone.build({ identityType: 'TTPS_B', activationDate: '2025-09-01', applyDate: '2025-04-15', today: '2026-10-29' });
+  ok('骨图：填了申请日 → 多一个节点', fbApp.nodes.length === 6, String(fbApp.nodes.length));
+  ok('骨图：申请日在最前（骨图最底部）', fbApp.nodes[0].key === 'apply' && fbApp.nodes[1].key === 'activation', fbApp.nodes.map((n) => n.key).join(','));
+  ok('骨图：申请日已过 = done', fbApp.nodes[0].status === 'done', fbApp.nodes[0].status);
+  ok('骨图：申请→激活等待天数被说明', fbApp.warnings.some((w) => w.indexOf('139 天') >= 0), fbApp.warnings.join('|'));
+  ok('骨图：进度仍按激活日算（申请日不参与）', fbApp.progressPct === 17, String(fbApp.progressPct));
+
+  const fbAppBad = AP.fishbone.build({ identityType: 'TTPS_B', activationDate: '2025-09-01', applyDate: '2025-10-01' });
+  ok('骨图：申请日晚于激活 → 提示顺序反了', fbAppBad.warnings.some((w) => w.indexOf('顺序反了') >= 0), fbAppBad.warnings.join('|'));
+  const fbAppInv = AP.fishbone.build({ identityType: 'TTPS_B', activationDate: '2025-09-01', applyDate: '2023-02-30' });
+  ok('骨图：非法申请日单独拦（BAD_APPLY_DATE）', fbAppInv.ok === false && fbAppInv.reason === 'BAD_APPLY_DATE', fbAppInv.reason);
+
   /* 统计与语料 */
   const st = a2.stats();
   ok('语料 89 条', st.rag_coverage.total === 89, String(st.rag_coverage.total));

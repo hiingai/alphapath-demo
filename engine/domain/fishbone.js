@@ -48,12 +48,35 @@
 
     var nodes = [];
     var warnings = [];
+
+    /* 可选的「开始申请」节点：只做展示与核对，不参与任何日期推算 */
+    var applyIso = null;
+    if (opt.applyDate) {
+      var ak = AP.timeline && AP.timeline.check_date ? AP.timeline.check_date(opt.applyDate) : { ok: true, iso: opt.applyDate };
+      if (!ak.ok) return { ok: false, reason: 'BAD_APPLY_DATE', message: '申请日期：' + ak.message };
+      applyIso = ak.iso;
+      if (applyIso > t.rounds[0].grant) {
+        warnings.push('申请日 ' + applyIso + ' 晚于激活日 ' + t.rounds[0].grant + '，顺序反了——请核对。');
+      } else {
+        var waitDays = daysBetween(applyIso, t.rounds[0].grant);
+        if (waitDays !== null && waitDays >= 0) {
+          warnings.push('从递交申请到签证激活：' + waitDays + ' 天（这段等待不计入 7 年）。');
+        }
+      }
+    }
     if (!t.canPr || !t.prDate) {
       warnings.push('该身份类型不产生永居路径（tier = ' + t.tier + '）：骨图只画到续签轮次，不画 7 年届满。');
     }
+    if (applyIso) {
+      nodes.push({
+        key: 'apply', label: '开始申请', date: applyIso, bone: 'left', kind: 'apply',
+        detail: '递交申请（等待期不计入 7 年）',
+        status: today >= applyIso ? 'done' : 'future'
+      });
+    }
     nodes.push({
       key: 'activation', label: '签证激活', date: t.rounds[0].grant, bone: 'right',
-      detail: 'Visa activated', status: 'done', kind: 'start'
+      detail: '7 年起算点', status: today >= t.rounds[0].grant ? 'done' : 'future', kind: 'start'
     });
     t.rounds.forEach(function (r, i) {
       var label = KIND_LABEL[r.kind] || r.kind;
@@ -97,6 +120,7 @@
       identityName: (AP_KB && AP_KB.identityTypes && AP_KB.identityTypes[identityType] || {}).name || identityType,
       tier: t.tier,
       activation: t.rounds[0].grant,
+      applyDate: applyIso,
       today: today,
       expiry7y: t.prDate,
       progressPct: progressPct,

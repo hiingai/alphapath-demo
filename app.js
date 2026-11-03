@@ -524,7 +524,7 @@
   /* ---------------- 右侧：7 年主航道进度鱼骨图 ---------------- */
   var FISH_KEY = 'ap:fish';
   var FISH_OPEN = 'ap:fish:open2'; /* v2：默认展开网页版（旧键保留但不读，避免老偏好压住新默认） */
-  var fishState = { identityType: '', activationDate: '' };
+  var fishState = { identityType: '', activationDate: '', applyDate: '' };
 
   function loadFish() {
     try {
@@ -532,6 +532,7 @@
       if (o && typeof o === 'object') {
         fishState.identityType = o.identityType || '';
         fishState.activationDate = o.activationDate || '';
+        fishState.applyDate = o.applyDate || '';
       }
     } catch (e) { /* 坏数据就当空的 */ }
   }
@@ -564,9 +565,10 @@
     var f = AP.fishbone.build(fishState);
     $('fishIdent').value = fishState.identityType || '';
     $('fishDate').value = fishState.activationDate || '';
+    if ($('fishApply')) $('fishApply').value = fishState.applyDate || '';
 
     if (!f.ok) {
-      $('fishFill').style.width = '0%';
+      $('fishFill').style.height = '0%';
       $('fishPct').textContent = '—';
       $('fishSum').textContent = f.message || '还不能画图。';
       $('fishWarn').textContent = '';
@@ -586,30 +588,33 @@
       return;
     }
 
-    $('fishFill').style.width = f.progressPct + '%';
+    $('fishFill').style.height = f.progressPct + '%';
     $('fishPct').textContent = f.progressPct + '% · ' + (f.identityName || f.identityType);
     $('fishSum').textContent = AP.fishbone.summary(f);
     $('fishWarn').textContent = (f.warnings || []).join(' ');
     if (f.ruleVersion) $('fishRule').textContent = f.ruleVersion;
 
+    /* 向上的箭头：底部「开始申请」→ 顶部「7 年届满」 */
+    wrap.appendChild(el('i', 'arrowhead'));
     var spine = el('div', 'spine');
     var fill = el('i', 'fill');
     fill.style.height = f.progressPct + '%';
     spine.appendChild(fill);
-    if (f.progressPct > 2 && f.progressPct < 100) {
-      var t = el('span', 'today', '今天');
-      t.style.top = f.progressPct + '%';
-      spine.appendChild(t);
-    }
     wrap.appendChild(spine);
+    if (f.progressPct > 2 && f.progressPct < 98) {
+      var t = el('div', 'today');
+      t.style.bottom = f.progressPct + '%';
+      t.appendChild(el('span', null, '今天'));
+      wrap.appendChild(t);
+    }
 
     var ul = el('ul', 'bones');
     f.nodes.forEach(function (n) {
-      var li = el('li', 'bone ' + (n.bone || 'right') + ' ' + n.status);
+      var li = el('li', 'bone ' + (n.bone || 'right') + ' ' + n.status + (n.kind === 'finish' ? ' finish' : ''));
       li.appendChild(el('span', 'stem'));
       li.appendChild(el('span', 'fdot'));
       var box = el('div', 'fnode');
-      box.appendChild(el('div', 'flabel', n.label + (n.kind === 'finish' ? ' 🏁' : (n.kind === 'start' ? ' 🛫' : ''))));
+      box.appendChild(el('div', 'flabel', n.label + (n.kind === 'finish' ? ' 🏁' : (n.kind === 'start' ? ' 🛫' : (n.kind === 'apply' ? ' 📝' : '')))));
       box.appendChild(el('div', 'fdate', n.date));
       if (n.windowStart) box.appendChild(el('div', 'fwin', '递交窗口 ' + n.windowStart + ' ~ ' + n.windowDeadline));
       if (n.status === 'current') box.appendChild(el('div', 'fwin', '★ 现在该办：建议 ' + n.suggestedSubmitBy + ' 前递交'));
@@ -655,8 +660,8 @@
     renderFish();
     var pref = null;
     try { pref = localStorage.getItem(FISH_OPEN); } catch (e) { pref = null; }
-    /* 网页版（宽屏）默认展开；手机默认收起，避免一进来就被抽屉盖住 */
-    var open = pref === null ? window.innerWidth > 1180 : pref === '1';
+    /* 宽屏（网页版）默认展开；窄屏一律先收起，避免一进来就被抽屉盖住 */
+    var open = window.innerWidth > 1180 ? (pref === null ? true : pref === '1') : false;
     setFishOpen(open);
 
     $('toggleFish').addEventListener('click', function () {
@@ -672,6 +677,13 @@
       fishState.activationDate = this.value;
       saveFish(); renderFish();
       $('fishSrc').textContent = this.value ? '已手动指定激活日：' + this.value : '还没填激活日期';
+    });
+    if ($('fishApply')) $('fishApply').addEventListener('change', function () {
+      fishState.applyDate = this.value;
+      saveFish(); renderFish();
+      $('fishSrc').textContent = this.value
+        ? '开始申请：' + this.value + '（等待期不计入 7 年，只做展示）'
+        : '没填开始申请日，只从激活日开始算。';
     });
     $('fishSync').addEventListener('click', function () {
       var hit = false;
@@ -691,8 +703,37 @@
     $('fishReset').addEventListener('click', function () {
       fishState.identityType = '';
       fishState.activationDate = '';
+      fishState.applyDate = '';
       saveFish(); renderFish();
       $('fishSrc').textContent = '已重置，重新选身份 + 填激活日。';
+    });
+  }
+
+  /* ---------------- 主题（浅色默认 / 深色可选） ---------------- */
+  var THEME_KEY = 'ap:theme';
+
+  function applyTheme(mode, announce) {
+    var t = mode === 'dark' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) { /* ignore */ }
+    var b = $('themeBtn');
+    if (b) {
+      b.innerHTML = t === 'dark' ? '<span class="fico">☀️</span><span class="tlabel">浅色</span>'
+        : '<span class="fico">🌙</span><span class="tlabel">深色</span>';
+      b.title = t === 'dark' ? '切换到浅色主题' : '切换到深色主题';
+    }
+    if (announce) appendNotice(t === 'dark' ? '已切换到深色主题。' : '已切换到浅色主题（默认）。');
+  }
+  function currentTheme() {
+    var t = document.documentElement.getAttribute('data-theme');
+    return t === 'dark' ? 'dark' : 'light';
+  }
+  function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) { saved = null; }
+    applyTheme(saved === 'dark' ? 'dark' : 'light', false); /* 默认浅色 */
+    if ($('themeBtn')) $('themeBtn').addEventListener('click', function () {
+      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
     });
   }
 
@@ -708,6 +749,7 @@
     renderMem();
     renderStats();
     renderSessions();
+    initTheme();
     initFish();
 
     $('send').addEventListener('click', send);

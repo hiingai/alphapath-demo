@@ -451,6 +451,7 @@
     $('send').disabled = true;
 
     addUser(text);
+    askState.turn++;
     if (!curSession()) newSession();
     pushMsg({ role: 'user', text: text });
     syncFishFromText(text);
@@ -518,6 +519,7 @@
       sending = false;
       $('send').disabled = false;
       input.focus();
+      setTimeout(maybeAskGap, 500);
     }
   }
 
@@ -871,6 +873,12 @@
         row.appendChild(x);
         box.appendChild(row);
       });
+      if ($('planHint')) {
+        var gp = AP.Plan.gaps(facts);
+        $('planHint').textContent = gp.length
+          ? ('还差 ' + gp.length + ' 项：' + gp.map(function (k) { return AP.Plan.FIELD[k]; }).join('、'))
+          : '信息齐全，可生成';
+      }
     });
   }
 
@@ -1044,6 +1052,8 @@
       });
     }
     registerOutboxHooks();
+    if ($('planBtn')) $('planBtn').addEventListener('click', openPlan);
+    if ($('planAsk')) $('planAsk').addEventListener('click', function () { askState.off = false; askState.asked = 0; askState.lastAtTurn = -9; maybeAskGap(); });
     if ($('leadExport')) {
       $('leadExport').addEventListener('click', function () {
         refreshLeadBox().then(function (lead) {
@@ -1168,6 +1178,115 @@
     });
     setInterval(function () { if (outbox().length && loadConsent().analytics) flushOutbox(); }, 60000);
     syncLabel();
+  }
+
+  /* ---------------- 84 个月规划：缺口提问 + 报告生成 ---------------- */
+  var askState = { turn: 0, asked: 0, lastAtTurn: -9, off: false };
+
+  function profileFacts() {
+    var d = db();
+    if (!d) return Promise.resolve({});
+    return d.profile.get().then(function (f) { return f || {}; }, function () { return {}; });
+  }
+
+  function appendAskCard(q, left) {
+    if (!q) return;
+    var wrap = el('div', 'msg assistant');
+    wrap.appendChild(el('div', 'avatar', '🧭'));
+    var b = el('div', 'bubble ask');
+    b.appendChild(el('p', 'ask-q', '还差 ' + left + ' 项就能生成 84 个月规划 —— ' + q.text));
+    var row = el('div', 'ask-chips');
+    q.opts.forEach(function (o) {
+      var btn = el('button', 'chip ask-chip', o.label);
+      btn.addEventListener('click', function () {
+        if (sending) return;
+        var d = db();
+        var after = function () {
+          row.textContent = '';
+          row.appendChild(el('span', 'hint', '已记录：' + o.label));
+          wrap.classList.add('answered');
+          if ($('planHint')) $('planHint').textContent = '已更新，可生成报告';
+          refreshProfile(); refreshLeadBox();
+        };
+        if (d) d.profile.set(q.key, o.value, 'user').then(after, after); else after();
+        var inp = $('input');
+        inp.value = o.say;
+        send();
+      });
+      row.appendChild(btn);
+    });
+    var skip = el('button', 'chip ghost', '稍后再填');
+    skip.addEventListener('click', function () {
+      askState.off = true;
+      row.textContent = '';
+      row.appendChild(el('span', 'hint', '好，随时在「我的档案」补齐再生成。'));
+    });
+    row.appendChild(skip);
+    b.appendChild(row);
+    wrap.appendChild(b);
+    $('chat').appendChild(wrap);
+    scrollBottom();
+  }
+
+  function maybeAskGap() {
+    if (askState.off || sending) return;
+    if (askState.turn < 1 || askState.asked >= 4) return;
+    if (askState.turn - askState.lastAtTurn < 1) return;
+    profileFacts().then(function (f) {
+      var gaps = AP.Plan.gaps(f);
+      if (!gaps.length) return;
+      var qs = AP.Plan.quickAsk(f);
+      if (!qs.length) return;
+      askState.asked++;
+      askState.lastAtTurn = askState.turn;
+      appendAskCard(qs[0], gaps.length);
+    });
+  }
+
+  function planFileName(plan) {
+    return 'AlphaPath-续签规划-' + (plan.person.identityType || 'plan') + '-' + plan.startYm + '.html';
+  }
+
+  function appendPlanCard(plan, url, html) {
+    var wrap = el('div', 'msg assistant');
+    wrap.appendChild(el('div', 'avatar', '📄'));
+    var b = el('div', 'bubble plan-card');
+    b.appendChild(el('p', 'plan-t', '已生成 84 个月规划：' + plan.person.identityName + ' · ' + plan.startYm + ' 起算'));
+    b.appendChild(el('p', 'hint', plan.segments.length + ' 个签证段 · ' + plan.risks.length + ' 条风险（高风险 ' +
+      plan.risks.filter(function (r) { return r.level === 'high'; }).length + '）· ' +
+      plan.timeline.filter(function (r) { return r.renewal; }).length + ' 次续签递交 · 目标 ' + (plan.prYm || '—')));
+    var row = el('div', 'row plan-acts');
+    var view = el('button', 'btn ghost small', '🔎 打开报告');
+    view.addEventListener('click', function () { window.open(url, '_blank'); });
+    var dl = el('button', 'btn primary small', '⤓ 下载 HTML');
+    dl.addEventListener('click', function () { download(planFileName(plan), html, 'text/html'); });
+    row.appendChild(view);
+    row.appendChild(dl);
+    b.appendChild(row);
+    wrap.appendChild(b);
+    $('chat').appendChild(wrap);
+    scrollBottom();
+  }
+
+  function openPlan() {
+    profileFacts().then(function (f) {
+      var gaps = AP.Plan.gaps(f);
+      if (gaps.length) {
+        var qs = AP.Plan.quickAsk(f);
+        if (qs.length) appendAskCard(qs[0], gaps.length);
+        appendNotice('还差 ' + gaps.length + ' 项（' + gaps.map(function (k) { return AP.Plan.FIELD[k]; }).join('、') + '），补齐后就能生成。');
+        if ($('planHint')) $('planHint').textContent = '还差 ' + gaps.length + ' 项';
+        return;
+      }
+      var plan = AP.Plan.build(f);
+      var html = AP.Plan.toHtml(plan);
+      var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var w = window.open(url, '_blank');
+      if (!w) download(planFileName(plan), html, 'text/html');
+      appendPlanCard(plan, url, html);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 120000);
+    });
   }
 
   function readMemories() {    try { return AP.Store.get('ap:mem:semantic', []) || []; } catch (e) { return []; }

@@ -540,3 +540,17 @@ body.fish-open .fish-toggle {
 /* 深色下品牌蓝更亮，主按钮白字对比度不足，改用深色字 */
 :root[data-theme="dark"] .btn.primary,
 :root[data-theme="dark"] .btn.primary:hover { color: #08192e; }
+
+/* 84 个月规划：档案入口 + 主动提问卡 + 报告卡 */
+.plan-box { border: 1px solid var(--line); border-radius: 12px; padding: 12px 13px; background: var(--panel-2); margin: 12px 0 10px; }
+.plan-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-weight: 600; font-size: 13.5px; margin-bottom: 6px; }
+.plan-head .hint { font-weight: 400; }
+.plan-box .hint { margin: 0 0 10px; font-size: 12.5px; }
+.msg .bubble.ask { border: 1px dashed var(--brand-line); background: var(--brand-soft); }
+.ask-q { margin: 0 0 10px; font-size: 13.5px; }
+.ask-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ask-chip { border-color: var(--brand-line); color: var(--brand); background: var(--panel); }
+.ask-chip:hover { background: var(--brand); color: var(--on-accent); }
+.msg.answered .bubble.ask { opacity: .75; }
+.plan-t { margin: 0 0 6px; font-weight: 600; }
+.plan-acts { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }

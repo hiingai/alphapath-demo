@@ -13,11 +13,11 @@
   document.documentElement.setAttribute('data-theme', t);
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=20261031g">
+<link rel="stylesheet" href="style.css?v=20261031j">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
 <script>
 /* 版本自愈：HTML 被 CDN 缓存（max-age=600）时自动换新 */
-window.__AP_BUILD__ = '20261031g';
+window.__AP_BUILD__ = '20261031j';
 (function () {
   function paint() {
     var b = document.getElementById('buildBadge');
@@ -220,6 +220,14 @@ window.__AP_BUILD__ = '20261031g';
           <a class="btn ghost small" id="leadAdmin" href="admin.html" target="_blank" rel="noopener">管理后台 ↗</a>
         </div>
       </div>
+      <div class="plan-box" id="planBox">
+        <div class="plan-head"><span>84 个月续签规划</span><span class="hint" id="planHint">检查中…</span></div>
+        <p class="hint">按你的档案排 84 个月的签证、强积金、报税、流水与材料动作，附风险评估；生成后可在线查看或下载 HTML。</p>
+        <div class="row">
+          <button class="btn primary small" id="planBtn" type="button">生成规划报告</button>
+          <button class="btn ghost small" id="planAsk" type="button">用几个小问题补齐</button>
+        </div>
+      </div>
       <div class="row">
         <button class="btn ghost small" id="profRebuild">从对话重建档案</button>
         <button class="btn ghost small" id="doLogout">退出登录</button>
@@ -239,24 +247,25 @@ window.__AP_BUILD__ = '20261031g';
   </div>
 </div>
 
-<script src="engine/data/kb.js?v=20261031g"></script>
-<script src="engine/embedding.js?v=20261031g"></script>
-<script src="engine/domain/timeline.js?v=20261031g"></script>
-<script src="engine/domain/legal.js?v=20261031g"></script>
-<script src="engine/domain/compliance.js?v=20261031g"></script>
-<script src="engine/domain/guardrails.js?v=20261031g"></script>
-<script src="engine/domain/matching.js?v=20261031g"></script>
-<script src="engine/domain/rag.js?v=20261031g"></script>
-<script src="engine/domain/fishbone.js?v=20261031g"></script>
-<script src="engine/userdb.js?v=20261031g"></script>
-<script src="engine/leaddb.js?v=20261031g"></script>
-<script src="engine/memory.js?v=20261031g"></script>
-<script src="engine/conductor.js?v=20261031g"></script>
-<script src="engine/tools.js?v=20261031g"></script>
-<script src="engine/llm.js?v=20261031g"></script>
-<script src="engine/harness.js?v=20261031g"></script>
+<script src="engine/data/kb.js?v=20261031j"></script>
+<script src="engine/embedding.js?v=20261031j"></script>
+<script src="engine/domain/timeline.js?v=20261031j"></script>
+<script src="engine/domain/legal.js?v=20261031j"></script>
+<script src="engine/domain/compliance.js?v=20261031j"></script>
+<script src="engine/domain/guardrails.js?v=20261031j"></script>
+<script src="engine/domain/matching.js?v=20261031j"></script>
+<script src="engine/domain/rag.js?v=20261031j"></script>
+<script src="engine/domain/fishbone.js?v=20261031j"></script>
+<script src="engine/userdb.js?v=20261031j"></script>
+<script src="engine/plan.js?v=20261031j"></script>
+<script src="engine/leaddb.js?v=20261031j"></script>
+<script src="engine/memory.js?v=20261031j"></script>
+<script src="engine/conductor.js?v=20261031j"></script>
+<script src="engine/tools.js?v=20261031j"></script>
+<script src="engine/llm.js?v=20261031j"></script>
+<script src="engine/harness.js?v=20261031j"></script>
 <script src="sync-config.js?v=20261031f"></script>
-<script src="engine/index.js?v=20261031g"></script>
-<script src="app.js?v=20261031g"></script>
+<script src="engine/index.js?v=20261031j"></script>
+<script src="app.js?v=20261031j"></script>
 </body>
 </html>

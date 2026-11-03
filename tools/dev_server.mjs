@@ -26,8 +26,8 @@ class Stmt {
 }
 const env = {
   DB: { prepare: (sql) => new Stmt(sql) },
-  ADMIN_USER: process.env.ADMIN_USER || 'admin',
-  ADMIN_PASS: process.env.ADMIN_PASS || 'alphapath',
+  ADMIN_USER: process.env.ADMIN_USER || 'admin1@alphapath.com',
+  ADMIN_PASS: process.env.ADMIN_PASS || 'Hkadmin123456',
   ADMIN_SECRET: process.env.ADMIN_SECRET || 'dev-secret',
   BUILD: 'dev'
 };

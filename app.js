@@ -1263,7 +1263,8 @@
     b.appendChild(el('p', 'plan-t', '已生成 84 个月规划：' + plan.person.identityName + ' · ' + plan.startYm + ' 起算'));
     b.appendChild(el('p', 'hint', plan.segments.length + ' 个签证段 · ' + plan.risks.length + ' 条风险（高风险 ' +
       plan.risks.filter(function (r) { return r.level === 'high'; }).length + '）· ' +
-      plan.timeline.filter(function (r) { return r.renewal; }).length + ' 次续签递交 · 目标 ' + (plan.prYm || '—')));
+      plan.timeline.filter(function (r) { return r.renewal; }).length + ' 次续签递交 · ' +
+      (plan.reminders ? plan.reminders.length + ' 条到期提醒 · ' : '') + '目标 ' + (plan.prYm || '—')));
     var row = el('div', 'row plan-acts');
     var view = el('button', 'btn ghost small', '🔎 打开报告');
     view.addEventListener('click', function () { window.open(url, '_blank'); });
@@ -1271,6 +1272,13 @@
     dl.addEventListener('click', function () { download(planFileName(plan), html, 'text/html'); });
     row.appendChild(view);
     row.appendChild(dl);
+    if (plan.ics) {
+      var ics = el('button', 'btn ghost small', '🗓 日历 (.ics)');
+      ics.addEventListener('click', function () {
+        download('AlphaPath-提醒-' + plan.startYm + '.ics', plan.ics, 'text/calendar;charset=utf-8');
+      });
+      row.appendChild(ics);
+    }
     b.appendChild(row);
     wrap.appendChild(b);
     $('chat').appendChild(wrap);
@@ -1298,6 +1306,32 @@
     });
   }
 
+  /* 测试账号种子：console.html?seed=1 → 把 accounts.seed.json 里缺的账号写进本机账号库
+     （只导入摘要，明文密码不落盘；重复打开不会重复导入） */
+  function seedAccounts() {
+    if (!/[?&]seed=1/.test(location.search)) return Promise.resolve(false);
+    var d = db();
+    if (!d) return Promise.resolve(false);
+    return fetch('accounts.seed.json', { cache: 'no-store' }).then(function (r) {
+      return r.ok ? r.json() : null;
+    }).then(function (j) {
+      if (!j || !j.users || !j.users.length) return false;
+      var added = 0, skipped = 0;
+      return j.users.reduce(function (p, u) {
+        return p.then(function () {
+          return d.adapter.get('users', u.id).then(function (ex) {
+            if (ex) { skipped++; return null; }
+            return d.adapter.put('users', u).then(function () { added++; }, function () { skipped++; });
+          }, function () { skipped++; });
+        });
+      }, Promise.resolve()).then(function () {
+        appendNotice('测试账号：已导入 ' + added + ' 个' + (skipped ? '，已有 ' + skipped + ' 个' : '') +
+          '。可用 user1@alphapath.com ~ user10@alphapath.com 登录（密码 Hk123456）。');
+        return true;
+      });
+    }, function () { return false; });
+  }
+
   function readMemories() {    try { return AP.Store.get('ap:mem:semantic', []) || []; } catch (e) { return []; }
   }
 
@@ -1316,7 +1350,8 @@
     initTheme();
     initAuth();
     initLead();
-  window.AP_BOOTED = true;
+    seedAccounts();
+    window.AP_BOOTED = true;
     initFish();
 
     $('send').addEventListener('click', send);

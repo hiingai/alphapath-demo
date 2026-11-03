@@ -1,0 +1,193 @@
+{
+  "note": "测试账号种子：仅本地演示用。用户密码统一 Hk123456；管理员密码见 docs/测试账号-说明.md。文件里只有 PBKDF2 摘要，没有明文密码。",
+  "build": "20261031l",
+  "generatedAt": "2026-11-03T12:38:27.260Z",
+  "algo": {
+    "name": "PBKDF2-SHA256",
+    "iter": 120000,
+    "bits": 256
+  },
+  "users": [
+    {
+      "id": "usr_seed_u1",
+      "email": "user1@alphapath.com",
+      "emailLower": "user1@alphapath.com",
+      "name": "测试用户 1",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "e1ba8f420241b30234e65c4ab2108d51",
+        "hash": "831a57a9f724865a53671b95aed543d0f709dbc1847ca348eb5aaa10d5dfb486"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:00:00.000Z"
+    },
+    {
+      "id": "usr_seed_u2",
+      "email": "user2@alphapath.com",
+      "emailLower": "user2@alphapath.com",
+      "name": "测试用户 2",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "23f258772858eea1a70c1b6fdba7fe76",
+        "hash": "f466a1590932bfa5af4ab8b91d996a05629bd605f07311a95faf34ed890b78f5"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:01:00.000Z"
+    },
+    {
+      "id": "usr_seed_u3",
+      "email": "user3@alphapath.com",
+      "emailLower": "user3@alphapath.com",
+      "name": "测试用户 3",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "2fc7f19075c268c5effc7d86f35f6dce",
+        "hash": "86c10bb7e9473f8aed3d8a827ab23814697b1fbc5c9c358e64739e2b22e1e383"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:02:00.000Z"
+    },
+    {
+      "id": "usr_seed_u4",
+      "email": "user4@alphapath.com",
+      "emailLower": "user4@alphapath.com",
+      "name": "测试用户 4",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "5f63d9fb1524dfc6cb25012c73dfda21",
+        "hash": "e45382fb4a855ba02fed0adc836cd7f79596ca10faa8d82bcb15930ee4decd53"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:03:00.000Z"
+    },
+    {
+      "id": "usr_seed_u5",
+      "email": "user5@alphapath.com",
+      "emailLower": "user5@alphapath.com",
+      "name": "测试用户 5",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "a72857edbda903bafa128a2eddb86071",
+        "hash": "511926140640c650af0d5d111638120af3c984a135b91d87db4e6adb570a2875"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:04:00.000Z"
+    },
+    {
+      "id": "usr_seed_u6",
+      "email": "user6@alphapath.com",
+      "emailLower": "user6@alphapath.com",
+      "name": "测试用户 6",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "0395ed35593d695f274ac93a75218e92",
+        "hash": "2cae3f29a2dfd92f6160493d2b70316c70ddf5c1e12907a8883f547956d451bb"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:05:00.000Z"
+    },
+    {
+      "id": "usr_seed_u7",
+      "email": "user7@alphapath.com",
+      "emailLower": "user7@alphapath.com",
+      "name": "测试用户 7",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "322cddecf2c0605b3bf3cf1653ed3c9d",
+        "hash": "366a528d2c04c0c20af6db87c2f9354ffbd2805c5c42646c1c2c4fd170864836"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:06:00.000Z"
+    },
+    {
+      "id": "usr_seed_u8",
+      "email": "user8@alphapath.com",
+      "emailLower": "user8@alphapath.com",
+      "name": "测试用户 8",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "afdd3278f5bd963e87ec21193217ef9c",
+        "hash": "85044dd2a2a7f606fb5f9dbe6dc56bd98f5438df7bbfcd45df4385dc665aa7b7"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:07:00.000Z"
+    },
+    {
+      "id": "usr_seed_u9",
+      "email": "user9@alphapath.com",
+      "emailLower": "user9@alphapath.com",
+      "name": "测试用户 9",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "c80878b96ad90944bb6add4fe2c011f6",
+        "hash": "556e59fd48241788b63824e252ec04ca9ad728984b63522e98602aa92efef07c"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:08:00.000Z"
+    },
+    {
+      "id": "usr_seed_u10",
+      "email": "user10@alphapath.com",
+      "emailLower": "user10@alphapath.com",
+      "name": "测试用户 10",
+      "pw": {
+        "algo": "PBKDF2-SHA256",
+        "iter": 120000,
+        "salt": "fa04b4dcd0d34dcbd97dcb3bef87812e",
+        "hash": "a459a9845070abbdd7e79763459b52410dab21ac9894ba708a2bf74959b5ce51"
+      },
+      "providers": {
+        "phone": null,
+        "wechat": null
+      },
+      "seeded": true,
+      "createdAt": "2026-10-31T00:09:00.000Z"
+    }
+  ],
+  "adminsNote": "管理员不走前端账号库，由 Worker 环境变量 ADMIN_USER / ADMIN_PASS 校验：admin1@alphapath.com / Hkadmin123456（生产用 wrangler secret put 设置）"
+}

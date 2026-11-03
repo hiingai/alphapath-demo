@@ -306,6 +306,97 @@
     return rows;
   }
 
+  /* ---------------- 提醒日历（到期日 / 报税 / 强积金 / 永居） ---------------- */
+  function d2(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function monthFirst(start, m) { var d = new Date(start.getFullYear(), start.getMonth() + (m - 1), 1); return d; }
+  function monthEnd(start, m) { return new Date(start.getFullYear(), start.getMonth() + m, 0); }
+  function minusDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() - n); }
+
+  function buildReminders(ctx, rows, prMonth) {
+    var info = ctx.info, start = ctx.start, out = [];
+    var win = (info && info.windowDays) || 28;
+    var prep = Math.ceil(win / 30) + 1;
+    var segs = ctx.segments || [];
+    var n = 0;
+
+    segs.forEach(function (s) {
+      if (s.from <= 1) return;
+      n++;
+      var exp = monthEnd(start, s.from - 1);
+      out.push({ date: d2(monthFirst(start, s.from - prep)), kind: 'renew', title: '第 ' + n + ' 次续签：开始备料',
+        detail: '距到期约 ' + (prep + 1) + ' 个月。先查签证到期日，再把雇佣/公司、强积金、报税、流水、住址证明按清单收齐。' });
+      out.push({ date: d2(minusDays(exp, win)), kind: 'renew', title: '第 ' + n + ' 次续签：递交窗口开启',
+        detail: '入境处一般接受到期前 ' + win + ' 天内递交，到期日 ' + d2(exp) + '。不要等到最后一周。' });
+      out.push({ date: d2(minusDays(exp, 7)), kind: 'renew', title: '第 ' + n + ' 次续签：最后 7 天核对',
+        detail: '确认已递交并拿到确认书；未递交的今天必须处理（逾期会断签）。' });
+    });
+
+    var y0 = start.getFullYear();
+    for (var y = y0; y <= y0 + 7; y++) {
+      if (new Date(y, 3, 1) >= start) out.push({ date: y + '-04-01', kind: 'tax', title: '报税季：整理上一个课税年度收入',
+        detail: '薪俸税 BIR60 / 自雇另有利得税表；报税收入要与强积金入息、银行流水对得上。' });
+      if (new Date(y, 4, 1) >= start) out.push({ date: y + '-05-01', kind: 'mpf', title: '强积金年结：核对全年供款',
+        detail: '下载周年供款报表，检查有没有断供月份；自雇按年度有关入息供 5%。' });
+      if (ctx.dependants > 0 && new Date(y, 8, 1) >= start) out.push({ date: y + '-09-01', kind: 'school', title: '开学：留存子女在学证明',
+        detail: '在读证明 / 成绩单 / 学费收据，作为家庭在港联系的旁证。' });
+    }
+
+    if (prMonth && info && info.canPr) {
+      var pr = monthFirst(start, prMonth);
+      out.push({ date: d2(minusDays(pr, 365)), kind: 'pr', title: '永居前 12 个月：整理 7 年居住记录',
+        detail: '出入境记录、租约、工作与纳税记录按年归档，确认「通常居住」连续、没有长时间离港。' });
+      out.push({ date: d2(pr), kind: 'pr', title: '递交永居申请（满 7 年当月）',
+        detail: '核对自己是否满足通常居住要求；本报告不构成审批结论，递交前以入境处要求为准。' });
+    }
+
+    out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    return out;
+  }
+
+  function icsEsc(s) {
+    return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  }
+  /* RFC 5545：按「字节」折行，每行 ≤ 75 字节，续行以空格开头；中文一个字 3 字节 */
+  function icsBytes(ch) { return encodeURIComponent(ch).replace(/%[0-9A-F]{2}/g, 'x').length; }
+  function icsFold(line) {
+    var out = '', cur = '', limit = 75, i;
+    for (i = 0; i < line.length; i++) {
+      var ch = line.charAt(i), n = icsBytes(ch);
+      if (n > limit) { out += (out ? '\r\n ' : '') + cur; cur = ch; limit = 74; }
+      else { cur += ch; limit -= n; }
+    }
+    return out + (out ? '\r\n ' : '') + cur;
+  }
+  function toIcs(plan) {
+    var stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AlphaPath//84M Plan//ZH', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+      'X-WR-CALNAME:' + icsEsc('续签规划 · ' + plan.person.identityName + ' · ' + plan.startYm)];
+    plan.reminders.forEach(function (r, i) {
+      var next = new Date(r.date + 'T00:00:00Z'); next.setUTCDate(next.getUTCDate() + 1);
+      lines.push('BEGIN:VEVENT');
+      lines.push('UID:' + 'ap-' + plan.startYm.replace('-', '') + '-' + (i + 1) + '@alphapath');
+      lines.push('DTSTAMP:' + stamp);
+      lines.push('DTSTART;VALUE=DATE:' + r.date.replace(/-/g, ''));
+      lines.push('DTEND;VALUE=DATE:' + next.toISOString().slice(0, 10).replace(/-/g, ''));
+      lines.push(icsFold('SUMMARY:' + icsEsc(r.title)));
+      lines.push(icsFold('DESCRIPTION:' + icsEsc(r.detail)));
+      lines.push('TRANSP:TRANSPARENT');
+      lines.push('BEGIN:VALARM');
+      lines.push('TRIGGER:-P30D');
+      lines.push('ACTION:DISPLAY');
+      lines.push(icsFold('DESCRIPTION:' + icsEsc(r.title + '（还有 30 天）')));
+      lines.push('END:VALARM');
+      lines.push('BEGIN:VALARM');
+      lines.push('TRIGGER:-P7D');
+      lines.push('ACTION:DISPLAY');
+      lines.push(icsFold('DESCRIPTION:' + icsEsc(r.title + '（还有 7 天）')));
+      lines.push('END:VALARM');
+      lines.push('END:VEVENT');
+    });
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n') + '\r\n';
+  }
+
   /* ---------------- 组装 ---------------- */
   function build(f, opts) {
     f = f || {}; opts = opts || {};
@@ -344,6 +435,7 @@
       tracks: tracks(ctx),
       money: money(ctx),
       risks: buildRisks(ctx),
+      reminders: buildReminders(ctx, rows, prMonth),
       evidence: [
         { doc: '旅行证件 + 电子签证/签证标签', why: '确认每次签证期与到期日', when: '全程，每次续签后更新' },
         { doc: '雇佣合同 / 公司注册证 + 商业登记', why: '证明在港工作或经营的真实性', when: '入职/注册当月' },
@@ -361,6 +453,7 @@
         '报告由确定性规则生成（ruleVersion ' + ((g.AP_KB && AP_KB.meta && AP_KB.meta.ruleVersion) || 'policy.2026-10-06') + '），任何资格判断都需人工复核。'
       ]
     };
+    plan.ics = toIcs(plan);
     return plan;
   }
 
@@ -401,6 +494,12 @@
 
     var evRows = plan.evidence.map(function (e) {
       return '<tr><td>' + esc(e.doc) + '</td><td>' + esc(e.why) + '</td><td class="nowrap">' + esc(e.when) + '</td></tr>';
+    }).join('');
+
+    var KIND = { renew: '续签', tax: '报税', mpf: '强积金', school: '学籍', pr: '永居' };
+    var remRows = plan.reminders.map(function (r) {
+      return '<tr><td class="nowrap">' + esc(r.date) + '</td><td>' + esc(r.title) +
+        '<div class="note" style="margin:2px 0 0">' + esc(r.detail) + '</div></td><td class="nowrap">' + esc(KIND[r.kind] || r.kind) + '</td></tr>';
     }).join('');
 
     var mpfRows = my.mpfScenarios.map(function (s) {
@@ -448,18 +547,21 @@
       '<p class="note">黄底＝续签准备月，绿底＝续签递交月。每月至少一件事，做完就能在续签时拿出材料。</p>' +
       '<table class="t plan"><thead><tr><th>月</th><th>年月</th><th>阶段</th><th>签证状态</th><th>本月动作 / 材料 / 风险</th></tr></thead><tbody>' + rows + '</tbody></table></section>' +
 
-      '<section><h2>6. 风险评估</h2>' + risks + '</section>' +
+      '<section><h2>6. 到期日提醒（可导入手机）</h2>' +
+      '<p class="note">共 <b>' + plan.reminders.length + '</b> 条提醒，每条自带「到期前 30 天」「前 7 天」两次提醒。点下面按钮下载 <code>.ics</code>，在手机/电脑日历里打开即可。</p>' +
+      '<div class="acts"><button id="icsBtn" class="btn">⤓ 下载日历（.ics，' + plan.reminders.length + ' 条）</button><span class="note">导入后不会联网、不会回传任何信息</span></div>' +
+      '<table class="t small"><thead><tr><th>日期</th><th>提醒事项</th><th>类型</th></tr></thead><tbody>' + remRows + '</tbody></table>' +
+      '<textarea id="icsData" hidden>' + esc(plan.ics) + '</textarea></section>' +
 
-      '<section><h2>7. 材料清单</h2><table class="t"><thead><tr><th>材料</th><th>为什么需要</th><th>什么时候准备</th></tr></thead><tbody>' + evRows + '</tbody></table></section>' +
+      '<section><h2>7. 风险评估</h2>' + risks + '</section>' +
 
-      '<section><h2>8. 依据与免责</h2><ul class="sum">' + plan.disclaimers.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>' +
+      '<section><h2>8. 材料清单</h2><table class="t"><thead><tr><th>材料</th><th>为什么需要</th><th>什么时候准备</th></tr></thead><tbody>' + evRows + '</tbody></table></section>' +
+
+      '<section><h2>9. 依据与免责</h2><ul class="sum">' + plan.disclaimers.map(function (d) { return '<li>' + esc(d) + '</li>'; }).join('') + '</ul>' +
       '<p class="note">本报告由 AlphaPath 本地引擎生成，未上传对话内容；如需修改，回到对话补充信息即可重新生成。</p></section>' +
       '</main>' +
       '<footer>AlphaPath · 84 个月续签规划 · ' + esc(plan.meta.generatedAt.slice(0, 10)) + '</footer>' +
-      '<script>(function(){var b=document.getElementById("dlBtn");if(!b)return;b.addEventListener("click",function(e){e.preventDefault();' +
-      'var h=document.documentElement.outerHTML;var blob=new Blob([h],{type:"text/html;charset=utf-8"});' +
-      'var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=' + JSON.stringify('AlphaPath-续签规划-' + (plan.person.identityType || 'plan') + '-' + plan.startYm + '.html') + ';' +
-      'document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},800);});})();<\/script>' +
+      '<script>(function(){function save(name,text,type){var blob=new Blob([text],{type:type||"application/octet-stream"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},800);}' +'var b=document.getElementById("dlBtn");if(b){b.addEventListener("click",function(e){e.preventDefault();save(' + JSON.stringify('AlphaPath-续签规划-' + (plan.person.identityType || 'plan') + '-' + plan.startYm + '.html') + ',document.documentElement.outerHTML,"text/html;charset=utf-8");});}' +'var c=document.getElementById("icsBtn");if(c){c.addEventListener("click",function(e){e.preventDefault();var t=document.getElementById("icsData");save(' + JSON.stringify('AlphaPath-提醒-' + plan.startYm + '.ics') + ',t.value,"text/calendar;charset=utf-8");});}' +'})();<\/script>' +
       '</body></html>';
   }
 
@@ -506,6 +608,10 @@
     '.risk{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:10px;padding:14px 16px;margin:0 0 12px}',
     '.risk.high{border-left-color:var(--bad)}.risk.low{border-left-color:var(--ok)}',
     '.risk .rh{display:flex;align-items:center;gap:10px;margin-bottom:6px}',
+    '.acts{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}',
+    '.btn{display:inline-block;padding:8px 14px;border-radius:10px;border:1px solid var(--brand);background:var(--brand);color:#fff;font:inherit;font-size:13.5px;cursor:pointer}',
+    '.btn:hover{filter:brightness(1.06)}',
+    'code{font-family:ui-monospace,Consolas,monospace;font-size:.92em;background:#eef3fa;padding:1px 5px;border-radius:5px}',
     '.risk .lv{color:#fff;font-size:11px;padding:2px 8px;border-radius:999px}',
     '.risk p{margin:4px 0;font-size:13.5px}',
     'footer{text-align:center;color:var(--muted);font-size:12.5px;padding:10px 0 40px}',
@@ -515,8 +621,8 @@
 
   AP.Plan = {
     MONTHS: MONTHS, FIELD: FIELD, KEY: KEY, OPTIONAL: OPTIONAL,
-    build: build, toHtml: toHtml, gaps: gaps, quickAsk: quickAsk,
+    build: build, toHtml: toHtml, gaps: gaps, quickAsk: quickAsk, toIcs: toIcs, reminders: function (f) { return build(f).reminders; },
     segments: function (k) { return segments(ident(k)); },
-    _pure: { ident: ident, segments: segments, buildTimeline: buildTimeline, buildRisks: buildRisks, money: money, tracks: tracks, calendarOf: calendarOf }
+    _pure: { ident: ident, segments: segments, buildTimeline: buildTimeline, buildRisks: buildRisks, money: money, tracks: tracks, calendarOf: calendarOf, buildReminders: buildReminders }
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -92,6 +92,10 @@ if (rep) {
   log('排期行数:', await e2("document.querySelectorAll('table.plan tbody tr').length"));
   log('含 M84:', await e2("document.body.textContent.indexOf('M84')>0"));
   log('双路径:', await e2("document.querySelectorAll('.track').length"));
+  log('提醒章节:', await e2("document.body.textContent.indexOf('6. 到期日提醒')>0"));
+  log('提醒表行数:', await e2("document.querySelectorAll('#icsData').length ? document.querySelectorAll('table.small tbody tr').length : '—'"));
+  log('日历按钮:', await e2("!!document.getElementById('icsBtn')"));
+  log('ICS 长度:', await e2("((document.getElementById('icsData')||{}).value||'').length"));
   log('风险条数:', await e2("document.querySelectorAll('.risk').length"));
   log('强积金章节:', await e2("document.body.textContent.indexOf('强积金')>0"));
   log('收入估算行:', await e2("(document.body.textContent.match(/按你填的 HK\\$ [\\d,]+ \\/ 月估算/)||['—'])[0]"));

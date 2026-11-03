@@ -102,6 +102,40 @@ ok('收入：低收入触发「收入偏低」风险', lowInc.risks.some((r) => 
 ok('收入：没填收入时报告不出现估算行', html.indexOf('按你填的') < 0);
 ok('收入：没填收入仍可生成报告（不阻断）', plan.ok === true && plan.money.mpfMonthly === null);
 
+/* ---- 到期日提醒 / ICS ---- */
+const rem = plan.reminders;
+ok('提醒：至少 20 条', rem.length >= 20, rem.length);
+ok('提醒：按日期升序', rem.every((r, i) => i === 0 || rem[i - 1].date <= r.date));
+ok('提醒：日期格式 YYYY-MM-DD', rem.every((r) => /^\d{4}-\d{2}-\d{2}$/.test(r.date)));
+ok('提醒：每次续签 3 条（备料/窗口/最后 7 天）', rem.filter((r) => r.kind === 'renew').length === 6, rem.filter((r) => r.kind === 'renew').length);
+ok('提醒：有报税与强积金年度提醒', rem.some((r) => r.kind === 'tax') && rem.some((r) => r.kind === 'mpf'));
+ok('提醒：有受养人时有开学提醒', rem.some((r) => r.kind === 'school'));
+ok('提醒：有永居前 12 个月与递交', rem.filter((r) => r.kind === 'pr').length === 2);
+ok('提醒：窗口开启日 = 到期日前 N 天（按知识库窗口）', (function () {
+  const w = rem.filter((r) => r.kind === 'renew');
+  const win = AP.AP_KB ? AP.AP_KB.identityTypes.TTPS_B.windowDays : 90;
+  const submit = w[1]; // 第 2 次续签
+  const exp = new Date(submit.detail.match(/到期日 (\d{4}-\d{2}-\d{2})/)[1] + 'T00:00:00Z');
+  const want = new Date(exp.getTime() - win * 864e5).toISOString().slice(0, 10);
+  return submit.date === want;
+})(), rem.filter((r) => r.kind === 'renew')[1].date);
+ok('提醒：无收入字段也能出提醒', P.build({ identityType: 'QMAS', activationDate: '2024-01-01', employment: 'self-employed' }).reminders.length >= 20);
+
+const ics = plan.ics;
+ok('ICS：有 VCALENDAR 头尾', ics.startsWith('BEGIN:VCALENDAR\r\n') && ics.trim().endsWith('END:VCALENDAR'));
+ok('ICS：事件数 = 提醒数', (ics.match(/BEGIN:VEVENT/g) || []).length === rem.length);
+ok('ICS：每事件带 30 天与 7 天提醒', (ics.match(/TRIGGER:-P30D/g) || []).length === rem.length && (ics.match(/TRIGGER:-P7D/g) || []).length === rem.length);
+ok('ICS：日期为 8 位', /DTSTART;VALUE=DATE:\d{8}/.test(ics) && /DTEND;VALUE=DATE:\d{8}/.test(ics));
+ok('ICS：全部用 CRLF（没有裸 LF）', ics.split('\r\n').every((l) => l.indexOf('\n') < 0));
+ok('ICS：长行已折行（≤75 字节）', ics.split('\r\n').every((l) => Buffer.byteLength(l, 'utf8') <= 75), ics.split('\r\n').map((l) => Buffer.byteLength(l, 'utf8')).filter((n) => n > 75).slice(0, 3));
+ok('ICS：逗号/分号/换行被转义', (function () {
+  const s = P.toIcs(Object.assign({}, P.build(base), { reminders: [{ date: '2027-01-01', kind: 'tax', title: 'a,b;c', detail: 'x\ny' }] }));
+  return s.indexOf('SUMMARY:a\\,b\\;c') > 0 && s.indexOf('DESCRIPTION:x\\ny') > 0;
+})());
+ok('HTML：有「到期日提醒」章节', html.indexOf('6. 到期日提醒') > 0);
+ok('HTML：有 .ics 下载按钮与内嵌日历数据', html.indexOf('id="icsBtn"') > 0 && html.indexOf('id="icsData"') > 0 && html.indexOf('BEGIN:VCALENDAR') > 0);
+ok('HTML：章节编号连续到 9', html.indexOf('7. 风险评估') > 0 && html.indexOf('8. 材料清单') > 0 && html.indexOf('9. 依据与免责') > 0);
+
 console.log(`\n通过 ${pass} / ${pass + fail}`);
 if (fail) { console.log('失败：'); failures.forEach((f) => console.log('  ✗ ' + f)); process.exit(1); }
 console.log('全部通过 ✅');

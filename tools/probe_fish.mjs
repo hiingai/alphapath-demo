@@ -26,6 +26,10 @@ const log = (...a) => { out.push(a.join(' ')); console.log(a.join(' ')); };
 
 log('fishbone 模块:', await ev('typeof AP.fishbone'));
 
+/* 0) 默认状态与开关文案 */
+log('默认展开(1440 宽):', await ev("document.body.classList.contains('fish-open')"));
+log('开关文案:', String(await ev("document.getElementById('toggleFish').innerText")).replace(/\s+/g, ' '));
+
 /* 1) 空态 */
 log('空态提示:', String(await ev('document.getElementById("fishSum").innerText')).slice(0, 40));
 

@@ -523,7 +523,7 @@
 
   /* ---------------- 右侧：7 年主航道进度鱼骨图 ---------------- */
   var FISH_KEY = 'ap:fish';
-  var FISH_OPEN = 'ap:fish:open';
+  var FISH_OPEN = 'ap:fish:open2'; /* v2：默认展开网页版（旧键保留但不读，避免老偏好压住新默认） */
   var fishState = { identityType: '', activationDate: '' };
 
   function loadFish() {
@@ -655,7 +655,8 @@
     renderFish();
     var pref = null;
     try { pref = localStorage.getItem(FISH_OPEN); } catch (e) { pref = null; }
-    var open = pref === null ? window.innerWidth >= 1240 : pref === '1';
+    /* 网页版（宽屏）默认展开；手机默认收起，避免一进来就被抽屉盖住 */
+    var open = pref === null ? window.innerWidth > 1180 : pref === '1';
     setFishOpen(open);
 
     $('toggleFish').addEventListener('click', function () {

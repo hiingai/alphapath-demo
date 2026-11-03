@@ -443,6 +443,7 @@
     addUser(text);
     if (!curSession()) newSession();
     pushMsg({ role: 'user', text: text });
+    syncFishFromText(text);
     var shell = addAssistantShell();
     var t0 = Date.now();
 
@@ -520,6 +521,180 @@
   }
   function closeSettings() { $('modal').hidden = true; }
 
+  /* ---------------- 右侧：7 年主航道进度鱼骨图 ---------------- */
+  var FISH_KEY = 'ap:fish';
+  var FISH_OPEN = 'ap:fish:open';
+  var fishState = { identityType: '', activationDate: '' };
+
+  function loadFish() {
+    try {
+      var o = JSON.parse(localStorage.getItem(FISH_KEY) || '{}');
+      if (o && typeof o === 'object') {
+        fishState.identityType = o.identityType || '';
+        fishState.activationDate = o.activationDate || '';
+      }
+    } catch (e) { /* 坏数据就当空的 */ }
+  }
+  function saveFish() {
+    try { localStorage.setItem(FISH_KEY, JSON.stringify(fishState)); } catch (e) { /* 配额满忽略 */ }
+  }
+
+  function fillFishIdent() {
+    var sel = $('fishIdent');
+    if (!sel) return;
+    var types = (window.AP_KB && AP_KB.identityTypes) || {};
+    sel.textContent = '';
+    var blank = document.createElement('option');
+    blank.value = ''; blank.textContent = '— 选择身份类型 —';
+    sel.appendChild(blank);
+    Object.keys(types).forEach(function (code) {
+      var o = document.createElement('option');
+      o.value = code;
+      o.textContent = types[code].name + (types[code].can_pr ? '' : '（不产生永居）');
+      sel.appendChild(o);
+    });
+    sel.value = fishState.identityType || '';
+  }
+
+  function renderFish() {
+    var wrap = $('fishWrap');
+    if (!wrap) return;
+    wrap.textContent = '';
+
+    var f = AP.fishbone.build(fishState);
+    $('fishIdent').value = fishState.identityType || '';
+    $('fishDate').value = fishState.activationDate || '';
+
+    if (!f.ok) {
+      $('fishFill').style.width = '0%';
+      $('fishPct').textContent = '—';
+      $('fishSum').textContent = f.message || '还不能画图。';
+      $('fishWarn').textContent = '';
+      if (f.reason === 'NO_ROUNDS') {
+        /* 身份 + 日期都有，只是这类身份不产生永居路径：给结论，不要求再填表 */
+        var w = el('div', 'fish-empty');
+        w.appendChild(el('div', null, '骨图不需要画——这本身就是结论。'));
+        w.appendChild(el('div', null, '换身份类型（高才 / 优才 / 专才 / 受养人）才会出现 7 年主航道。'));
+        wrap.appendChild(w);
+        return;
+      }
+      var e = el('div', 'fish-empty');
+      e.appendChild(el('div', null, '① 选身份类型（高才 A/B/C、优才、专才…）'));
+      e.appendChild(el('div', null, '② 填签证激活日期（入境激活那天，不是获批日）'));
+      e.appendChild(el('div', null, '③ 骨图会按引擎口径自动画出首签、各轮续签、7 年届满'));
+      wrap.appendChild(e);
+      return;
+    }
+
+    $('fishFill').style.width = f.progressPct + '%';
+    $('fishPct').textContent = f.progressPct + '% · ' + (f.identityName || f.identityType);
+    $('fishSum').textContent = AP.fishbone.summary(f);
+    $('fishWarn').textContent = (f.warnings || []).join(' ');
+    if (f.ruleVersion) $('fishRule').textContent = f.ruleVersion;
+
+    var spine = el('div', 'spine');
+    var fill = el('i', 'fill');
+    fill.style.height = f.progressPct + '%';
+    spine.appendChild(fill);
+    if (f.progressPct > 2 && f.progressPct < 100) {
+      var t = el('span', 'today', '今天');
+      t.style.top = f.progressPct + '%';
+      spine.appendChild(t);
+    }
+    wrap.appendChild(spine);
+
+    var ul = el('ul', 'bones');
+    f.nodes.forEach(function (n) {
+      var li = el('li', 'bone ' + (n.bone || 'right') + ' ' + n.status);
+      li.appendChild(el('span', 'stem'));
+      li.appendChild(el('span', 'fdot'));
+      var box = el('div', 'fnode');
+      box.appendChild(el('div', 'flabel', n.label + (n.kind === 'finish' ? ' 🏁' : (n.kind === 'start' ? ' 🛫' : ''))));
+      box.appendChild(el('div', 'fdate', n.date));
+      if (n.windowStart) box.appendChild(el('div', 'fwin', '递交窗口 ' + n.windowStart + ' ~ ' + n.windowDeadline));
+      if (n.status === 'current') box.appendChild(el('div', 'fwin', '★ 现在该办：建议 ' + n.suggestedSubmitBy + ' 前递交'));
+      li.appendChild(box);
+      ul.appendChild(li);
+    });
+    wrap.appendChild(ul);
+  }
+
+  /* 从一句话里抽身份/激活日，喂给骨图（确定性规则，不问模型） */
+  function syncFishFromText(text) {
+    if (!text) return false;
+    var changed = false;
+    var id = AP.Agent && AP.Agent.detect_identity ? AP.Agent.detect_identity(text) : null;
+    var d = AP.Agent && AP.Agent._detect_date ? AP.Agent._detect_date(text) : null;
+    if (id && id !== fishState.identityType) { fishState.identityType = id; changed = true; }
+    if (d && d !== fishState.activationDate) { fishState.activationDate = d; changed = true; }
+    if (changed) {
+      saveFish();
+      renderFish();
+      $('fishSrc').textContent = '已从对话自动识别：' + (fishState.identityType || '身份未定') + (fishState.activationDate ? ' · ' + fishState.activationDate + ' 激活' : '');
+      flashFish();
+    }
+    return changed;
+  }
+  function flashFish() {
+    var p = $('fishPanel');
+    if (!p) return;
+    if (window.innerWidth <= 1180 && !document.body.classList.contains('fish-open')) return;
+    p.classList.remove('flash');
+    void p.offsetWidth;
+    p.classList.add('flash');
+  }
+  function setFishOpen(open) {
+    document.body.classList.toggle('fish-open', !!open);
+    try { localStorage.setItem(FISH_OPEN, open ? '1' : '0'); } catch (e) { /* ignore */ }
+    if (open) renderFish();
+  }
+
+  function initFish() {
+    fillFishIdent();
+    loadFish();
+    renderFish();
+    var pref = null;
+    try { pref = localStorage.getItem(FISH_OPEN); } catch (e) { pref = null; }
+    var open = pref === null ? window.innerWidth >= 1240 : pref === '1';
+    setFishOpen(open);
+
+    $('toggleFish').addEventListener('click', function () {
+      setFishOpen(!document.body.classList.contains('fish-open'));
+    });
+    $('closeFish').addEventListener('click', function () { setFishOpen(false); });
+    $('fishIdent').addEventListener('change', function () {
+      fishState.identityType = this.value;
+      saveFish(); renderFish();
+      $('fishSrc').textContent = this.value ? '已手动指定身份类型' : '还没选身份类型';
+    });
+    $('fishDate').addEventListener('change', function () {
+      fishState.activationDate = this.value;
+      saveFish(); renderFish();
+      $('fishSrc').textContent = this.value ? '已手动指定激活日：' + this.value : '还没填激活日期';
+    });
+    $('fishSync').addEventListener('click', function () {
+      var hit = false;
+      for (var i = 0; i < sessions.length && !hit; i++) {
+        var msgs = sessions[i].msgs || [];
+        for (var j = msgs.length - 1; j >= 0; j--) {
+          if (msgs[j].role === 'user' && msgs[j].text) {
+            var before = fishState.identityType + '|' + fishState.activationDate;
+            syncFishFromText(msgs[j].text);
+            if (before !== fishState.identityType + '|' + fishState.activationDate) { hit = true; break; }
+          }
+        }
+      }
+      if (!hit) $('fishSrc').textContent = '对话里没找到身份/激活日，手动选一下更快。';
+      renderFish();
+    });
+    $('fishReset').addEventListener('click', function () {
+      fishState.identityType = '';
+      fishState.activationDate = '';
+      saveFish(); renderFish();
+      $('fishSrc').textContent = '已重置，重新选身份 + 填激活日。';
+    });
+  }
+
   /* ---------------- 启动 ---------------- */
   var homeHTML = '';
 
@@ -532,6 +707,7 @@
     renderMem();
     renderStats();
     renderSessions();
+    initFish();
 
     $('send').addEventListener('click', send);
     $('input').addEventListener('keydown', function (e) {
@@ -550,7 +726,7 @@
     });
     $('clearAll').addEventListener('click', function () {
       if (!confirm('清空本机的长期记忆、对话记录与虚拟文件？此操作不可撤销。')) return;
-      ['ap:mem:episodic', 'ap:mem:semantic', 'ap:mem:procedural', 'ap:vfs', SES_KEY].forEach(function (k) { AP.Store.del(k); });
+      ['ap:mem:episodic', 'ap:mem:semantic', 'ap:mem:procedural', 'ap:vfs', SES_KEY, FISH_KEY, FISH_OPEN].forEach(function (k) { AP.Store.del(k); });
       agent.clear_short_term();
       sessions = [];
       curId = null;

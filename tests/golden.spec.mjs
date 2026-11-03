@@ -208,6 +208,39 @@ async function e2e() {
   has(rNoDate.reply, '签证激活日期', '没给激活日 → 索取日期而不是让模型猜');
   ok('缺日期时不进模型、不计算', rNoDate.tool_used === null && rNoDate.steps.length === 0);
 
+  /* 第 11 节：鱼骨图（数据层确定性） */
+  const fb = AP.fishbone.build({ identityType: 'TTPS_B', activationDate: '2025-09-01', today: '2026-10-29' });
+  ok('骨图：B 类可算', fb.ok === true);
+  ok('骨图：5 个节点（激活/首签/续签1/续签2/7年）', fb.nodes.length === 5, String(fb.nodes.length));
+  ok('骨图：首签 2027-09-01（2+2+3）', fb.nodes[1].date === '2027-09-01', fb.nodes[1].date);
+  ok('骨图：7 年届满 2032-09-01', fb.expiry7y === '2032-09-01', String(fb.expiry7y));
+  ok('骨图：进度 17%（2025-09-01→2032-09-01，今天 2026-10-29）', fb.progressPct === 17, String(fb.progressPct));
+  ok('骨图：激活节点为已完成', fb.nodes[0].status === 'done', fb.nodes[0].status);
+  ok('骨图：首个未完成节点是首签', fb.next && fb.next.key === 'round1', fb.next && fb.next.key);
+  ok('骨图：日期单调递增（主脊顺序）', fb.nodes.every((n, i) => i === 0 || n.date >= fb.nodes[i - 1].date));
+
+  const fbA = AP.fishbone.build({ identityType: 'TTPS_A', activationDate: '2025-09-01', today: '2026-10-29' });
+  ok('骨图：A 类首签 2028-09-01（3+3+3）', fbA.nodes[1].date === '2028-09-01', fbA.nodes[1].date);
+  ok('骨图：A/B 首签不同 → 身份换会整条重算', fbA.nodes[1].date !== fb.nodes[1].date);
+
+  const fbBad = AP.fishbone.build({ identityType: 'TTPS_B', activationDate: '2023-09-31' });
+  ok('骨图：非法日期不算（BAD_DATE）', fbBad.ok === false && fbBad.reason === 'BAD_DATE', fbBad.reason);
+  ok('骨图：缺激活日只要日期', AP.fishbone.build({ identityType: 'TTPS_B' }).reason === 'NO_DATE');
+  ok('骨图：缺身份先问身份', AP.fishbone.build({ activationDate: '2025-09-01' }).reason === 'NO_IDENTITY');
+
+  const fbQuota = AP.fishbone.build({ identityType: 'QMAS', activationDate: '2025-09-01', today: '2026-10-29' });
+  ok('骨图：7 年届满按日期插进主脊（优才 2032 在 2034 之前）',
+    fbQuota.nodes.map((n) => n.date).join(',').indexOf('2032-09-01,2034-09-01') >= 0,
+    fbQuota.nodes.map((n) => n.date).join(','));
+  ok('骨图：骨位左右交替', fbQuota.nodes.every((n, i) => n.bone === (i % 2 === 0 ? 'right' : 'left')));
+
+  const fbFdh = AP.fishbone.build({ identityType: 'FDH', activationDate: '2020-01-01' });
+  ok('骨图：外佣不产生永居路径 → 不画', fbFdh.ok === false && fbFdh.reason === 'NO_ROUNDS', fbFdh.reason);
+
+  const fbOld = AP.fishbone.build({ identityType: 'TTPS_A', activationDate: '2018-01-01', today: '2026-10-29' });
+  ok('骨图：满 7 年进度 100%', fbOld.progressPct === 100, String(fbOld.progressPct));
+  ok('骨图：摘要说明已届满', AP.fishbone.summary(fbOld).indexOf('7 年已届满') >= 0, AP.fishbone.summary(fbOld));
+
   /* 统计与语料 */
   const st = a2.stats();
   ok('语料 89 条', st.rag_coverage.total === 89, String(st.rag_coverage.total));

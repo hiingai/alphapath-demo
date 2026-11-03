@@ -16,6 +16,8 @@ const FILES = [
   'engine/domain/guardrails.js',
   'engine/domain/matching.js',
   'engine/domain/rag.js',
+  'engine/domain/fishbone.js',
+  'engine/userdb.js',
   'engine/memory.js',
   'engine/conductor.js',
   'engine/tools.js',

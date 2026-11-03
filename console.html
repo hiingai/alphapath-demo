@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AlphaPath v1.4 · 香港身份续签与教育择校智能体（在线体验）</title>
 <meta name="description" content="AlphaPath v1.4 在线体验：7 年主航道时间线、三层法定资格守门、合规红线自检、择校匹配。全部在浏览器本地运行。">
-<link rel="stylesheet" href="style.css?v=20261027n">
+<link rel="stylesheet" href="style.css?v=20261029b">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
 <script>
 /* 版本自愈：HTML 被 CDN 缓存（max-age=600）时自动换新 */
-window.__AP_BUILD__ = '20261027n';
+window.__AP_BUILD__ = '20261029b';
 (function () {
   function paint() {
     var b = document.getElementById('buildBadge');
@@ -86,6 +86,7 @@ window.__AP_BUILD__ = '20261027n';
       <button class="icon-btn open-side" id="openSide" title="展开侧栏">☰</button>
       <div class="title">香港身份 · 续签与教育择校智能体</div>
       <div class="top-actions">
+        <button class="icon-btn" id="toggleFish" title="显示/隐藏进度鱼骨图">🐟</button>
         <span class="badge build" id="buildBadge" title="页面构建版本">build ——</span>
         <span class="badge" id="llmBadge">离线</span>
         <button class="icon-btn" id="openSettings2" title="设置">⚙</button>
@@ -112,6 +113,37 @@ window.__AP_BUILD__ = '20261027n';
       演示站不含任何真实个案数据；模型 Key（若填写）只存在你本机浏览器。
     </p>
   </main>
+
+  <aside class="fishpanel" id="fishPanel" aria-label="7 年主航道进度鱼骨图">
+    <div class="fish-head">
+      <strong>7 年主航道 · 进度鱼骨图</strong>
+      <button class="icon-btn" id="closeFish" title="收起">✕</button>
+    </div>
+
+    <div class="fish-form">
+      <label>身份类型<select id="fishIdent"></select></label>
+      <label>签证激活日期<input id="fishDate" type="date"></label>
+      <div class="row">
+        <button class="btn ghost small" id="fishSync">从对话自动识别</button>
+        <button class="btn ghost small" id="fishReset">重置</button>
+      </div>
+      <p class="hint" id="fishSrc">还没读到你的身份和激活日期。</p>
+    </div>
+
+    <div class="fish-progress">
+      <div class="fp-bar"><i id="fishFill"></i></div>
+      <span id="fishPct">0%</span>
+    </div>
+    <p class="fish-sum" id="fishSum"></p>
+
+    <div class="fish" id="fishWrap"></div>
+
+    <p class="fish-warn" id="fishWarn"></p>
+    <p class="fish-note">
+      节点日期全部由本地确定性引擎算出（<code id="fishRule">policy.2026-10-06</code>），
+      不含模型推测；改身份或激活日会立刻整条重算——估错一天，续签窗口就全错。
+    </p>
+  </aside>
 </div>
 
 <!-- 设置面板 -->
@@ -134,20 +166,21 @@ window.__AP_BUILD__ = '20261027n';
   </div>
 </div>
 
-<script src="engine/data/kb.js?v=20261027n"></script>
-<script src="engine/embedding.js?v=20261027n"></script>
-<script src="engine/domain/timeline.js?v=20261027n"></script>
-<script src="engine/domain/legal.js?v=20261027n"></script>
-<script src="engine/domain/compliance.js?v=20261027n"></script>
-<script src="engine/domain/guardrails.js?v=20261027n"></script>
-<script src="engine/domain/matching.js?v=20261027n"></script>
-<script src="engine/domain/rag.js?v=20261027n"></script>
-<script src="engine/memory.js?v=20261027n"></script>
-<script src="engine/conductor.js?v=20261027n"></script>
-<script src="engine/tools.js?v=20261027n"></script>
-<script src="engine/llm.js?v=20261027n"></script>
-<script src="engine/harness.js?v=20261027n"></script>
-<script src="engine/index.js?v=20261027n"></script>
-<script src="app.js?v=20261027n"></script>
+<script src="engine/data/kb.js?v=20261029b"></script>
+<script src="engine/embedding.js?v=20261029b"></script>
+<script src="engine/domain/timeline.js?v=20261029b"></script>
+<script src="engine/domain/legal.js?v=20261029b"></script>
+<script src="engine/domain/compliance.js?v=20261029b"></script>
+<script src="engine/domain/guardrails.js?v=20261029b"></script>
+<script src="engine/domain/matching.js?v=20261029b"></script>
+<script src="engine/domain/rag.js?v=20261029b"></script>
+<script src="engine/domain/fishbone.js?v=20261029b"></script>
+<script src="engine/memory.js?v=20261029b"></script>
+<script src="engine/conductor.js?v=20261029b"></script>
+<script src="engine/tools.js?v=20261029b"></script>
+<script src="engine/llm.js?v=20261029b"></script>
+<script src="engine/harness.js?v=20261029b"></script>
+<script src="engine/index.js?v=20261029b"></script>
+<script src="app.js?v=20261029b"></script>
 </body>
 </html>

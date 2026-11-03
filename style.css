@@ -227,3 +227,86 @@ code { background: #0e1729; padding: 1px 5px; border-radius: 5px; font-size: 11.
   .title { font-size: 13px; }
   .bubble { font-size: 13.5px; }
 }
+
+/* ---------- 右侧：7 年主航道进度鱼骨图 ---------- */
+.fishpanel {
+  width: 336px; flex: 0 0 336px; background: var(--panel); border-left: 1px solid var(--line);
+  padding: 12px 12px 20px; overflow-y: auto; display: none;
+}
+body.fish-open .fishpanel { display: block; }
+.fishpanel .fish-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.fishpanel .fish-head strong { font-size: 13px; color: #cfe0f7; }
+.fishpanel .fish-head .icon-btn { margin-left: auto; }
+
+.fish-form label { display: block; font-size: 12px; color: #a9bfdc; margin: 8px 0 0; }
+.fish-form select, .fish-form input {
+  width: 100%; margin-top: 4px; background: #0e1729; color: var(--text);
+  border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: inherit; font-size: 13px;
+}
+.fish-form select:focus, .fish-form input:focus { outline: none; border-color: var(--brand); }
+.fish-form .row { display: flex; gap: 6px; margin-top: 8px; }
+
+.fish-progress { display: flex; align-items: center; gap: 8px; margin: 14px 0 6px; }
+.fp-bar { position: relative; flex: 1; height: 7px; background: #0e1729; border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+.fp-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand-2), var(--brand)); transition: width .4s ease; }
+.fish-progress span { font-size: 11.5px; color: #9dc3f0; font-variant-numeric: tabular-nums; }
+.fish-sum { font-size: 12.5px; color: #c7d6ea; margin: 4px 0 12px; line-height: 1.5; }
+
+/* 竖直主脊 + 交替斜骨 */
+.fish { position: relative; padding-left: 6px; }
+.fish .spine {
+  position: absolute; left: 17px; top: 12px; bottom: 12px; width: 2px;
+  background: linear-gradient(180deg, #2b3d5c, #1b2740); border-radius: 2px;
+}
+.fish .spine .fill {
+  position: absolute; left: 0; top: 0; width: 100%; height: 0;
+  background: linear-gradient(180deg, var(--brand), #2ecc8f); border-radius: 2px; transition: height .4s ease;
+}
+.fish .spine .today {
+  position: absolute; left: -22px; transform: translateY(-50%);
+  font-size: 10px; color: #7fe6bb; white-space: nowrap;
+}
+.fish .spine .today::after {
+  content: ""; position: absolute; left: 26px; top: 50%; width: 34px; height: 1px;
+  background: repeating-linear-gradient(90deg, #7fe6bb 0 4px, transparent 4px 8px);
+}
+.bones { list-style: none; margin: 0; padding: 0; }
+.bone { position: relative; padding: 0 0 16px 42px; min-height: 44px; }
+.bone .stem {
+  position: absolute; left: 18px; top: 16px; width: 24px; height: 1px; background: #2b3d5c;
+  transform-origin: 0 50%; transform: rotate(-26deg);
+}
+.bone.left .stem { transform: rotate(26deg); }
+.bone.done .stem { background: #2ecc8f; }
+.bone.current .stem { background: var(--brand); }
+.bone .fdot {
+  position: absolute; left: 12px; top: 12px; width: 10px; height: 10px; border-radius: 50%;
+  background: #16223a; border: 2px solid #37507a; z-index: 1;
+}
+.bone.done .fdot { background: var(--ok); border-color: var(--ok); }
+.bone.current .fdot { background: var(--brand); border-color: #bfe0ff; animation: fpulse 1.6s infinite; }
+@keyframes fpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(77,163,255,.5); } 50% { box-shadow: 0 0 0 6px rgba(77,163,255,0); } }
+.fnode { background: #0e1729; border: 1px solid var(--line); border-radius: 9px; padding: 6px 9px; }
+.bone.current .fnode { border-color: var(--brand); }
+.bone.done .fnode { border-color: #24614a; }
+.fnode .flabel { font-size: 12.5px; color: #dbe8f8; font-weight: 600; }
+.fnode .fdate { font-size: 12px; color: #9dc3f0; font-variant-numeric: tabular-nums; }
+.fnode .fwin { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.bone.future .fnode .fdate { color: #7f93aa; }
+.fish-warn { font-size: 11.5px; color: var(--warn); margin: 10px 0 0; }
+.fish-note { font-size: 11px; color: #55688a; margin: 14px 0 0; line-height: 1.5; }
+.fish-empty { font-size: 12.5px; color: var(--muted); border: 1px dashed var(--line); border-radius: 9px; padding: 10px; line-height: 1.55; }
+
+@media (max-width: 1180px) {
+  .fishpanel {
+    position: fixed; right: 0; top: 0; bottom: 0; width: min(90vw, 350px); flex-basis: auto;
+    z-index: 45; box-shadow: -18px 0 40px rgba(0, 0, 0, .45);
+    transform: translateX(100%); transition: transform .24s ease; display: block;
+  }
+  body.fish-open .fishpanel { transform: translateX(0); }
+}
+.fishpanel.flash { animation: fflash .9s ease; }
+@keyframes fflash {
+  0% { box-shadow: inset 0 0 0 2px rgba(77,163,255,.9); }
+  100% { box-shadow: inset 0 0 0 2px rgba(77,163,255,0); }
+}

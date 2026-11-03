@@ -18,6 +18,14 @@ await new Promise((r, j) => { ws.addEventListener('open', r); ws.addEventListene
 const send = (m, pr = {}) => { const i = ++id; ws.send(JSON.stringify({ id: i, method: m, params: pr })); return new Promise((res, rej) => pd.set(i, { res, rej })); };
 const ev = async (x) => (await send('Runtime.evaluate', { expression: x, returnByValue: true, awaitPromise: true, userGesture: true })).result.value;
 const out = []; const log = (...a) => { const s = a.join(' '); out.push(s); console.log(s); };
+async function waitFor(expr, ms = 15000) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) {
+    if (await ev(expr).catch(() => false)) return true;
+    await sleep(300);
+  }
+  return false;
+}
 
 await send('Runtime.enable'); await send('Page.enable');
 await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 980, deviceScaleFactor: 1, mobile: false });
@@ -30,11 +38,13 @@ await ev(`(async function(){
   try{ await new Promise(function(r){var q=indexedDB.deleteDatabase('alphapath');q.onsuccess=r;q.onerror=r;q.onblocked=r;}); }catch(e){}
   return 1; })()`);
 await send('Page.reload', { ignoreCache: true });
-await sleep(3200);
+await waitFor("!!window.AP_BOOTED");
+await sleep(600);
 
 /* 1. 说一句话（只给身份，缺日期与工作）→ 走一轮，触发主动提问 */
+await waitFor("!!document.getElementById('send') && !document.getElementById('send').disabled");
 await ev("document.getElementById('input').value='我是高才B类，带 2 个孩子读中二'; document.getElementById('send').click(); 1");
-await sleep(4200);
+await sleep(5200);
 log('已问卡片数:', await ev("document.querySelectorAll('.bubble.ask').length"));
 log('卡片问题:', await ev("(document.querySelector('.ask-q')||{}).textContent||'（无）'"));
 log('选项数:', await ev("document.querySelectorAll('.ask-chip').length"));

@@ -1307,6 +1307,7 @@
     initTheme();
     initAuth();
     initLead();
+  window.AP_BOOTED = true;
     initFish();
 
     $('send').addEventListener('click', send);

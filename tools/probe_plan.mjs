@@ -50,7 +50,7 @@ log('卡片问题:', await ev("(document.querySelector('.ask-q')||{}).textConten
 log('选项数:', await ev("document.querySelectorAll('.ask-chip').length"));
 
 /* 2. 点选项补齐（日期 + 工作） */
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < 5; i++) {
   const has = await ev("document.querySelectorAll('.msg:last-child .ask-chip').length");
   if (!has) break;
   await ev("var b=document.querySelectorAll('.msg:last-child .ask-chip'); if(b[0]) b[0].click(); 1");
@@ -94,6 +94,7 @@ if (rep) {
   log('双路径:', await e2("document.querySelectorAll('.track').length"));
   log('风险条数:', await e2("document.querySelectorAll('.risk').length"));
   log('强积金章节:', await e2("document.body.textContent.indexOf('强积金')>0"));
+  log('收入估算行:', await e2("(document.body.textContent.match(/按你填的 HK\\$ [\\d,]+ \\/ 月估算/)||['—'])[0]"));
   log('免责声明:', await e2("document.body.textContent.indexOf('不构成')>0"));
   log('下载按钮:', await e2("!!document.getElementById('dlBtn')"));
   log('横向溢出:', await e2("document.documentElement.scrollWidth-document.documentElement.clientWidth"));

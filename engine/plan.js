@@ -90,6 +90,13 @@
       opts: [{ label: '没有', value: 0, say: '没有受养人' }, { label: '1 个孩子', value: 1, say: '1 个孩子' },
       { label: '2 个孩子', value: 2, say: '2 个孩子' }, { label: '3 个', value: 3, say: '3 个孩子' }]
     });
+    if (!has(f.monthlyIncome)) q.push({
+      key: 'monthlyIncome', text: '月收入大概哪一档？（只用来估强积金）',
+      opts: [{ label: '2 万以下', value: 15000, say: '月收入 2 万以下' },
+      { label: '2–4 万', value: 30000, say: '月收入 2 到 4 万' },
+      { label: '4–6 万', value: 50000, say: '月收入 4 到 6 万' },
+      { label: '6 万以上', value: 70000, say: '月收入 6 万以上' }]
+    });
     return q;
   }
 
@@ -430,6 +437,8 @@
 
       '<section><h2>4. 强积金 / 报税 / 银行流水</h2>' +
       '<p><b>强积金：</b>' + esc(my.mpfNote) + '</p>' +
+      (my.mpfMonthly ? '<p class="note">按你填的 HK$ ' + my.monthlyIncome.toLocaleString() + ' / 月估算：你每月供 HK$ ' + my.mpfMonthly.toLocaleString() +
+        '，连同雇主合计 HK$ ' + (my.mpfMonthly * 2).toLocaleString() + '；自雇则按年度有关入息一次/分期供 5%。</p>' : '') +
       '<table class="t small"><thead><tr><th>月收入</th><th>个人供款/月</th><th>连同雇主合计</th></tr></thead><tbody>' + mpfRows + '</tbody></table>' +
       '<p><b>报税：</b>' + esc(my.taxNote) + '</p>' +
       '<p><b>银行流水五条规矩：</b></p><ul class="sum">' + my.bankRules.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +

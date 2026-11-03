@@ -87,6 +87,21 @@ ok('HTML：转义注入内容', P.toHtml(P.build(Object.assign({}, base, { schoo
 ok('HTML：打印样式存在', html.indexOf('@media print') > 0);
 ok('HTML：未知身份也能出报告', P.toHtml(P.build({ identityType: 'NOPE', activationDate: '2025-01-01', employment: 'employed' })).indexOf('84 个月') > 0);
 
+/* ---- 收入（可选，用来估强积金）---- */
+const asksFull = P.quickAsk(base);
+ok('收入：档案齐全时只剩收入一问', asksFull.length === 1 && asksFull[0].key === 'monthlyIncome', asksFull.map((q) => q.key));
+ok('收入：选项 4 档且带数值', asksFull[0].opts.length === 4 && asksFull[0].opts.every((o) => typeof o.value === 'number'));
+const rich = P.build(Object.assign({}, base, { monthlyIncome: 50000 }));
+ok('收入：按实际收入算供款（5 万 → 1500 封顶）', rich.money.mpfMonthly === 1500, rich.money.mpfMonthly);
+const lowInc = P.build(Object.assign({}, base, { monthlyIncome: 12000 }));
+ok('收入：1.2 万 → 600', lowInc.money.mpfMonthly === 600, lowInc.money.mpfMonthly);
+const htmlInc = P.toHtml(rich);
+ok('收入：报告写出「你的估算」一行', htmlInc.indexOf('按你填的 HK$ 50,000 / 月估算') > 0);
+ok('收入：高收入不产生「收入偏低」风险', !rich.risks.some((r) => r.id === 'income'));
+ok('收入：低收入触发「收入偏低」风险', lowInc.risks.some((r) => r.id === 'income'));
+ok('收入：没填收入时报告不出现估算行', html.indexOf('按你填的') < 0);
+ok('收入：没填收入仍可生成报告（不阻断）', plan.ok === true && plan.money.mpfMonthly === null);
+
 console.log(`\n通过 ${pass} / ${pass + fail}`);
 if (fail) { console.log('失败：'); failures.forEach((f) => console.log('  ✗ ' + f)); process.exit(1); }
 console.log('全部通过 ✅');

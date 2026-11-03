@@ -1181,7 +1181,7 @@
   }
 
   /* ---------------- 84 个月规划：缺口提问 + 报告生成 ---------------- */
-  var askState = { turn: 0, asked: 0, lastAtTurn: -9, off: false };
+  var askState = { turn: 0, asked: 0, lastAtTurn: -9, off: false, incomeAsked: false };
 
   function profileFacts() {
     var d = db();
@@ -1194,7 +1194,9 @@
     var wrap = el('div', 'msg assistant');
     wrap.appendChild(el('div', 'avatar', '🧭'));
     var b = el('div', 'bubble ask');
-    b.appendChild(el('p', 'ask-q', '还差 ' + left + ' 项就能生成 84 个月规划 —— ' + q.text));
+    b.appendChild(el('p', 'ask-q', left > 0
+      ? ('还差 ' + left + ' 项就能生成 84 个月规划 —— ' + q.text)
+      : ('补一项能让预算更准 —— ' + q.text)));
     var row = el('div', 'ask-chips');
     q.opts.forEach(function (o) {
       var btn = el('button', 'chip ask-chip', o.label);
@@ -1234,12 +1236,19 @@
     if (askState.turn - askState.lastAtTurn < 1) return;
     profileFacts().then(function (f) {
       var gaps = AP.Plan.gaps(f);
-      if (!gaps.length) return;
       var qs = AP.Plan.quickAsk(f);
       if (!qs.length) return;
+      var q = null;
+      if (gaps.length) {
+        q = qs[0];
+      } else if (!askState.incomeAsked && !f.monthlyIncome) {
+        q = qs.filter(function (x) { return x.key === 'monthlyIncome'; })[0];
+        if (q) askState.incomeAsked = true;
+      }
+      if (!q) return;
       askState.asked++;
       askState.lastAtTurn = askState.turn;
-      appendAskCard(qs[0], gaps.length);
+      appendAskCard(q, gaps.length);
     });
   }
 

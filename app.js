@@ -30,14 +30,24 @@
   var sessions = [];
   var curId = null;
 
+  /* 登录后会话与鱼骨状态按用户隔离存（未登录走访客命名空间） */
+  function uidScope() {
+    try {
+      var db = AP.DB && AP.DB.get ? AP.DB.get() : null;
+      var u = db && db.auth ? db.auth.current() : null;
+      return u && u.id ? u.id : '';
+    } catch (e) { return ''; }
+  }
+  function scoped(base) { var u = uidScope(); return u ? base + ':u:' + u : base; }
+
   function loadSessions() {
     var a = [];
-    try { a = JSON.parse(localStorage.getItem(SES_KEY) || '[]'); } catch (e) { a = []; }
+    try { a = JSON.parse(localStorage.getItem(scoped(SES_KEY)) || '[]'); } catch (e) { a = []; }
     if (!Array.isArray(a)) a = [];
     return a.filter(function (s) { return s && s.id && Array.isArray(s.msgs); });
   }
   function saveSessions() {
-    try { localStorage.setItem(SES_KEY, JSON.stringify(sessions.slice(0, SES_MAX))); } catch (e) { /* 配额满就放弃 */ }
+    try { localStorage.setItem(scoped(SES_KEY), JSON.stringify(sessions.slice(0, SES_MAX))); } catch (e) { /* 配额满就放弃 */ }
   }
   function curSession() {
     for (var i = 0; i < sessions.length; i++) if (sessions[i].id === curId) return sessions[i];
@@ -444,6 +454,7 @@
     if (!curSession()) newSession();
     pushMsg({ role: 'user', text: text });
     syncFishFromText(text);
+    learnProfile(text);
     var shell = addAssistantShell();
     var t0 = Date.now();
 
@@ -528,7 +539,7 @@
 
   function loadFish() {
     try {
-      var o = JSON.parse(localStorage.getItem(FISH_KEY) || '{}');
+      var o = JSON.parse(localStorage.getItem(scoped(FISH_KEY)) || '{}');
       if (o && typeof o === 'object') {
         fishState.identityType = o.identityType || '';
         fishState.activationDate = o.activationDate || '';
@@ -537,7 +548,7 @@
     } catch (e) { /* 坏数据就当空的 */ }
   }
   function saveFish() {
-    try { localStorage.setItem(FISH_KEY, JSON.stringify(fishState)); } catch (e) { /* 配额满忽略 */ }
+    try { localStorage.setItem(scoped(FISH_KEY), JSON.stringify(fishState)); } catch (e) { /* 配额满忽略 */ }
   }
 
   function fillFishIdent() {
@@ -737,6 +748,216 @@
     });
   }
 
+  /* ---------------- 账号 / 用户档案 ---------------- */
+  function db() {
+    return AP.DB && AP.DB.get ? AP.DB.get() : null;
+  }
+  function authApi() { var d = db(); return d ? d.auth : null; }
+
+  function setAuthMsg(text, kind) {
+    var m = $('authMsg');
+    if (!m) return;
+    m.textContent = text || '';
+    m.className = 'auth-msg' + (kind ? ' ' + kind : '');
+  }
+
+  function authView(view) {
+    ['login', 'register', 'profile'].forEach(function (v) {
+      var box = $('view' + v.charAt(0).toUpperCase() + v.slice(1));
+      if (box) box.hidden = v !== view;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.auth-tab'), function (b) {
+      b.classList.toggle('active', b.getAttribute('data-view') === view);
+    });
+    $('authTitle').textContent = view === 'register' ? '创建 AlphaPath 账号'
+      : (view === 'profile' ? '我的档案' : '登录 AlphaPath');
+    setAuthMsg('');
+    if (view === 'profile') refreshProfile();
+  }
+
+  function openAuth(view) {
+    var u = authApi() && authApi().current();
+    $('authTabProfile').hidden = !u;
+    authView(view || (u ? 'profile' : 'login'));
+    $('authModal').hidden = false;
+    setTimeout(function () {
+      var first = $('authModal').querySelector('.auth-view:not([hidden]) input');
+      if (first) first.focus();
+    }, 60);
+  }
+  function closeAuth() {
+    $('authModal').hidden = true;
+    setAuthMsg('');
+    $('loginPw').value = ''; $('regPw').value = ''; $('regPw2').value = '';
+  }
+
+  /* 顶栏账号按钮：未登录=「登录 / 注册」，已登录=昵称 + 小点 */
+  function renderAcctBtn() {
+    var b = $('acctBtn'), l = $('acctLabel');
+    if (!b || !l) return;
+    var u = authApi() && authApi().current();
+    if (u) {
+      l.textContent = u.name || u.email.split('@')[0];
+      b.classList.add('signed-in');
+      b.title = u.email + ' · 点开「我的档案」';
+    } else {
+      l.textContent = '登录 / 注册';
+      b.classList.remove('signed-in');
+      b.title = '账号 / 我的档案';
+    }
+    $('authTabProfile').hidden = !u;
+  }
+
+  /* 登录态变化：会话与鱼骨状态按用户重新载入，需要时把访客会话收编过来 */
+  function onAuthChanged(opts) {
+    var o = opts || {};
+    if (o.adoptGuest && uidScope()) {
+      try {
+        var gk = SES_KEY, uk = scoped(SES_KEY);
+        var guest = JSON.parse(localStorage.getItem(gk) || '[]');
+        var mine = JSON.parse(localStorage.getItem(uk) || '[]');
+        if (Array.isArray(guest) && guest.length && (!Array.isArray(mine) || !mine.length)) {
+          localStorage.setItem(uk, JSON.stringify(guest.slice(0, SES_MAX)));
+          localStorage.removeItem(gk);
+          o.adopted = guest.length;
+        }
+      } catch (e) { /* ignore */ }
+    }
+    sessions = loadSessions();
+    curId = null;
+    renderAcctBtn();
+    renderSessions();
+    loadFish();
+    renderFish();
+    if (sessions.length && sessions[0].msgs && sessions[0].msgs.length) openSession(sessions[0].id);
+    else { agent.clear_short_term(); $('chat').innerHTML = homeHTML; scrollBottom(); }
+    return o;
+  }
+
+  function factLabel(k) {
+    var d = (AP.DB && AP.DB.FACT_DEFS) || {};
+    return (d[k] && d[k].label) || k;
+  }
+  function factText(k, v) {
+    if (k === 'identityType' && window.AP_KB && AP_KB.identityTypes && AP_KB.identityTypes[v]) return AP_KB.identityTypes[v].name;
+    if (k === 'employment') return v === 'self-employed' ? '自雇 / 自己开公司' : (v === 'employed' ? '受雇' : v);
+    if (k === 'goal') return ({ pr: '拿永居', renewal: '续签', school: '择校 / 插班' })[v] || v;
+    if (k === 'dependants') return v + ' 个孩子';
+    return String(v);
+  }
+  function refreshProfile() {
+    var d = db();
+    if (!d) return;
+    var u = d.auth.current();
+    $('profWho').textContent = u ? ('已登录：' + (u.name || '') + ' · ' + u.email) : '未登录（档案存在本机访客空间）';
+    var box = $('profList');
+    box.textContent = '';
+    d.profile.get().then(function (facts) {
+      var keys = Object.keys(facts);
+      if (!keys.length) {
+        box.appendChild(el('p', 'hint', '还没有档案。去对话里说一句「我是高才B类，2025-09-01 激活，带 2 个孩子读中二」就会自动记下来。'));
+        return;
+      }
+      keys.forEach(function (k) {
+        var row = el('div', 'prof-row');
+        row.appendChild(el('span', 'prof-k', factLabel(k)));
+        row.appendChild(el('span', 'prof-v', factText(k, facts[k])));
+        var x = el('button', 'prof-x', '✕');
+        x.title = '清掉这一项';
+        x.addEventListener('click', function () {
+          d.profile.clear(k).then(function () { refreshProfile(); });
+        });
+        row.appendChild(x);
+        box.appendChild(row);
+      });
+    });
+  }
+
+  /* 每轮用户消息后静默学习档案（确定性规则，不调模型） */
+  function learnProfile(text) {
+    var d = db();
+    if (!d || !text) return;
+    try {
+      d.profile.learn(text).then(function (picked) {
+        if (Object.keys(picked || {}).length && !$('authModal').hidden) refreshProfile();
+      }, function () { /* 学不到就算了 */ });
+    } catch (e) { /* ignore */ }
+  }
+
+  function initAuth() {
+    if (!db()) { $('acctBtn').disabled = true; return; }
+    renderAcctBtn();
+    $('acctBtn').addEventListener('click', function () { openAuth(); });
+    $('closeAuth').addEventListener('click', closeAuth);
+    $('authModal').addEventListener('click', function (e) { if (e.target === $('authModal')) closeAuth(); });
+    Array.prototype.forEach.call(document.querySelectorAll('.auth-tab'), function (b) {
+      b.addEventListener('click', function () { authView(b.getAttribute('data-view')); });
+    });
+
+    $('viewLogin').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = $('loginEmail').value.trim(), pw = $('loginPw').value;
+      if (!email || !pw) { setAuthMsg('邮箱和密码都要填。', 'bad'); return; }
+      setAuthMsg('正在登录…');
+      db().auth.login(email, pw).then(function (u) {
+        var res = onAuthChanged({ adoptGuest: true });
+        setAuthMsg('欢迎回来，' + (u.name || u.email) + '。' + (res.adopted ? '（已把本机 ' + res.adopted + ' 条对话收进你的账号）' : ''), 'ok');
+        closeAuth();
+        appendNotice('已登录：' + u.email + '。对话记录与档案现在跟着这个账号走' + (res.adopted ? '（原有 ' + res.adopted + ' 条对话已并入）' : '') + '。');
+      }, function (err) { setAuthMsg(err.message || '登录失败', 'bad'); });
+    });
+
+    $('viewRegister').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = $('regEmail').value.trim(), pw = $('regPw').value, pw2 = $('regPw2').value, name = $('regName').value.trim();
+      if (pw !== pw2) { setAuthMsg('两次密码不一致。', 'bad'); return; }
+      if (pw.length < 8) { setAuthMsg('密码至少 8 位。', 'bad'); return; }
+      setAuthMsg('正在创建…');
+      db().auth.register(email, pw, name).then(function (u) {
+        var res = onAuthChanged({ adoptGuest: true });
+        var tips = ['账号已创建：' + u.email + '。'];
+        if (res.adopted) tips.push('本机原有 ' + res.adopted + ' 条对话已并入。');
+        db().profile.rebuild(sessions, readMemories()).then(function (p) {
+          var n = Object.keys(p || {}).length;
+          appendNotice(tips.join('') + (n ? '已从历史对话建立档案（' + n + ' 项）。' : '档案还是空的，聊两句就会自动填。'));
+          refreshProfile();
+        }, function () { appendNotice(tips.join('')); });
+        closeAuth();
+      }, function (err) { setAuthMsg(err.message || '注册失败', 'bad'); });
+    });
+
+    $('loginPhone').addEventListener('click', function () {
+      db().auth.loginWithPhone('', '').then(null, function (err) {
+        setAuthMsg(err.message + '（' + err.code + '）', 'bad');
+      });
+    });
+    $('loginWeChat').addEventListener('click', function () {
+      db().auth.loginWithWeChat({}).then(null, function (err) {
+        setAuthMsg(err.message + '（' + err.code + '）', 'bad');
+      });
+    });
+
+    $('doLogout').addEventListener('click', function () {
+      db().auth.logout().then(function () {
+        closeAuth();
+        onAuthChanged({});
+        appendNotice('已退出登录。当前进入访客空间（对话记录按账号隔离，不会丢）。');
+      });
+    });
+    $('profRebuild').addEventListener('click', function () {
+      $('profNote').textContent = '正在从历史对话重建…';
+      db().profile.rebuild(sessions, readMemories()).then(function (p) {
+        var n = Object.keys(p || {}).length;
+        $('profNote').textContent = '重建完成：' + n + ' 项事实（以最近一次说法为准）。';
+        refreshProfile();
+      }, function (e) { $('profNote').textContent = '重建失败：' + (e.message || e); });
+    });
+  }
+
+  function readMemories() {
+    try { return AP.Store.get('ap:mem:semantic', []) || []; } catch (e) { return []; }
+  }
+
   /* ---------------- 启动 ---------------- */
   var homeHTML = '';
 
@@ -750,6 +971,7 @@
     renderStats();
     renderSessions();
     initTheme();
+    initAuth();
     initFish();
 
     $('send').addEventListener('click', send);
@@ -769,7 +991,7 @@
     });
     $('clearAll').addEventListener('click', function () {
       if (!confirm('清空本机的长期记忆、对话记录与虚拟文件？此操作不可撤销。')) return;
-      ['ap:mem:episodic', 'ap:mem:semantic', 'ap:mem:procedural', 'ap:vfs', SES_KEY, FISH_KEY, FISH_OPEN].forEach(function (k) { AP.Store.del(k); });
+      ['ap:mem:episodic', 'ap:mem:semantic', 'ap:mem:procedural', 'ap:vfs', SES_KEY, FISH_KEY, FISH_OPEN, scoped(SES_KEY), scoped(FISH_KEY)].forEach(function (k) { AP.Store.del(k); });
       agent.clear_short_term();
       sessions = [];
       curId = null;

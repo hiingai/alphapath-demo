@@ -13,11 +13,11 @@
   document.documentElement.setAttribute('data-theme', t);
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=20261029e">
+<link rel="stylesheet" href="style.css?v=20261030c">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
 <script>
 /* 版本自愈：HTML 被 CDN 缓存（max-age=600）时自动换新 */
-window.__AP_BUILD__ = '20261029e';
+window.__AP_BUILD__ = '20261030c';
 (function () {
   function paint() {
     var b = document.getElementById('buildBadge');
@@ -94,6 +94,7 @@ window.__AP_BUILD__ = '20261029e';
       <button class="icon-btn open-side" id="openSide" title="展开侧栏">☰</button>
       <div class="title">香港身份 · 续签与教育择校智能体</div>
       <div class="top-actions">
+        <button class="btn ghost small acct-btn" id="acctBtn" title="账号 / 我的档案"><span class="fico">👤</span><span class="tlabel" id="acctLabel">登录 / 注册</span></button>
         <button class="btn ghost small theme-toggle" id="themeBtn" title="切换主题"><span class="fico">🌙</span><span class="tlabel">深色</span></button>
         <button class="btn ghost small fish-toggle" id="toggleFish" title="显示 / 隐藏 7 年主航道进度鱼骨图"><span class="fico">🐟</span><span class="tlabel">动态进度</span></button>
         <span class="badge build" id="buildBadge" title="页面构建版本">build ——</span>
@@ -176,21 +177,68 @@ window.__AP_BUILD__ = '20261029e';
   </div>
 </div>
 
-<script src="engine/data/kb.js?v=20261029e"></script>
-<script src="engine/embedding.js?v=20261029e"></script>
-<script src="engine/domain/timeline.js?v=20261029e"></script>
-<script src="engine/domain/legal.js?v=20261029e"></script>
-<script src="engine/domain/compliance.js?v=20261029e"></script>
-<script src="engine/domain/guardrails.js?v=20261029e"></script>
-<script src="engine/domain/matching.js?v=20261029e"></script>
-<script src="engine/domain/rag.js?v=20261029e"></script>
-<script src="engine/domain/fishbone.js?v=20261029e"></script>
-<script src="engine/memory.js?v=20261029e"></script>
-<script src="engine/conductor.js?v=20261029e"></script>
-<script src="engine/tools.js?v=20261029e"></script>
-<script src="engine/llm.js?v=20261029e"></script>
-<script src="engine/harness.js?v=20261029e"></script>
-<script src="engine/index.js?v=20261029e"></script>
-<script src="app.js?v=20261029e"></script>
+<!-- 账号：注册 / 登录 / 我的档案（数据只存本机 IndexedDB） -->
+<div class="modal" id="authModal" hidden>
+  <div class="modal-box auth-box">
+    <h2 id="authTitle">登录 AlphaPath</h2>
+    <div class="auth-tabs" id="authTabs">
+      <button class="auth-tab active" data-view="login">登录</button>
+      <button class="auth-tab" data-view="register">注册</button>
+      <button class="auth-tab" data-view="profile" id="authTabProfile" hidden>我的档案</button>
+    </div>
+
+    <form class="auth-view" id="viewLogin" autocomplete="on">
+      <label>邮箱<input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="username" spellcheck="false"></label>
+      <label>密码<input id="loginPw" type="password" placeholder="至少 8 位" autocomplete="current-password"></label>
+      <div class="row end"><button class="btn primary" id="doLogin" type="submit">登录</button></div>
+    </form>
+
+    <form class="auth-view" id="viewRegister" hidden>
+      <label>昵称（可选）<input id="regName" type="text" placeholder="怎么称呼你" maxlength="24" autocomplete="nickname"></label>
+      <label>邮箱<input id="regEmail" type="email" placeholder="you@example.com" autocomplete="username" spellcheck="false"></label>
+      <label>密码<input id="regPw" type="password" placeholder="至少 8 位，建议字母 + 数字" autocomplete="new-password"></label>
+      <label>确认密码<input id="regPw2" type="password" placeholder="再输一次" autocomplete="new-password"></label>
+      <div class="row end"><button class="btn primary" id="doRegister" type="submit">创建账号</button></div>
+    </form>
+
+    <div class="auth-view" id="viewProfile" hidden>
+      <p class="hint" id="profWho">未登录</p>
+      <div class="prof-list" id="profList"></div>
+      <div class="row">
+        <button class="btn ghost small" id="profRebuild">从对话重建档案</button>
+        <button class="btn ghost small" id="doLogout">退出登录</button>
+      </div>
+      <p class="hint" id="profNote">档案是确定性的：身份类型、激活日、受养人、学段、诉求从你的对话里按规则抽取，随时可改。</p>
+    </div>
+
+    <div class="auth-divider"><span>其他登录方式</span></div>
+    <div class="row auth-alt">
+      <button class="btn ghost small" id="loginPhone" disabled>📱 手机号验证码</button>
+      <button class="btn ghost small" id="loginWeChat" disabled>💬 微信登录</button>
+      <span class="soon">即将开放</span>
+    </div>
+    <p class="auth-msg" id="authMsg"></p>
+    <p class="warn small">账号数据只存在这台设备的浏览器（IndexedDB），密码经 PBKDF2-SHA256 加盐派生后只存摘要，不上传任何服务器。</p>
+    <div class="row end"><button class="btn ghost" id="closeAuth">关闭</button></div>
+  </div>
+</div>
+
+<script src="engine/data/kb.js?v=20261030c"></script>
+<script src="engine/embedding.js?v=20261030c"></script>
+<script src="engine/domain/timeline.js?v=20261030c"></script>
+<script src="engine/domain/legal.js?v=20261030c"></script>
+<script src="engine/domain/compliance.js?v=20261030c"></script>
+<script src="engine/domain/guardrails.js?v=20261030c"></script>
+<script src="engine/domain/matching.js?v=20261030c"></script>
+<script src="engine/domain/rag.js?v=20261030c"></script>
+<script src="engine/domain/fishbone.js?v=20261030c"></script>
+<script src="engine/userdb.js?v=20261030c"></script>
+<script src="engine/memory.js?v=20261030c"></script>
+<script src="engine/conductor.js?v=20261030c"></script>
+<script src="engine/tools.js?v=20261030c"></script>
+<script src="engine/llm.js?v=20261030c"></script>
+<script src="engine/harness.js?v=20261030c"></script>
+<script src="engine/index.js?v=20261030c"></script>
+<script src="app.js?v=20261030c"></script>
 </body>
 </html>

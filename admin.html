@@ -20,12 +20,25 @@
     </div>
   </div>
   <div class="tools">
+    <span class="mode" id="modeTag">本机模式</span>
     <button class="btn ghost" id="btnTheme">🌙 深色</button>
     <button class="btn ghost" id="btnDemo">载入演示数据</button>
     <button class="btn ghost" id="btnRefresh">刷新</button>
     <button class="btn primary" id="btnExport">导出 CSV</button>
   </div>
 </header>
+
+<div class="login" id="login" hidden>
+  <form class="login-box" id="loginForm">
+    <h2>管理员登录</h2>
+    <p class="hint">汇总库含真实联系方式，需登录后查看。演示数据请用 <code>?demo=1</code>。</p>
+    <label>账号<input id="lgUser" autocomplete="username" value="admin"></label>
+    <label>密码<input id="lgPass" type="password" autocomplete="current-password"></label>
+    <p class="err" id="lgErr" hidden></p>
+    <div class="row"><button class="btn primary" type="submit">登录</button>
+      <a class="btn ghost" href="?demo=1">看演示数据</a></div>
+  </form>
+</div>
 
 <div class="banner" id="demoBanner" hidden>
   <b>DEMO DATA</b>　当前混入了演示种子数据（姓名与联系方式均为虚构），仅用于展示产品能力，不代表真实用户。
@@ -101,6 +114,7 @@
 </footer>
 
 <script src="engine/data/kb.js?v=20261030c"></script>
+<script src="sync-config.js?v=20261031f"></script>
 <script src="engine/leaddb.js?v=20261030c"></script>
 <script src="admin.js?v=20261030c"></script>
 </body>

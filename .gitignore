@@ -14,3 +14,6 @@ _dom.html
 _*.png
 _*.txt
 *.bak
+
+# 本地 dev 数据库（汇总库真身，别提交）
+.data/

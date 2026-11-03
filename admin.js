@@ -6,6 +6,21 @@
   var L = window.AP && AP.Lead;
   var PALETTE = ['#2b7de0', '#12996a', '#b3760f', '#8b5cf6', '#d64545', '#0ea5b7', '#e2719b', '#7c8a99'];
   var state = { leads: [], rows: [], q: '', stage: '', sort: 'intent', cur: null };
+  var MODE = 'local';            /* local = 本机库；live = 服务端汇总库 */
+  var API = String(window.AP_SYNC_BASE || '').replace(/\/+$/, '');
+
+  function jfetch(p, opts) {
+    var h = { 'content-type': 'application/json' };
+    var tk = '';
+    try { tk = sessionStorage.getItem('ap:admin:token') || ''; } catch (e) { }
+    if (tk) h.authorization = 'Bearer ' + tk;
+    return fetch(API + p, Object.assign({ credentials: 'same-origin', headers: h }, opts || {}))
+      .then(function (r) {
+        if (r.status === 401) { var e = new Error('unauthorized'); e.code = 401; throw e; }
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+  }
 
   function $(id) { return document.getElementById(id); }
   function esc(s) {
@@ -36,11 +51,26 @@
 
   /* ---------------- 载入 ---------------- */
   function load() {
+    if (MODE === 'live') {
+      return jfetch('/_api/admin/leads?limit=200')
+        .then(function (j) {
+          state.leads = (j.rows || []).map(function (r) { return Object.assign({}, r, { id: r.lead_id, facts: r.facts || [] }); });
+          $('demoBanner').hidden = true;
+          $('modeTag').textContent = '汇总库 · ' + state.leads.length + ' 条';
+          $('modeTag').className = 'mode live';
+          renderAll();
+        })
+        .catch(function (e) {
+          if (e.code === 401) { $('login').hidden = false; return; }
+          $('modeTag').textContent = '汇总服务出错';
+        });
+    }
     if (!L) { $('empty').hidden = false; $('empty').textContent = '留资模块未加载（engine/leaddb.js 缺失）。'; return; }
     L.all().then(function (list) {
       state.leads = list || [];
       var hasDemo = state.leads.some(function (l) { return l.demo; });
       $('demoBanner').hidden = !hasDemo;
+      $('modeTag').textContent = '本机模式 · ' + state.leads.length + ' 条';
       renderAll();
     });
   }
@@ -243,15 +273,35 @@
 
     $('drawer').hidden = false;
     $('drSave').addEventListener('click', function () {
-      lead.stage = $('drStage').value;
-      L.put(lead).then(function () { $('drawer').hidden = true; load(); });
+      var st = $('drStage').value;
+      var done = function () { $('drawer').hidden = true; load(); };
+      if (MODE === 'live') {
+        jfetch('/_api/admin/leads/' + lead.lead_id, { method: 'PATCH', body: JSON.stringify({ stage: st }) })
+          .then(done).catch(function () { alert('保存失败（登录可能已过期）'); });
+        return;
+      }
+      lead.stage = st;
+      L.put(lead).then(done);
     });
     $('drSaveNote').addEventListener('click', function () {
-      lead.note = $('drNote').value.slice(0, 500);
-      L.put(lead).then(function () { $('drawer').hidden = true; load(); });
+      var note = $('drNote').value.slice(0, 500);
+      var done = function () { $('drawer').hidden = true; load(); };
+      if (MODE === 'live') {
+        jfetch('/_api/admin/leads/' + lead.lead_id, { method: 'PATCH', body: JSON.stringify({ note: note }) })
+          .then(done).catch(function () { alert('保存失败（登录可能已过期）'); });
+        return;
+      }
+      lead.note = note;
+      L.put(lead).then(done);
     });
     $('drDel').addEventListener('click', function () {
       if (!confirm('删除「' + (lead.display_name || '访客') + '」这条线索？')) return;
+      if (MODE === 'live') {
+        jfetch('/_api/admin/leads/' + lead.lead_id + '/delete', { method: 'POST' })
+          .then(function () { $('drawer').hidden = true; load(); })
+          .catch(function () { alert('删除失败'); });
+        return;
+      }
       L.remove(lead.id).then(function () { $('drawer').hidden = true; load(); });
     });
   }
@@ -282,10 +332,16 @@
     });
     $('btnRefresh').addEventListener('click', load);
     $('btnExport').addEventListener('click', function () {
+      if (MODE === 'live') {
+        var qs = '?limit=200' + (state.stage ? '&stage=' + encodeURIComponent(state.stage) : '') + (state.q ? '&q=' + encodeURIComponent(state.q) : '');
+        window.open(API + '/_api/admin/export.csv' + qs, '_blank');
+        return;
+      }
       var rows = state.rows.length ? state.rows : state.leads;
       download('alphapath-leads-' + new Date().toISOString().slice(0, 10) + '.csv', L.toCsv(rows));
     });
     $('btnDemo').addEventListener('click', function () {
+      if (MODE === 'live') { alert('当前连接的是汇总库；演示数据请用 admin.html?demo=1 查看。'); return; }
       L.seedDemo(36).then(function (r) {
         $('demoBanner').hidden = false;
         load();
@@ -311,14 +367,43 @@
     }).catch(function () { });
 
     var demo = /(\?|&)demo=1/.test(location.search);
+    var loginForm = $('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        $('lgErr').hidden = true;
+        fetch(API + '/_api/admin/login', {
+          method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ user: $('lgUser').value, pass: $('lgPass').value })
+        }).then(function (r) {
+          if (!r.ok) throw new Error('bad');
+          return r.json();
+        }).then(function (j) {
+          try { if (j && j.token) sessionStorage.setItem('ap:admin:token', j.token); } catch (e) { }
+          $('login').hidden = true;
+          load();
+        }).catch(function () {
+          $('lgErr').textContent = '账号或密码不正确';
+          $('lgErr').hidden = false;
+        });
+      });
+    }
     if (demo) {
+      MODE = 'local';
       L.all().then(function (list) {
         if (list.some(function (l) { return l.demo; })) { load(); return; }
         L.seedDemo(36).then(function () { load(); });
       });
-    } else {
-      load();
+      return;
     }
+    /* 先问汇总服务在不在：在 → 真库（需登录）；不在 → 本机库 */
+    fetch(API + '/_api/health', { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.ok && j.db) { MODE = 'live'; $('btnDemo').hidden = true; load(); }
+        else { MODE = 'local'; load(); }
+      })
+      .catch(function () { MODE = 'local'; $('modeTag').textContent = '本机模式（未连接汇总服务）'; load(); });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

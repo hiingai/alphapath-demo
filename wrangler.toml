@@ -1,0 +1,17 @@
+name = "alphapath-api"
+main = "worker/index.js"
+compatibility_date = "2026-10-01"
+
+# 免费额度足够演示与早期使用：5GB 存储 / 每天 500 万行读 / 10 万次请求
+[[d1_databases]]
+binding = "DB"
+database_name = "alphapath"
+database_id = "请把 wrangler d1 create alphapath 输出的 id 填这里"
+
+[vars]
+BUILD = "20261031d"
+
+# 密钥不要写进仓库，用命令行注入：
+#   wrangler secret put ADMIN_USER
+#   wrangler secret put ADMIN_PASS
+#   wrangler secret put ADMIN_SECRET

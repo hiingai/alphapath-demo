@@ -992,6 +992,8 @@
       return L.syncFrom({ user: u, facts: facts, factExtra: extra, sessions: sessions, consent: consent });
     }).then(function (lead) {
       lastLead = lead;
+      enqueueLead(lead);
+      flushOutbox();
       if (!$('leadStage')) return lead;
       $('leadStage').textContent = AP.Lead.STAGE_LABEL[lead.stage] || lead.stage;
       $('leadStage').setAttribute('data-stage', lead.stage);
@@ -1020,11 +1022,28 @@
     if (chk) {
       chk.checked = !!loadConsent().contact;
       chk.addEventListener('change', function () {
-        saveConsent({ contact: chk.checked, analytics: true, at: new Date().toISOString() });
+        var c = loadConsent();
+        saveConsent({ contact: chk.checked, analytics: !!c.analytics, at: new Date().toISOString() });
         refreshLeadBox();
-        appendNotice(chk.checked ? '已同意记录我的情况并接受联系（数据仍只存在本机）。' : '已撤回同意：联系方式不再写入留资记录。');
+        appendNotice(chk.checked ? '已同意记录我的情况并接受联系。' : '已撤回同意：联系方式不再写入留资记录。');
       });
     }
+    var chkA = $('leadAnalytics');
+    if (chkA) {
+      chkA.checked = !!loadConsent().analytics;
+      chkA.addEventListener('change', function () {
+        var c = loadConsent();
+        saveConsent({ contact: !!c.contact, analytics: chkA.checked, at: new Date().toISOString() });
+        if (chkA.checked) {
+          refreshLeadBox();
+          appendNotice('已同意匿名汇总：只上传身份/日期/受养人/诉求等结构化字段与证据片段，不上传对话原文。');
+        } else {
+          syncLabel('已关闭汇总：之后的更新不再上传');
+          appendNotice('已关闭匿名汇总，后续不再上传。');
+        }
+      });
+    }
+    registerOutboxHooks();
     if ($('leadExport')) {
       $('leadExport').addEventListener('click', function () {
         refreshLeadBox().then(function (lead) {
@@ -1039,15 +1058,116 @@
       $('leadWipe').addEventListener('click', function () {
         if (!confirm('删除本机保存的留资记录（档案字段不受影响）？')) return;
         var u = db().auth.current();
+        var goneId = lastLead && lastLead.id;
         AP.Lead.clearMine(u ? u.id : '').then(function () {
           saveConsent({});
           if ($('leadConsent')) $('leadConsent').checked = false;
-          appendNotice('留资记录已删除。');
+          if ($('leadAnalytics')) $('leadAnalytics').checked = false;
+          if (goneId) {
+            /* 汇总库也要删（用户行使删除权），失败就留在队列里下次重试 */
+            fetch(SYNC_BASE + '/_api/lead-delete', {
+              method: 'POST', headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ token: installToken(), lead_id: goneId })
+            }).catch(function () { });
+          }
+          saveOutbox(outbox().filter(function (e) { return !goneId || (e.payload && e.payload.lead_id) !== goneId; }));
+          syncLabel('留资记录已删除');
+          appendNotice('留资记录已删除（本机；已通知汇总服务删除）。');
           refreshLeadBox();
         });
       });
     }
     refreshLeadBox();
+  }
+
+  /* ---------------- 汇总同步：出站队列 + 幂等 event_id ---------------- */
+  var SYNC_BASE = String(window.AP_SYNC_BASE || '').replace(/\/+$/, '');
+  var OUTBOX_KEY = 'ap:outbox';
+  var TOKEN_KEY = 'ap:install';
+
+  function installToken() {
+    var t = '';
+    try { t = localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { }
+    if (!/^[a-z0-9-]{16,64}$/.test(t)) {
+      t = 'u-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+      try { localStorage.setItem(TOKEN_KEY, t); } catch (e) { }
+    }
+    return t;
+  }
+  function outbox() {
+    try { return JSON.parse(localStorage.getItem(OUTBOX_KEY) || '[]') || []; } catch (e) { return []; }
+  }
+  function saveOutbox(a) {
+    try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(a.slice(-200))); } catch (e) { }
+  }
+  function enqueueLead(lead) {
+    if (!lead || !lead.id) return;
+    var ev = {
+      event_id: lead.id + '@' + lead.updated_at,
+      type: 'lead.upsert',
+      occurred_at: lead.updated_at,
+      payload: {
+        lead_id: lead.id, display_name: lead.display_name, email_hash: lead.email_hash,
+        contact_email: lead.consent_scope ? lead.contact_email : null,
+        identity_type: lead.identity_type, activation_date: lead.activation_date,
+        dependants: lead.dependants, school_stage: lead.school_stage, goal: lead.goal,
+        employment: lead.employment, consent_at: lead.consent_at, consent_scope: lead.consent_scope,
+        first_seen_at: lead.first_seen_at, last_active_at: lead.last_active_at,
+        n_sessions: lead.n_sessions, n_turns: lead.n_turns, n_days: lead.n_days,
+        summary: lead.summary, facts: lead.facts || [], demo: false
+      }
+    };
+    var q = outbox().filter(function (x) { return x.event_id !== ev.event_id; });
+    q.push(ev);
+    saveOutbox(q);
+  }
+  function syncLabel(msg) {
+    var el2 = $('leadSync');
+    if (!el2) return;
+    var c = loadConsent(), q = outbox().length;
+    el2.textContent = msg || (c.analytics
+      ? (q ? '待上传 ' + q + ' 条' : '已开启汇总：仅上传脱敏画像，不上传对话原文')
+      : '汇总未开启：数据只在本机');
+  }
+  var flushing = false;
+  function flushOutbox() {
+    var c = loadConsent(), q = outbox();
+    if (!c.analytics) { syncLabel(); return Promise.resolve(); }
+    if (!q.length) { syncLabel(); return Promise.resolve(); }
+    if (navigator.onLine === false) { syncLabel('离线：' + q.length + ' 条待上传'); return Promise.resolve(); }
+    if (flushing) return Promise.resolve();
+    flushing = true;
+    var batch = q.slice(0, 50);
+    return fetch(SYNC_BASE + '/_api/ingest', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'omit',
+      body: JSON.stringify({ token: installToken(), events: batch })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function () {
+      var ids = {};
+      batch.forEach(function (e) { ids[e.event_id] = 1; });
+      saveOutbox(outbox().filter(function (e) { return !ids[e.event_id]; }));
+      flushing = false;
+      syncLabel('已汇总 ' + new Date().toTimeString().slice(0, 5));
+      return outbox().length ? flushOutbox() : null;
+    }).catch(function () {
+      flushing = false;
+      syncLabel('汇总服务未连接（已排队 ' + outbox().length + ' 条）');
+    });
+  }
+  function registerOutboxHooks() {
+    window.addEventListener('online', function () { flushOutbox(); });
+    document.addEventListener('pagehide', function () {
+      var q = outbox();
+      if (!q.length || !loadConsent().analytics || !navigator.sendBeacon) return;
+      try {
+        navigator.sendBeacon(SYNC_BASE + '/_api/ingest',
+          new Blob([JSON.stringify({ token: installToken(), events: q.slice(0, 50) })], { type: 'application/json' }));
+      } catch (e) { }
+    });
+    setInterval(function () { if (outbox().length && loadConsent().analytics) flushOutbox(); }, 60000);
+    syncLabel();
   }
 
   function readMemories() {    try { return AP.Store.get('ap:mem:semantic', []) || []; } catch (e) { return []; }

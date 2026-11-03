@@ -13,11 +13,11 @@
   document.documentElement.setAttribute('data-theme', t);
 })();
 </script>
-<link rel="stylesheet" href="style.css?v=20261031d">
+<link rel="stylesheet" href="style.css?v=20261031g">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
 <script>
 /* 版本自愈：HTML 被 CDN 缓存（max-age=600）时自动换新 */
-window.__AP_BUILD__ = '20261031d';
+window.__AP_BUILD__ = '20261031g';
 (function () {
   function paint() {
     var b = document.getElementById('buildBadge');
@@ -212,6 +212,8 @@ window.__AP_BUILD__ = '20261031d';
         <div class="lead-bar"><span>完整度</span><div class="track"><i id="leadBarC"></i></div><b id="leadPctC">0%</b></div>
         <div class="lead-bar"><span>意向分</span><div class="track"><i id="leadBarS"></i></div><b id="leadPctS">0</b></div>
         <label class="lead-consent"><input type="checkbox" id="leadConsent"> 同意为咨询目的记录我的情况、并接受顾问联系</label>
+        <label class="lead-consent"><input type="checkbox" id="leadAnalytics"> 同意把脱敏后的画像汇总到服务端（用于改进服务与统计）</label>
+        <p class="hint" id="leadSync">汇总未开启：数据只在本机</p>
         <div class="row lead-acts">
           <button class="btn ghost small" id="leadExport" type="button">导出我的数据</button>
           <button class="btn ghost small" id="leadWipe" type="button">删除我的留资</button>
@@ -237,23 +239,24 @@ window.__AP_BUILD__ = '20261031d';
   </div>
 </div>
 
-<script src="engine/data/kb.js?v=20261031d"></script>
-<script src="engine/embedding.js?v=20261031d"></script>
-<script src="engine/domain/timeline.js?v=20261031d"></script>
-<script src="engine/domain/legal.js?v=20261031d"></script>
-<script src="engine/domain/compliance.js?v=20261031d"></script>
-<script src="engine/domain/guardrails.js?v=20261031d"></script>
-<script src="engine/domain/matching.js?v=20261031d"></script>
-<script src="engine/domain/rag.js?v=20261031d"></script>
-<script src="engine/domain/fishbone.js?v=20261031d"></script>
-<script src="engine/userdb.js?v=20261031d"></script>
-<script src="engine/leaddb.js?v=20261031d"></script>
-<script src="engine/memory.js?v=20261031d"></script>
-<script src="engine/conductor.js?v=20261031d"></script>
-<script src="engine/tools.js?v=20261031d"></script>
-<script src="engine/llm.js?v=20261031d"></script>
-<script src="engine/harness.js?v=20261031d"></script>
-<script src="engine/index.js?v=20261031d"></script>
-<script src="app.js?v=20261031d"></script>
+<script src="engine/data/kb.js?v=20261031g"></script>
+<script src="engine/embedding.js?v=20261031g"></script>
+<script src="engine/domain/timeline.js?v=20261031g"></script>
+<script src="engine/domain/legal.js?v=20261031g"></script>
+<script src="engine/domain/compliance.js?v=20261031g"></script>
+<script src="engine/domain/guardrails.js?v=20261031g"></script>
+<script src="engine/domain/matching.js?v=20261031g"></script>
+<script src="engine/domain/rag.js?v=20261031g"></script>
+<script src="engine/domain/fishbone.js?v=20261031g"></script>
+<script src="engine/userdb.js?v=20261031g"></script>
+<script src="engine/leaddb.js?v=20261031g"></script>
+<script src="engine/memory.js?v=20261031g"></script>
+<script src="engine/conductor.js?v=20261031g"></script>
+<script src="engine/tools.js?v=20261031g"></script>
+<script src="engine/llm.js?v=20261031g"></script>
+<script src="engine/harness.js?v=20261031g"></script>
+<script src="sync-config.js?v=20261031f"></script>
+<script src="engine/index.js?v=20261031g"></script>
+<script src="app.js?v=20261031g"></script>
 </body>
 </html>
